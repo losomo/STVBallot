@@ -18,7 +18,8 @@ sub OnInit {
     my($this) = @_;
     my ($dialog) = STVBallot::WelcomeDialog->new(lh->maketext("STV Ballot"), [-1, -1]);
     $dialog->ShowModal();
-    my $app_state = {app_mode => STVBallot::WelcomeDialog->get_mode()};
+    my $app_state = {app_mode => $dialog->get_mode()};
+    exit 1 unless $app_state->{app_mode};
     my($frame) = STVBallot::BallotFrame->new($app_state, undef, -1, lh->maketext("STV Ballot"));
     $frame->Show(1);
     $this->SetTopWindow($frame);

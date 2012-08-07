@@ -46,7 +46,7 @@ sub new {
         EVT_BUTTON(
             $this,
             $button,
-            sub {$this->{app_mode} = $spec->[0]}
+            sub {$this->{app_mode} = $spec->[0]; $this->Close}
         );
     }
 
@@ -61,7 +61,13 @@ sub new {
 
 sub OnClose {
     my($this, $event) = @_;
-    $this->Destroy();
+    $this->EndModal(0);
+    $this->Destroy();    
+}
+
+sub get_mode {
+    my($this) = @_;
+    return $this->{app_mode};
 }
 
 1;
