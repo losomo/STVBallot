@@ -16,6 +16,8 @@ use Wx qw(:sizer
           wxTE_MULTILINE
           );
 
+use constant ROW => 30;
+
 sub new {
     my $class = shift;
 
@@ -30,7 +32,21 @@ sub new {
         $_[1],  # position [x, y]
         [$form_width, $form_height] # size [width, height]
     );
-    my $h = 5;
+    my $h = 1;
+    my $name_caption = Wx::StaticText->new(
+        $this,             
+        -1,                
+        lh->maketext('Enter your name'), 
+        [20, ROW * $h],           # [x, y] coordinates of the control
+    );
+    my $name_ctrl = Wx::TextCtrl->new(
+            $this, 
+            -1,
+            '', 
+            [20 + 160,ROW * $h++ - 5], 
+            [$form_width-205, ROW], 
+            0 
+    );
     for my $spec (        
         [server => 'Host ballots'],
         [client => 'Join the committee'],
@@ -39,8 +55,8 @@ sub new {
         my $button = Wx::Button->new(
             $this,                  # parent
              -1,                    # id
-             lh()->maketext($spec->[1]),   # label
-             [20, 20 * $h++],         # position [x,y]
+             lh->maketext($spec->[1]),   # label
+             [20, ROW * $h++],         # position [x,y]
              [$form_width-45, 30]   # size [w, h]
         );
         EVT_BUTTON(
@@ -49,7 +65,6 @@ sub new {
             sub {$this->{app_mode} = $spec->[0]; $this->Close}
         );
     }
-
 
     EVT_CLOSE(
         $this,

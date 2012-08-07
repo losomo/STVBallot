@@ -20,7 +20,7 @@ sub OnInit {
     $dialog->ShowModal();
     my $app_state = {app_mode => $dialog->get_mode()};
     exit 1 unless $app_state->{app_mode};
-    my($frame) = STVBallot::BallotFrame->new($app_state, undef, -1, lh->maketext("STV Ballot"));
+    my($frame) = STVBallot::BallotFrame->new($app_state, undef, -1, lh->maketext("STV Ballot"), [-1, -1]);
     $frame->Show(1);
     $this->SetTopWindow($frame);
     return 1;
