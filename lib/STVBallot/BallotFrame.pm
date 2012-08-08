@@ -1,23 +1,25 @@
 package STVBallot::BallotFrame;
 use Modern::Perl;
 use base qw(Wx::Frame);
-use Wx qw(:id :toolbar wxNullBitmap wxDefaultPosition wxDefaultSize wxDefaultPosition wxDefaultSize wxNullBitmap wxTB_VERTICAL wxSIZE wxTE_MULTILINE wxBITMAP_TYPE_BMP);
-use Wx::Event qw(EVT_SIZE EVT_MENU EVT_COMBOBOX EVT_UPDATE_UI EVT_TOOL_ENTER);
+use Wx qw(:id :splitterwindow);
+use Wx::Event qw(EVT_SIZE);
+use STVBallot::ClientsOverview;
+use STVBallot::MainNotebook;
 use Data::Dump;
 
 sub new {
-    my( $class ) = shift;
-    my( $app_state ) = shift;
-    my( $this ) = $class->SUPER::new(@_);
-    ddx $app_state;
-
-    # allocate id numbers for controls.
-    # This method appears a little strange, but it's a way to quickly allocate
-    # all IDs in one place.
-
-    my( $ID_LeftPanel, $ID_tabPanel ) = ( 1 .. 100 );
-
-
+    my ($class) = shift;
+    my ($app_state) = shift;
+    my ($this) = $class->SUPER::new(@_);
+    if ($app_state->{app_mode} eq 'server') {
+        my $splitter = Wx::SplitterWindow->new($this, -1);
+        my $left  = STVBallot::ClientsOverview->new($app_state, $splitter);
+        my $right = STVBallot::MainNotebook->new($app_state, $splitter);
+        $splitter->SplitVertically($left, $right);
+    }
+    else {
+        STVBallot::MainNotebook->new($app_state, $this);
+    }
     return $this;
 }
 
