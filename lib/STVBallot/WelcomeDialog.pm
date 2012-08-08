@@ -4,7 +4,7 @@ use base qw(Wx::Dialog);
 use Data::Dump;
 use STVBallot::BallotApp qw(lh);
 
-use Wx::Event qw(EVT_BUTTON EVT_CLOSE);
+use Wx::Event qw(EVT_BUTTON EVT_CLOSE EVT_TEXT);
 use Wx qw(:sizer
           wxDefaultPosition
           wxDefaultSize
@@ -48,9 +48,9 @@ sub new {
             0 
     );
     for my $spec (        
-        [server => 'Host ballots'],
-        [client => 'Join the committee'],
-        [standalone => 'Standalone mode'],
+        [server =>     'Host ballots',       0],
+        [client =>     'Join the committee', 0],
+        [standalone => 'Standalone mode',    1],
         ) {
         my $button = Wx::Button->new(
             $this,                  # parent
@@ -64,8 +64,15 @@ sub new {
             $button,
             sub {$this->{app_mode} = $spec->[0]; $this->Close}
         );
+        $button->Enable($spec->[2]);
+        $this->{buttons} //= [];
+        push @{$this->{buttons}}, $button;
     }
 
+    EVT_TEXT($this, $name_ctrl, sub {
+        my $enable = length $name_ctrl->GetValue >= 2;
+        $this->{buttons}->[$_]->Enable($enable) for (0,1);        
+    });
     EVT_CLOSE(
         $this,
         \&OnClose
