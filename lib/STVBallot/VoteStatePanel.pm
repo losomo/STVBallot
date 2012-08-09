@@ -10,6 +10,7 @@ sub new {
     my ($class) = shift;
     my ($app_control) = shift;
     my ($this) = $class->SUPER::new(@_);
+    $app_control->listen('vote_started', sub {$this->Enable(1);});
     $this->Disable();
     my $main_sizer = Wx::BoxSizer->new(wxHORIZONTAL);
     $this->SetSizer($main_sizer);
@@ -20,7 +21,6 @@ sub new {
     $left_panel->SetSizer($left_sizer);
     
     my $ballots_button = Wx::Button->new($left_panel, -1,lh->maketext('Print ballots'));
-    $ballots_button->Disable();
     EVT_BUTTON($ballots_button, -1, sub {
         #TODO
     });

@@ -12,6 +12,7 @@ sub new {
     my ($app_control) = shift;
     my ($this) = $class->SUPER::new(@_);
     $this->Disable();
+    $app_control->listen('vote_started', sub {$this->Enable(1);});
     my $main_sizer = Wx::BoxSizer->new(wxVERTICAL);
     $this->SetSizer($main_sizer);
 

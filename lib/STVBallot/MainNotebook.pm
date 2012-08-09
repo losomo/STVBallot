@@ -15,6 +15,7 @@ sub new {
     my ($this) = $class->SUPER::new(@_);
     $this->SetMinSize([500, 300]);
     my $notebook = Wx::Notebook->new($this);
+    $app_control->listen('vote_started', sub {$notebook->ChangeSelection(1);});
     my $status_bar = Wx::StaticText->new($this, -1, 'Initial status');
     my $sizer = Wx::BoxSizer->new(wxVERTICAL);
     $sizer->Add($notebook, 1, wxEXPAND);

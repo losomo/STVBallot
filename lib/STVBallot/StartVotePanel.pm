@@ -58,9 +58,7 @@ sub new {
     my $launch_button = Wx::Button->new($left_panel, -1,lh->maketext('Launch ballot'));
     EVT_BUTTON($launch_button, -1, sub {
        #TODO validate
-       $app_control->{vote_state_panel}->Enable(1);
-       $app_control->{type_panel}->Enable(1);
-       $app_control->{notebook}->ChangeSelection(1);
+       $app_control->signal('vote_started');
     });
     $left_sizer->Add(10, 10);
     $left_sizer->Add($launch_button);
