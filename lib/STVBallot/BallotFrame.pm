@@ -13,11 +13,11 @@ sub new {
     my ($this) = $class->SUPER::new(@_);
     if ($app_state->{app_mode} eq 'server') {
         my $splitter = Wx::SplitterWindow->new($this);
+        $splitter->SetMinimumPaneSize(20);
         my $left  = STVBallot::ClientsOverview->new($app_state, $splitter);
         my $right = STVBallot::MainNotebook->new($app_state, $splitter);
         $splitter->SplitVertically($left, $right);
 		$splitter->SetSashPosition(150);
-#TODO prevent collapsing
     }
     else {
         STVBallot::MainNotebook->new($app_state, $this);

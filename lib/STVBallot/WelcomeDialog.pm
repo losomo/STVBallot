@@ -59,11 +59,7 @@ sub new {
              [20, ROW * $h++],         # position [x,y]
              [$form_width-45, 30]   # size [w, h]
         );
-        EVT_BUTTON(
-            $this,
-            $button,
-            sub {$this->{app_mode} = $spec->[0]; $this->Close}
-        );
+        EVT_BUTTON($button, -1, sub {$this->{app_mode} = $spec->[0]; $this->Close});
         $button->Enable($spec->[2]);
         $this->{buttons} //= [];
         push @{$this->{buttons}}, $button;

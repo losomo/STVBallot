@@ -26,10 +26,6 @@ sub new {
     my $members_sizer = Wx::FlexGridSizer->new(0, 3);
     $members_panel->SetSizer($members_sizer);
 
-    #for (1..99) {
-    #     $members_sizer->Add(Wx::StaticText->new($members_panel, -1, 'Test....'));
-    #}
-
     return $this;
 }
 

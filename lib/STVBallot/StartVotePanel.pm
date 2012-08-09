@@ -2,7 +2,7 @@ package STVBallot::StartVotePanel;
 use Modern::Perl;
 use base qw(Wx::Panel);
 use Wx qw(:id wxVERTICAL wxHORIZONTAL wxTE_RIGHT wxTE_PROCESS_ENTER wxEXPAND);
-use Wx::Event qw(EVT_KILL_FOCUS EVT_TEXT_ENTER);
+use Wx::Event qw(EVT_KILL_FOCUS EVT_TEXT_ENTER EVT_BUTTON);
 use STVBallot::BallotApp qw(lh);
 use Data::Dump;
 
@@ -40,9 +40,28 @@ sub new {
     $left_sizer->Add($replacement_checkbox);
     
     my $shuffle_button = Wx::Button->new($left_panel, -1,lh->maketext('Shuffle candidates'));
+    EVT_BUTTON($shuffle_button, -1, sub {
+        my $c = $this->{candidates_controls};
+        my $i = @$c;
+        while (--$i) {
+            my $j = int rand ($i+1);
+            my ($orig_i) = [$c->[$i]->[0]->GetValue, $c->[$i]->[1]->GetSelection];
+            $c->[$i]->[0]->ChangeValue($c->[$j]->[0]->GetValue);
+            $c->[$i]->[1]->SetSelection($c->[$j]->[1]->GetSelection);
+            $c->[$j]->[0]->ChangeValue($orig_i->[0]);
+            $c->[$j]->[1]->SetSelection($orig_i->[1]);
+        }
+        $shuffle_button->Disable;
+    });
     $left_sizer->Add($shuffle_button);
 
     my $launch_button = Wx::Button->new($left_panel, -1,lh->maketext('Launch ballot'));
+    EVT_BUTTON($launch_button, -1, sub {
+       #TODO validate
+       $app_state->{vote_state_panel}->Enable(1);
+       $app_state->{type_panel}->Enable(1) if $app_state->{type_panel};
+       $app_state->{notebook}->ChangeSelection(1);
+    });
     $left_sizer->Add(10, 10);
     $left_sizer->Add($launch_button);
     $main_sizer->Add($left_panel);
@@ -66,7 +85,7 @@ sub new {
         my $current_no = @{$this->{candidates_controls} // []};
         if ($no > $current_no) {
             for (1..($no-$current_no)) {
-                my $candidate_name_input = Wx::TextCtrl->new($candidates_grid, -1, '');
+                my $candidate_name_input = Wx::TextCtrl->new($candidates_grid, -1, chr 64 + $current_no + $_);
                 $candidate_name_input->SetMinSize([200, -1]);
                 my $candidate_gender_select = Wx::Choice->new($candidates_grid, -1, [-1,-1], [-1,-1], [
                     '---',
@@ -95,6 +114,7 @@ sub new {
     $right_sizer->Add($candidates_scroll_pane, 1, wxEXPAND);
     $main_sizer->Add(20, 20);
     $main_sizer->Add($right_panel, 1, wxEXPAND);
+
     return $this;
 }
 
