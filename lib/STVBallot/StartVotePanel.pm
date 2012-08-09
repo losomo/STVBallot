@@ -8,7 +8,7 @@ use Data::Dump;
 
 sub new {
     my ($class) = shift;
-    my ($app_state) = shift;
+    my ($app_control) = shift;
     my ($this) = $class->SUPER::new(@_);
 
     my $main_sizer = Wx::BoxSizer->new(wxHORIZONTAL);
@@ -58,9 +58,9 @@ sub new {
     my $launch_button = Wx::Button->new($left_panel, -1,lh->maketext('Launch ballot'));
     EVT_BUTTON($launch_button, -1, sub {
        #TODO validate
-       $app_state->{vote_state_panel}->Enable(1);
-       $app_state->{type_panel}->Enable(1) if $app_state->{type_panel};
-       $app_state->{notebook}->ChangeSelection(1);
+       $app_control->{vote_state_panel}->Enable(1);
+       $app_control->{type_panel}->Enable(1);
+       $app_control->{notebook}->ChangeSelection(1);
     });
     $left_sizer->Add(10, 10);
     $left_sizer->Add($launch_button);

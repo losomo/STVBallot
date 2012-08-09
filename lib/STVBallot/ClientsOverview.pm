@@ -8,7 +8,7 @@ use Data::Dump;
 
 sub new {
     my ($class) = shift;
-    my ($app_state) = shift;
+    my ($app_control) = shift;
     my ($this) = $class->SUPER::new(@_);
 
     my $panel_caption = Wx::StaticText->new($this, -1, lh->maketext('Committee'));

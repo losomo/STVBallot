@@ -5,60 +5,32 @@ use Data::Dump;
 use STVBallot::BallotApp qw(lh);
 
 use Wx::Event qw(EVT_BUTTON EVT_CLOSE EVT_TEXT);
-use Wx qw(:sizer
-          wxDefaultPosition
-          wxDefaultSize
-          wxDefaultValidator
-          wxDEFAULT_DIALOG_STYLE
-          wxID_OK
-          wxOK
-          wxRESIZE_BORDER
-          wxTE_MULTILINE
-          );
-
-use constant ROW => 30;
+use Wx qw(:sizer wxVERTICAL wxHORIZONTAL wxEXPAND wxALL wxALIGN_CENTER);
 
 sub new {
     my $class = shift;
+    my $parent = shift;
 
-    # Main window
-    my $form_width  = 480;
-    my $form_height = 175;
+    my $this = $class->SUPER::new($parent, -1, lh->maketext("STV Ballot"));
+    my $main_sizer = Wx::BoxSizer->new(wxVERTICAL);
+    $this->SetSizer($main_sizer);
 
-    my $this = $class->SUPER::new(
-        undef,  # parent
-        -1,     # id
-        $_[0],  # title
-        $_[1],  # position [x, y]
-        [$form_width, $form_height] # size [width, height]
-    );
-    my $h = 1;
-    my $name_caption = Wx::StaticText->new(
-        $this,             
-        -1,                
-        lh->maketext('Enter your name'), 
-        [20, ROW * $h],           # [x, y] coordinates of the control
-    );
-    my $name_ctrl = Wx::TextCtrl->new(
-            $this, 
-            -1,
-            '', 
-            [20 + 160,ROW * $h++ - 5], 
-            [$form_width-205, ROW], 
-            0 
-    );
+    my $top_row = Wx::Panel->new($this);
+    $main_sizer->Add($top_row, 0, wxALL, 15);
+    my $top_sizer = Wx::BoxSizer->new(wxHORIZONTAL);
+    $top_row->SetSizer($top_sizer);
+
+    $top_sizer->Add(Wx::StaticText->new($top_row, -1, lh->maketext('Enter your name')), 0, wxALIGN_CENTER | wxALL, 5);
+    my $name_ctrl = Wx::TextCtrl->new($top_row, -1, '');
+    $name_ctrl->SetMinSize([160,-1]);
+    $top_sizer->Add($name_ctrl, 0, wxALIGN_CENTER | wxALL, 5);
     for my $spec (        
         [server =>     lh->maketext('Host ballots'),       0],
         [client =>     lh->maketext('Join the committee'), 0],
         [standalone => lh->maketext('Standalone mode'),    1],
         ) {
-        my $button = Wx::Button->new(
-            $this,                  # parent
-             -1,                    # id
-             $spec->[1],  			 # label
-             [20, ROW * $h++],         # position [x,y]
-             [$form_width-45, 30]   # size [w, h]
-        );
+        my $button = Wx::Button->new($this, -1, $spec->[1]);
+        $main_sizer->Add($button, 0, wxEXPAND|wxALL, 5);
         EVT_BUTTON($button, -1, sub {$this->{app_mode} = $spec->[0]; $this->Close});
         $button->Enable($spec->[2]);
         $this->{buttons} //= [];
@@ -73,7 +45,7 @@ sub new {
         $this,
         \&OnClose
     );
-
+    $this->Fit;
     $this;
 }
 

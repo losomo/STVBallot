@@ -9,7 +9,7 @@ use Data::Dump;
 
 sub new {
     my ($class) = shift;
-    my ($app_state) = shift;
+    my ($app_control) = shift;
     my ($this) = $class->SUPER::new(@_);
     $this->Disable();
     my $main_sizer = Wx::BoxSizer->new(wxVERTICAL);
