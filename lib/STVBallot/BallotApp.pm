@@ -25,7 +25,7 @@ sub OnInit {
         client => 'Committee member',
         standalone => 'Standalone',
         }->{$app_state->{app_mode}});
-    my($frame) = STVBallot::BallotFrame->new($app_state, undef, -1, $title, [-1, -1]);
+    my($frame) = STVBallot::BallotFrame->new($app_state, undef, -1, $title, [-1, -1], [700, 500]);
     $frame->Show(1);
     $this->SetTopWindow($frame);
     return 1;

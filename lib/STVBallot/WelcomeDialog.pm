@@ -48,14 +48,14 @@ sub new {
             0 
     );
     for my $spec (        
-        [server =>     'Host ballots',       0],
-        [client =>     'Join the committee', 0],
-        [standalone => 'Standalone mode',    1],
+        [server =>     lh->maketext('Host ballots'),       0],
+        [client =>     lh->maketext('Join the committee'), 0],
+        [standalone => lh->maketext('Standalone mode'),    1],
         ) {
         my $button = Wx::Button->new(
             $this,                  # parent
              -1,                    # id
-             lh->maketext($spec->[1]),   # label
+             $spec->[1],  			 # label
              [20, ROW * $h++],         # position [x,y]
              [$form_width-45, 30]   # size [w, h]
         );
@@ -69,7 +69,7 @@ sub new {
         push @{$this->{buttons}}, $button;
     }
 
-    EVT_TEXT($this, $name_ctrl, sub {
+    EVT_TEXT($name_ctrl, -1, sub {
         my $enable = length $name_ctrl->GetValue >= 2;
         $this->{buttons}->[$_]->Enable($enable) for (0,1);        
     });
