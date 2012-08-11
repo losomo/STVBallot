@@ -1,5 +1,7 @@
 #!/usr/bin/perl 
 package STVBallot::BallotApp;
+use threads;
+ use threads::shared;
 use Modern::Perl;
 my $_lh = STVBallot::L10N->get_handle("en_us") || die "Language?";
 sub lh { $_lh; }
@@ -12,6 +14,7 @@ use STVBallot::BallotFrame;
 use STVBallot::WelcomeDialog;
 use STVBallot::ClientConnectDialog;
 use STVBallot::AppControl;
+use STVBallot::ConnectionManager;
 use base qw(Wx::App);
 use Data::Dump;
 
@@ -27,12 +30,13 @@ sub OnInit {
         client => 'Committee member',
         standalone => 'Standalone',
         }->{$app_control->{app_mode}});
+    $app_control->{connection_manager} = STVBallot::ConnectionManager->new($app_control->{app_mode});
     my($frame) = STVBallot::BallotFrame->new($app_control, undef, -1, $title, [-1, -1], [700, 500]);
     $frame->Show(1);
     $this->SetTopWindow($frame);
     if ($app_control->{app_mode} eq 'client') {
-        $dialog = STVBallot::ClientConnectDialog->new();
-        $dialog->ShowModal();
+        $dialog = STVBallot::ClientConnectDialog->new($frame, $app_control);
+        exit if $dialog->ShowModal();        
     }
     return 1;
 }

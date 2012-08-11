@@ -23,6 +23,7 @@ sub new {
     $top_sizer->Add(Wx::StaticText->new($top_row, -1, lh->maketext('Enter your name')), 0, wxALIGN_CENTER | wxALL, 5);
     my $name_ctrl = Wx::TextCtrl->new($top_row, -1, '');
     $name_ctrl->SetMinSize([160,-1]);
+    $name_ctrl->SetFocus();
     $top_sizer->Add($name_ctrl, 0, wxALIGN_CENTER | wxALL, 5);
     for my $spec (        
         [server =>     lh->maketext('Host ballots'),       0],
