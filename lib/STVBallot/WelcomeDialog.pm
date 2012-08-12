@@ -22,6 +22,7 @@ sub new {
 
     $top_sizer->Add(Wx::StaticText->new($top_row, -1, lh->maketext('Enter your name')), 0, wxALIGN_CENTER | wxALL, 5);
     my $name_ctrl = Wx::TextCtrl->new($top_row, -1, '');
+    $this->{name_ctrl} = $name_ctrl;
     $name_ctrl->SetMinSize([160,-1]);
     $name_ctrl->SetFocus();
     $top_sizer->Add($name_ctrl, 0, wxALIGN_CENTER | wxALL, 5);
@@ -52,6 +53,7 @@ sub new {
 
 sub OnClose {
     my($this, $event) = @_;
+    $this->{name} = $this->{name_ctrl}->GetValue();
     $this->EndModal(0);
     $this->Destroy();    
 }
@@ -59,6 +61,11 @@ sub OnClose {
 sub get_mode {
     my($this) = @_;
     return $this->{app_mode};
+}
+
+sub get_name {
+    my($this) = @_;
+    return $this->{name};
 }
 
 1;

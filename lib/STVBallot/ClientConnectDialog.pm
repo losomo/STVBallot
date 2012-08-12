@@ -33,18 +33,17 @@ sub new {
         }
         $status_text->SetLabel(lh->maketext('Searching...'));
         $app_control->{connection_manager}->find_servers_async($parent, sub {
+            my ($found) = @_;
             if ($this->{destroy})  {
                     $this->Destroy();
                     return;
             }
-            my (@found) = @_;
-            $status_text->SetLabel(lh->maketext('Found [*,_1, session,sessions,no sessions]', scalar(@found)));
+            $status_text->SetLabel(lh->maketext('Found [*,_1, session,sessions,no sessions]', scalar(@$found)));
             for ($session_list->GetChildren()) {
                 $session_sizer->Remove($_);
                 $_->Destroy();
             }
-            for my $session (@found) {
-                ddx $session;
+            for my $session (@$found) {
                 $session_sizer->Add(Wx::StaticText->new($session_list, -1, $session->{name}));
                 $session_sizer->Add(Wx::StaticText->new($session_list, -1, $session->{sec_code}));
                 my $connect_button = Wx::Button->new($session_list, -1,lh->maketext('Join'));

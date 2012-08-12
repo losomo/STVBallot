@@ -23,14 +23,18 @@ sub OnInit {
     my($this) = @_;
     my ($dialog) = STVBallot::WelcomeDialog->new(undef);
     $dialog->ShowModal();
-    my $app_control = STVBallot::AppControl->new({app_mode => $dialog->get_mode()});
+    my $app_control = STVBallot::AppControl->new({
+        app_mode => $dialog->get_mode(),
+        user_name => $dialog->get_name(),
+        app => $this,
+    });
     exit 1 unless $app_control->{app_mode};
     my $title = lh->maketext("STV Ballot") . ' – ' . lh->maketext({
         server => 'Chairman',
         client => 'Committee member',
         standalone => 'Standalone',
         }->{$app_control->{app_mode}});
-    $app_control->{connection_manager} = STVBallot::ConnectionManager->new($app_control->{app_mode});
+    $app_control->{connection_manager} = STVBallot::ConnectionManager->new($app_control);
     my($frame) = STVBallot::BallotFrame->new($app_control, undef, -1, $title, [-1, -1], [700, 500]);
     $frame->Show(1);
     $this->SetTopWindow($frame);
