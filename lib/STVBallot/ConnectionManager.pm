@@ -9,6 +9,8 @@ use Net::Rendezvous::Publish;
 use Net::Bonjour;
 use IO::Socket::SSL;
 use Encode;
+use Crypt::OpenSSL::Random;
+use Crypt::OpenSSL::RSA;
 
 use constant SERVICE_PORT => 51432;
 my $DONE_EVENT : shared = Wx::NewEventType;
@@ -29,7 +31,7 @@ sub find_servers_async {
     my ($self, $widget, $cb) = @_; @_ = ();
     EVT_COMMAND($widget, -1, $DONE_EVENT, sub {
         my ($widget, $command) = @_;
-        my $response = from_json($command->GetData());
+        my $response = decode_json($command->GetData());
         $cb->($response);
     });
     threads->create(sub {
@@ -39,7 +41,7 @@ sub find_servers_async {
             name => decode_utf8(($_->all_attrs)[0]),
             sec_code => ($_->all_attrs)[2]
         }, $self->_discover_servers();
-        $result = to_json([@servers]);
+        $result = encode_json([@servers]);
         my $threvent = new Wx::PlThreadEvent( -1, $DONE_EVENT, $result);
         Wx::PostEvent($widget, $threvent);
     })->detach();    
@@ -53,13 +55,17 @@ sub join_session {
 
 sub _start_server {
     my ($self, $app_control) = @_;
-    # TODO
+    my $rsa = $self->_generate_key();
+    ddx $rsa->get_private_key_string();
+    ddx $rsa->get_public_key_x509_string();
     $app_control->{sec_code} = 'ODINID';
     threads->create(sub {
         my ($s, $sock);
         if(!($sock = IO::Socket::SSL->new( Listen => 5,
                            LocalAddr => 'localhost',
                            LocalPort => SERVICE_PORT,
+                           SSL_key => $rsa->get_private_key_string(),
+                           SSL_cert => $rsa->get_public_key_x509_string(),
                            Proto     => 'tcp',
                            Reuse     => 1,
                            SSL_verify_mode => 0x01,
@@ -112,6 +118,13 @@ sub _discover_servers {
     my $res = Net::Bonjour->new("stvballot");
     $res->discover;
     return $res->entries;
+}
+
+sub _generate_key {
+    my ($self) = @_;
+    Crypt::OpenSSL::Random::random_seed(localtime . $self->{app_control}->{user_name});
+    Crypt::OpenSSL::RSA->import_random_seed();
+    return Crypt::OpenSSL::RSA->generate_key(1024);
 }
 
 1;
