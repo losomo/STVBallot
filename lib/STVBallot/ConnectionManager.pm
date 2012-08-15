@@ -7,10 +7,10 @@ use Wx::Event qw(EVT_COMMAND);
 use JSON; 
 use Net::Rendezvous::Publish;
 use Net::Bonjour;
-use IO::Socket::SSL;
 use Encode;
-use Crypt::OpenSSL::Random;
 use Crypt::OpenSSL::RSA;
+use Crypt::CBC;
+use Digest::MD5 qw(md5 md5_hex md5_base64);
 
 use constant SERVICE_PORT => 51432;
 my $DONE_EVENT : shared = Wx::NewEventType;
@@ -38,8 +38,8 @@ sub find_servers_async {
         my $result : shared;
         my @servers = map {
             address => $_->address,
-            name => decode_utf8(($_->all_attrs)[0]),
-            sec_code => ($_->all_attrs)[2]
+            name => decode_utf8(($_->all_attrs)[2]),
+            sec_code => ($_->all_attrs)[0]
         }, $self->_discover_servers();
         $result = encode_json([@servers]);
         my $threvent = new Wx::PlThreadEvent( -1, $DONE_EVENT, $result);
@@ -49,43 +49,43 @@ sub find_servers_async {
 
 sub join_session {
     my ($self, $session) = @_;
-    #TODO
-    ddx $session;
+    my $sock = IO::Socket::INET->new(
+            PeerAddr => $session->{address},
+            PeerPort => SERVICE_PORT,
+            Proto    => 'tcp');
+    $self->{socket} = $sock;
+    $self->{enc_key} = get_random_bytes(256);
+    $sock->print(encode_json({command => 'get_public_key'}));
+    my $server_key = $sock->getline;
+    $server_key = Crypt::OpenSSL::RSA->new_public_key($server_key);
+    md5_base64($server_key->get_public_key_string) eq $session->{sec_code} or die "security code mismatch";
+    $sock->print(encode_json({command => 'set_enc_key', enc_key => $server_key->encrypt($self->{enc_key})}));
+    my $confirmation = $sock->getline;
+    $confirmation =~ /OK/ or die "Couldn't set encryption key";
 }
 
 sub _start_server {
     my ($self, $app_control) = @_;
     my $rsa = $self->_generate_key();
-    ddx $rsa->get_private_key_string();
-    ddx $rsa->get_public_key_x509_string();
-    $app_control->{sec_code} = 'ODINID';
+    $app_control->{key} = $rsa;
+    $app_control->{sec_code} = md5_base64($rsa->get_public_key_string);
     threads->create(sub {
         my ($s, $sock);
-        if(!($sock = IO::Socket::SSL->new( Listen => 5,
+        if(!($sock = IO::Socket::INET->new( Listen => 5,
                            LocalAddr => 'localhost',
                            LocalPort => SERVICE_PORT,
-                           SSL_key => $rsa->get_private_key_string(),
-                           SSL_cert => $rsa->get_public_key_x509_string(),
                            Proto     => 'tcp',
                            Reuse     => 1,
-                           SSL_verify_mode => 0x01,
                          )) ) {
-            die "unable to create socket: ", &IO::Socket::SSL::errstr, "\n";
+            die "unable to create socket: ", &IO::Socket::INET::errstr, "\n";
         }
         while (1) {
           while(($s = $sock->accept())) {
-              my ($peer_cert, $subject_name, $issuer_name, $date, $str);
               if( ! $s ) {
                   warn "error: ", $sock->errstr, "\n";
                   next;
               }
               warn "connection opened ($s).\n";
-              if(ref($sock) eq "IO::Socket::SSL") {
-                  $subject_name = $s->peer_certificate("subject");
-                  $issuer_name = $s->peer_certificate("issuer");
-              }
-              warn "\t subject: '$subject_name'.\n";
-              warn "\t issuer: '$issuer_name'.\n";
               my $line = <$s>;
               while ($line) {
                   ddx $line;
@@ -122,8 +122,6 @@ sub _discover_servers {
 
 sub _generate_key {
     my ($self) = @_;
-    Crypt::OpenSSL::Random::random_seed(localtime . $self->{app_control}->{user_name});
-    Crypt::OpenSSL::RSA->import_random_seed();
     return Crypt::OpenSSL::RSA->generate_key(1024);
 }
 

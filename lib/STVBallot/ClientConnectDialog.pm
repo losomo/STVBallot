@@ -24,7 +24,7 @@ sub new {
     my $session_list = Wx::Panel->new($sessions_scrollpane);
     $scroll_sizer->Add($session_list, 1, wxEXPAND);
     $session_list->SetMinSize([200,100]);
-    my $session_sizer = Wx::FlexGridSizer->new(0, 3);
+    my $session_sizer = Wx::FlexGridSizer->new(0, 3, 10, 10);
     my $refresh_sub;
     $refresh_sub = sub {
         if ($this->{destroy})  {
