@@ -7,7 +7,7 @@ use JSON;
 use Net::Rendezvous::Publish;
 use Net::Bonjour;
 use Encode;
-use Crypt::OpenSSL::RSA;
+use Crypt::RSA;
 use Crypt::CBC;
 use Digest::MD5 qw(md5_base64);
 use Wx qw(:socket);
@@ -23,6 +23,8 @@ sub new {
     my $self = {app_control => $app_control};
     bless $self, $class;
     if ($app_control->{app_mode} eq 'server') {
+        $self->{clients} = {};
+        $self->{client_names} = {};
         $self->_start_server($app_control);
         $self->_publish_server_async($app_control);
     }
@@ -61,15 +63,19 @@ sub join_session {
     $sock->Connect($session->{address}, SERVICE_PORT);
     if (! $sock->IsConnected ) { ddx "ERROR", $sock;}
     $self->{socket} = $sock;
-    $sock->WriteMsg(encode_json({command => 'get_public_key'}) . "\n");
+    $sock->WriteMsg(encode_json({command => 'get_public_key', cname => $app_control->{user_name}}) . "\n");
     ddx "key requested";
     my $server_key = _readMsg($sock);
     ddx "key received: $server_key";
-    $server_key = Crypt::OpenSSL::RSA->new_public_key($server_key);
-    md5_base64($server_key->get_public_key_string) eq $session->{sec_code} or die "security code mismatch";
-    $sock->WriteMsg(encode_json({command => 'set_enc_key', enc_key => $server_key->encrypt($self->{enc_key})}) . "\n");
+    if ($server_key =~ /Error/) {
+        return $server_key;
+    }
+    my $key = new Crypt::RSA::Key::Public()->deserialize($server_key);
+    $self->{server_key} = $key;
+    md5_base64($key) eq $session->{sec_code} or die "security code mismatch";
+    $sock->WriteMsg(encode_json({command => 'set_enc_key', enc_key => $key->encrypt($self->{enc_key})}) . "\n");
     my $confirmation = _readMsg($sock);
-    $confirmation =~ /OK/ or die "Couldn't set encryption key";
+    $confirmation =~ /OK/ or die "Couldn't set encryption key: $confirmation";
     EVT_SOCKET_INPUT($app_control->{app}, $sock , sub {
             my ($s , $this , $evt) = @_ ;
             $self->_client_handle_command(_readMsg($s));
@@ -78,17 +84,20 @@ sub join_session {
 
 sub _start_server {
     my ($self, $app_control) = @_;
-    my $rsa = $self->_generate_key();
-    $app_control->{key} = $rsa;
-    $app_control->{sec_code} = md5_base64($rsa->get_public_key_string);
+    my ($rsa_pub, $rsa_priv) = $self->_generate_key();
+    $self->{key} = $rsa_priv;
+    $self->{public_key_string} = $rsa_pub->serialize();
+    ddx $self->{public_key_string};
+    $app_control->{sec_code} = md5_base64($self->{public_key_string});
     my $sock = Wx::SocketServer->new('0.0.0.0',SERVICE_PORT,wxSOCKET_WAITALL);
     EVT_SOCKET_CONNECTION($app_control->{app}, $sock , sub {
         my ( $soc , $this , $evt ) = @_ ;
         my $client = $soc->Accept(0) ;
-        ddx $client;
-        EVT_SOCKET_INPUT($app_control->{app} , $client , sub {
+        EVT_SOCKET_INPUT($app_control->{app}, $client , sub {
                 my ($s , $this , $evt) = @_ ;
-                $self->_server_handle_command($s, _readMsg($s));
+                my $response = $self->_server_handle_command($client, _readMsg($s));
+                ddx $response;
+                $s->WriteMsg($response . "\n");
         });
     });
 }
@@ -116,7 +125,7 @@ sub _discover_servers {
 
 sub _generate_key {
     my ($self) = @_;
-    return Crypt::OpenSSL::RSA->generate_key(1024);
+    return new Crypt::RSA()->keygen(Size => 1024);
 }
 
 sub _client_handle_command {
@@ -125,9 +134,47 @@ sub _client_handle_command {
 }
 
 sub _server_handle_command {
-    my ($self, $s, $command) = @_;
+    my ($self, $client, $command) = @_;
     ddx $command;
-    $s->WriteMsg("Whatever\n");
+    my $cname = $self->{client_names}->{$client};
+    if (defined $cname) {
+        my $cinfo = $self->{clients}->{$cname};
+        die unless $cinfo;
+        if ($cinfo->{crypt})  {
+            my $cmd_str = $cinfo->{crypt}->decrypt($command);
+            my $cmd = decode_json($cmd_str);
+            return ({
+            }->{$cmd->{command}} // sub {"Unknown command: $cmd->{command}"})->();
+        }
+        else {
+            my $cmd = decode_json($command);
+            $cmd->{command} eq 'set_enc_key' or return "Unexpected command: $cmd->{command}";
+            my $enc_key = $self->{key}->decrypt($cmd->{enc_key});
+            $cinfo->{crypt} = Crypt::CBC->new(-key => $cmd->{enc_key}, -cipher => 'Blowfish');
+            return 'OK';
+        }
+    }
+    else {
+        my $msg = decode_json($command);
+        return ({
+            get_public_key => sub {
+                $cname = $msg->{cname};
+                if ($self->{clients}->{$cname})  {
+                    return encode_json({Error => lh->maketext("Error: [_1] is already connected", $cname)});
+                }
+                else {
+                    ddx $cname;
+                    $self->{clients}->{$cname} = {client => $client};
+                    ddx "cname";
+                    $self->{client_names}->{$client} = $cname;
+                    return $self->{public_key_string};
+                }
+            },
+            reconnect => sub {
+                die "TODO";
+            },
+        }->{$msg->{command}} // sub {"Unknown command: $msg->{command}"})->();
+    }
 }
 
 sub _readMsg {
