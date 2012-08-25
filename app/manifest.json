@@ -1,0 +1,13 @@
+{
+  "name": "STVBallot",
+  "description": "STV Ballot",
+  "manifest_version": 2,
+  "version": "0.0.1",
+  "app": {
+    "background": {
+      "scripts": ["background.js"]
+    }
+  },
+  "permissions": ["experimental", "socket", "app.window"],
+  "icons": { "32": "favicon.png"}
+}
