@@ -9,80 +9,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="shortcut icon" href="favicon.png">
-  <link rel="stylesheet" href="css/style.css?v=2">
+  <link rel="stylesheet" href="css/style.css?v=0.0.1">
 
   <!--[if lt IE 9]>
   <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
   <![endif]-->
+    <script data-template-name="setup" type="text/x-handlebars">
+      Hello, <b>AAAAA</b>
+    </script>
+    <script  data-template-name="application" type="text/x-handlebars">
+        <h1>App goes here:</h1>
+        {{outlet}}
+    </script>
 </head>
 <body>
-<script type="text/x-handlebars" data-template-name="application">
-      <div class="navbar navbar-fixed-top">
-        <div class="navbar-inner">
-          <div class="container">
-            <div class="nav-collapse">
-              <ul class="nav">
-                <li class="setup" {{bindAttr class="isSetup:active"}}><a {{action "doSetup"}}>Setup</a></li>
-                <li class="tabs" {{bindAttr class="isTabs:active"}}><a {{action doTabs}}>Tabs</a></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-  
-      <div class="container">
-        {{outlet}}
-      </div>
-    </script>
-    
-    <script type="text/x-handlebars" data-template-name="setup">
-      <div class="hero-unit">
-        <h1>Select your destiny</h1>
-         {{view SetupChoice name="server" value="Host a Ballot"}}
-         {{view SetupChoice name="client"  value="Join a Ballot"}}
-         {{view SetupChoice name="standalone" value="Standalone"}}
-      </div>
-    </script>
-
-    <script type="text/x-handlebars" data-template-name="tabs">
-      <header class="jumbotron subhead">
-        <h1>Layout Nesting</h1>
-        <p>Views can be dynamically nested using <code>&#123;&#123;outlet&#125;&#125;</code> handlebars helpers.</p>
-        <div class="subnav">
-          <ul class ="nav nav-pills">
-            <li class="tabStart" {{bindAttr class="isTabStart:active"}}><a {{action "doTabStart"}}>Tab Start</a></li>
-            <li class="tabProgress" {{bindAttr class="isTabProgress:active"}}><a {{action "doTabProgress"}}>Tab Progress</a></li>
-            <li class="tabEnter" {{bindAttr class="isTabEnter:active"}}><a {{action "doTabEnter"}}>Tab Enter</a></li>
-          </ul>
-        </div>
-      </header>
-      {{outlet}}
-    </script>
-
-    <script type="text/x-handlebars" data-template-name="tabStart">
-      <section>
-        <h1>Tab Start</h1>
-        {{lorem type=paragraph amount=4}}
-      </section>
-    </script>
-
-    <script type="text/x-handlebars" data-template-name="tabProgress">
-      <section>
-        <h1>Tab Progress</h1>
-        {{lorem type=paragraph amount=4}}
-      </section>
-    </script>
-
-    <script type="text/x-handlebars" data-template-name="tabEnter">
-      <section>
-        <h1>Tab Enter</h1>
-        {{lorem type=paragraph amount=4}}
-      </section>
-    </script>
-
     <script src="js/libs/jquery-1.7.2.min.js"></script>
     <script src="js/libs/handlebars-1.0.0.beta.6.js"></script>
     <script src="js/libs/ember-1.0.pre.js"></script>
+    <script src="js/templates.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
