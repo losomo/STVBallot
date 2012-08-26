@@ -42,6 +42,12 @@ Ballot = Em.Object.extend({
     checkNumbers: function() {
         this.set('touched', !this.get('entries').everyProperty('order', ''));
     }.observes('entries.@each.order'),
+    addVoteAt: function (i) {
+        var maxOrder = this.get('entries').reduce(function(p,e){
+            return e.get('order') > p ? e.get('order') : p;
+        },0);
+        this.get('entries').objectAt(i).set('order', parseInt(maxOrder) + 1);
+    },
 });
 
 Pile = Em.Object.extend({
@@ -71,13 +77,26 @@ Pile = Em.Object.extend({
             this.get('ballots').pushObject(Ballot.create({index: bCount}));
         }
     }.observes('ballots.@each.touched', 'ballots.@each.invalid', 'ballots.@each.empty'),
+    lastIncompleteBallot: function () {
+        var bCount = this.get('ballots').content.length;
+        if (bCount == 1) {
+            return this.get('ballots').objectAt(bCount - 1);
+        }
+        var lastFilled = this.get('ballots').objectAt(bCount - 2);
+        if (lastFilled.get('entries').someProperty('order', '')) {
+            return lastFilled;
+        }
+        else    {
+            return this.get('ballots').objectAt(bCount - 1);
+        }
+    },
 });
 
 Piles = Em.ArrayProxy.extend({
     toString: function() {
         if (this.content.objectAt(0)) return this.content.objectAt(0).get('name');
         return "empty pileGroup";
-    }
+    },
     crosscheckstatus: function() {
         return 'open'; //TODO crosscheck
     }.property('content.@each.pileStatus')
@@ -328,6 +347,12 @@ App.Router = Em.Router.extend({
             done: function(router) {
             },
             print: function(router) {
+            },
+            addVoteFor: function(router, candidate) {
+                var c = router.get('typingController');
+                var p = c.get('currentPile');
+                var lastB = p.lastIncompleteBallot();
+                lastB.addVoteAt(candidate.context.get('index'));
             },
         }),
         connect: Em.Route.extend({

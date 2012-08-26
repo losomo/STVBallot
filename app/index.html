@@ -35,7 +35,7 @@
        <table class="typing">
        <tr> <td>Status</td><!-- indicators row -->
            {{#each b in currentPile.ballots}}
-                <td>Message: {{b.errorMessage}}</td>
+                <td>{{b.errorMessage}}</td>
            {{/each}}
        </tr>
        <tr> <td>Invalid</td><!-- Invalid row -->
@@ -43,7 +43,7 @@
                 <td>{{view Ember.Checkbox checkedBinding="b.invalid"}}</td>
            {{/each}}
        </tr>
-       <tr>  <td>Empty</td><!-- Empty row -->
+       <tr>  <td>Empty</td><!-- "Empty" row -->
            {{#each b in currentPile.ballots}}
                 <td>{{view Ember.Checkbox checkedBinding="b.empty"}}</td>
            {{/each}}
@@ -51,7 +51,7 @@
        <!-- Candidates -->
        {{#each c in candidates}}
        <tr>
-           <td>{{c.name}}}</td>
+           <td {{action addVoteFor c}}>{{c.name}}}</td>
            {{#each b in currentPile.ballots}}
                {{#findBEntry c b}}
                     <td>{{view Em.TextField tabindexBinding="computedindex" valueBinding="bentry.order"}}</td>
