@@ -53,17 +53,19 @@ App.VoteSetupController = Em.Controller.extend({
     }.observes('candidateCount'),
     launchState: function() {
         if (this.get('voteNo') > 0 && this.get('candidateCount') > 0 && this.get('mandateCount') > 0 && this.get('ballotCount') > 0) {
+            var problem = false;
             this.get('candidatesController').forEach (function(item) {
-                if (item == undefined || item.length < 1) {
-                    return "disabled";
+                if (item.get("name").length < 1) {
+                    problem = true;
+                    return;
                 }
             });
-            return false;
+            return problem ? 'disabled' : false;
         }
         else {
             return "disabled";
         }
-    }.property('voteNo', 'candidateCount', 'mandateCount', 'ballotCount', 'candidatesController'),
+    }.property('voteNo', 'candidateCount', 'mandateCount', 'ballotCount', 'candidatesController.@each.name'),
     shuffled: false,
     shuffle: function() {
         var c = this.get('candidatesController');
