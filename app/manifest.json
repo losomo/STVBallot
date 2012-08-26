@@ -8,6 +8,9 @@
       "scripts": ["background.js"]
     }
   },
-  "permissions": ["experimental", "socket", "app.window"],
-  "icons": { "32": "favicon.png"}
+  "sandbox": {
+     "pages": ["index.html"]
+  },
+  "permissions": ["experimental", "experimental.socket", "app.window"],
+  "icons": { "16": "favicon.png", "32": "favicon.png", "128": "favicon.png"}
 }

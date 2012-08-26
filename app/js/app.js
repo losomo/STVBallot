@@ -3,7 +3,10 @@ var App = Em.Application.create();
 /*   MODELS  */
 Candidate = Em.Object.extend({
     name: null,
-    gender: null
+    gender: null,
+    toString: function () {
+        return this.name + " (" + this.gender + ")";
+    }
 });
 
 /* CONTROLLERS */
@@ -24,11 +27,12 @@ App.AppSetupController = Em.Controller.extend({
     }.property('userName')
 });
 App.VoteSetupController = Em.Controller.extend({
-    voteNo: null,
+    voteNo: 1,
     candidateCount: null,
     mandateCount: null,
     ballotCount: null,
     replacements: null,
+    candidatesControllerBinding: 'App.candidatesController',
     genders: ['---','Female','Male'],
     updateCandidates: function() {
         var no = this.candidateCount;
@@ -37,7 +41,7 @@ App.VoteSetupController = Em.Controller.extend({
             for (var i = current_no; i < no; i++) {
                 App.candidatesController.pushObject(Candidate.create({
                     name:   String.fromCharCode(65 + i),
-                    gander: '---'
+                    gender: '---'
                 }));
             }
         }
@@ -46,7 +50,37 @@ App.VoteSetupController = Em.Controller.extend({
                 App.candidatesController.popObject();
             }
         }
-    }.observes('candidateCount')
+    }.observes('candidateCount'),
+    launchState: function() {
+        if (this.get('voteNo') > 0 && this.get('candidateCount') > 0 && this.get('mandateCount') > 0 && this.get('ballotCount') > 0) {
+            this.get('candidatesController').forEach (function(item) {
+                if (item == undefined || item.length < 1) {
+                    return "disabled";
+                }
+            });
+            return false;
+        }
+        else {
+            return "disabled";
+        }
+    }.property('voteNo', 'candidateCount', 'mandateCount', 'ballotCount', 'candidatesController'),
+    shuffled: false,
+    shuffle: function() {
+        var c = this.get('candidatesController');
+        var i = c.content.length;
+        while (--i) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var oi = c.objectAt(i);
+            var oj = c.objectAt(j);
+            var iname = oi.get('name');
+            var igeneder = oi.get('gender');
+            oi.set('name', oj.get('name'));
+            oi.set('gender', oj.get('gender'));
+            oj.set('name', iname);
+            oj.set('gender', igeneder);
+        }
+        this.set('shuffled', "disabled");
+    }
 });
 
 App.candidatesController = Em.ArrayController.create({
@@ -114,6 +148,7 @@ App.Router = Em.Router.extend({
         voteSetup: Em.Route.extend({
             route: '/voteSetup',
             shuffle: function(router) {
+                router.get('voteSetupController').shuffle();
             },
             launch: function(router) {
                 router.transitionTo('voteRunning');
@@ -147,7 +182,7 @@ App.Router = Em.Router.extend({
             route: '/server_start',
             enter: function(router) {
                 console.log('Starting server');
-                start_server();
+                command("start_server");
             },
             redirectsTo: 'voteSetup'
         }),
@@ -155,26 +190,25 @@ App.Router = Em.Router.extend({
 });
 
 /* Non-emberjs functions */
-function start_server() {
-    chrome.experimental.socket.create('udp', '225.0.0.37', 5353, { 
-        onEvent: function(d) {
-            var data = chrome.experimental.socket.read(d.socketId);
-            console.log(data);
-            }
-        },
-        function(socketInfo) {
-          // The socket is created, now we want to connect to the service
-          var socketId = socketInfo.socketId;
-          chrome.experimental.socket.connect(socketId, function(result) {
-            // We are now connected to the socket so send it some data
-            chrome.experimental.socket.write(socketId, arrayBuffer,
-              function(sendInfo) {
-                console.log("wrote " + sendInfo.bytesWritten);
-              }
-            );
-          });
-        }
-    );
+function command(c) {
+    App.source.postMessage({
+       command: c,
+    }, '*');
 }
 
+function handle_request (data) {
+    var command = data.command;
+    switch(command) {
+        case 'init':
+            console.log("connection with background page initialized");
+            break;
+    }
+}
+
+var messageHandler = function(e) {
+  App.source = e.source;
+  handle_request(e.data);
+};
+
+parent.addEventListener('message', messageHandler, false);
 App.initialize();

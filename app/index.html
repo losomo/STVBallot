@@ -23,11 +23,11 @@
        <button {{ action clearTable }}>Start over</button>
        <table class="typing">
        <tr> <!-- indicators row -->
-       </tr> 
+       </tr>
        <tr> <!-- Invalid row -->
-       </tr> 
+       </tr>
        <tr> <!-- Empty row -->
-       </tr> 
+       </tr>
        <!-- Candidates -->
        </table>
 
@@ -44,11 +44,11 @@
        <button {{ action exportOstv }}>Export to OpenSTV</button>
 
        <button {{ action runSTV }}>Export to OpenSTV</button>
-       
+
        Results - Mandates:
-       {{#each m in App.mandatesController}} 
+       {{#each m in App.mandatesController}}
             {{m}}<br/>
-       {{/each}} 
+       {{/each}}
 
        <button {{ action exportProtocol }}>Export Protocol</button>
     </script>
@@ -62,19 +62,19 @@
            {{view Ember.Checkbox valueBinding="replacements" classNames="stvb-chkbox"}}
            Elect replacement mandates
        </label>
-       <button {{action shuffle }}>Shuffle candidates</button>
-       <button {{action launch }}>Launch ballot</button> 
+       <button {{action shuffle }} {{bindAttr disabled="shuffled"}}>Shuffle candidates</button>
+       <button {{action launch }} {{bindAttr disabled="launchState"}}>Launch ballot</button>
         Candidates to appear here
-       {{#each c in App.candidatesController}} 
+       {{#each c in App.candidatesController}}
            {{view Em.TextField valueBinding="c.name"}}
            {{view Ember.Select contentBinding="genders" valueBinding="c.gender"}}
-       {{/each}} 
+       {{/each}}
     </script>
     <script data-template-name="app-setup" type="text/x-handlebars">
        Enter your name: {{view Em.TextField valueBinding="userName"}}
-       {{#each btn in buttons}} 
-           <button {{ action start btn.ba }} {{bindAttr disabled="btnState"}} >{{ btn.desc }}</button>
-       {{/each}} 
+       {{#each btn in buttons}}
+           <button {{ action start btn.ba }} {{bindAttr enabled="btnState"}} >{{ btn.desc }}</button>
+       {{/each}}
     </script>
     <script  data-template-name="application" type="text/x-handlebars">
         <h1>Main frame content:</h1>
