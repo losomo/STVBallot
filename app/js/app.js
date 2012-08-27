@@ -54,7 +54,10 @@ Pile = Em.Object.extend({
     name: null,
     note: "", // "crosscheck"
     ballots: null,
-    pileStatus: null,
+    pileClosed: false,
+    pileOpened: function () {
+        return !this.get('pileClosed');
+    }.property('pileClosed'),
     progress: function () {
         return this.get('ballots').content.length - 1;
     }.property('ballots', 'ballots.@each'),
@@ -65,16 +68,20 @@ Pile = Em.Object.extend({
         this._super();
         this.set('ballots', Ballots.create({content: []}));
     },
+    addBallot: function() {
+        var bCount = this.get('ballots').content.length;
+        this.get('ballots').pushObject(Ballot.create({index: bCount}));
+    },
     newBallotsCreator: function() {
         var bCount = this.get('ballots').content.length;
         if (bCount > 0) {
             var lastB = this.get('ballots').objectAt(bCount - 1);
             if (lastB.invalid || lastB.empty || lastB.touched) {
-                this.get('ballots').pushObject(Ballot.create({index: bCount}));
+                this.addBallot();
             }
         }
         else {
-            this.get('ballots').pushObject(Ballot.create({index: bCount}));
+            this.addBallot();
         }
     }.observes('ballots.@each.touched', 'ballots.@each.invalid', 'ballots.@each.empty'),
     lastIncompleteBallot: function () {
@@ -83,7 +90,7 @@ Pile = Em.Object.extend({
             return this.get('ballots').objectAt(bCount - 1);
         }
         var lastFilled = this.get('ballots').objectAt(bCount - 2);
-        if (lastFilled.get('entries').someProperty('order', '')) {
+        if (lastFilled.get('entries').someProperty('order', '') && !lastFilled.get('empty') && !lastFilled.get('invalid')) {
             return lastFilled;
         }
         else    {
@@ -99,7 +106,7 @@ Piles = Em.ArrayProxy.extend({
     },
     crosscheckstatus: function() {
         return 'open'; //TODO crosscheck
-    }.property('content.@each.pileStatus')
+    }.property('content.@each.pileClosed')
 });
 
 PileGroups = Em.ArrayProxy.extend({});
@@ -248,6 +255,10 @@ App.TypingController = Em.Controller.extend({
         });
         return a;
     }.property('pileGroups', 'pileGroups.@each'),
+    init: function() {
+        this.set('currentPileCaption', this.get('pilesCaptions')[0]);
+        console.log(this.get('currentPileCaption'));
+    },
 });
 
 App.ConnectingController = Em.Controller.extend({
@@ -343,8 +354,15 @@ App.Router = Em.Router.extend({
                 router.get('applicationController').connectOutlet('typing');
             },
             clearTable: function(router) {
+                if (confirm("Really clear this pile?")) {
+                    router.get('typingController').get('currentPile').get('ballots').clear();
+                }
+            },
+            addBallot: function(router) {
+                router.get('typingController').get('currentPile').addBallot();
             },
             done: function(router) {
+                router.get('typingController').get('currentPile').set('pileClosed', true);
             },
             print: function(router) {
             },
@@ -352,12 +370,14 @@ App.Router = Em.Router.extend({
                 var cindex = candidate.context.get('index');
                 var c = router.get('typingController');
                 var p = c.get('currentPile');
-                var lastB = p.lastIncompleteBallot();
-                if (lastB.get('entries').objectAt(cindex).get('order')) {
-                     var bCount = p.get('ballots').content.length;
-                     lastB = p.get('ballots').objectAt(bCount - 1);
+                if (!p.get('pileClosed')) {
+                    var lastB = p.lastIncompleteBallot();
+                    if (lastB.get('entries').objectAt(cindex).get('order')) {
+                         var bCount = p.get('ballots').content.length;
+                         lastB = p.get('ballots').objectAt(bCount - 1);
+                    }
+                    lastB.addVoteAt(cindex);
                 }
-                lastB.addVoteAt(cindex);
             },
         }),
         connect: Em.Route.extend({

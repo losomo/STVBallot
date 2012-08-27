@@ -30,8 +30,8 @@
        <button {{ action joinSession }}>Connect</button>
     </script>
     <script data-template-name="typing" type="text/x-handlebars">
-       {{view Ember.Select contentBinding="pilesCaptions" valueBinding="currentPileCaption"}}
-       <button {{ action clearTable }}>Start over</button>
+       {{view Ember.Select contentBinding="pilesCaptions" selectionBinding="currentPileCaption"}}
+       <button {{ action clearTable }}{{bindAttr disabled="currentPile.pileClosed"}}>Start over</button>
        <table class="typing">
        <tr> <td>Status</td><!-- indicators row -->
            {{#each b in currentPile.ballots}}
@@ -40,12 +40,12 @@
        </tr>
        <tr> <td>Invalid</td><!-- Invalid row -->
            {{#each b in currentPile.ballots}}
-                <td>{{view Ember.Checkbox checkedBinding="b.invalid"}}</td>
+                <td>{{view Ember.Checkbox checkedBinding="b.invalid" disabledBinding="currentPile.pileClosed"}}</td>
            {{/each}}
        </tr>
        <tr>  <td>Empty</td><!-- "Empty" row -->
            {{#each b in currentPile.ballots}}
-                <td>{{view Ember.Checkbox checkedBinding="b.empty"}}</td>
+                <td>{{view Ember.Checkbox checkedBinding="b.empty" disabledBinding="currentPile.pileClosed"}}</td>
            {{/each}}
        </tr>
        <!-- Candidates -->
@@ -54,15 +54,16 @@
            <td {{action addVoteFor c}}>{{c.name}}}</td>
            {{#each b in currentPile.ballots}}
                {{#findBEntry c b}}
-                    <td>{{view Em.TextField tabindexBinding="computedindex" valueBinding="bentry.order"}}</td>
+                    <td>{{view Em.TextField tabindexBinding="computedindex" valueBinding="bentry.order" disabledBinding="currentPile.pileClosed"}}</td>
                {{/findBEntry}}
            {{/each}}
        </tr>
        {{/each}}
        </table>
 
-       <button {{ action done }}>Done</button>
-       <button {{ action print }}>Export protocol</button>
+       <button {{ action addBallot }}{{bindAttr disabled="currentPile.pileClosed"}}>+</button>
+       <button {{ action done }}{{bindAttr disabled="currentPile.pileClosed"}}>Done</button>
+       <button {{ action print }}{{bindAttr disabled="currentPile.pileOpened"}}>Export protocol</button>
     </script>
     <script data-template-name="vote-running" type="text/x-handlebars">
        <h2>Vote Running</h2>
@@ -111,7 +112,7 @@
         Candidates to appear here
        {{#each c in candidates}}
            {{view Em.TextField valueBinding="c.name"}}
-           {{view Ember.Select contentBinding="genders" valueBinding="c.gender"}}
+           {{view Ember.Select contentBinding="genders" selectionBinding="c.gender"}}
        {{/each}}
     </script>
     <script data-template-name="app-setup" type="text/x-handlebars">

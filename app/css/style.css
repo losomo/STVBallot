@@ -90,6 +90,7 @@ a:hover { color: #036; }
 b {font-weight: bold}
 input {display: block}
 .typing input {width: 2em}
+td {padding-right: 1em}
 
 
 
