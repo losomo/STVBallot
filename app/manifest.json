@@ -11,6 +11,6 @@
   "sandbox": {
      "pages": ["index.html"]
   },
-  "permissions": ["experimental", "experimental.socket", "app.window"],
+  "permissions": ["experimental", "socket", "app.window"],
   "icons": { "16": "favicon.png", "128": "icon.png"}
 }

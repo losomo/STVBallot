@@ -37,7 +37,7 @@ Ballot = Em.Object.extend({
         this.set('empty', false);
     },
     errorMessage: function() {
-        return stv.validate(this);
+        return stv.validate(STVDataBallot.fromGUI(this));
     }.property('empty', 'invalid', 'entries.@each.order'),
     checkNumbers: function() {
         this.set('touched', !this.get('entries').everyProperty('order', ''));
@@ -349,10 +349,15 @@ App.Router = Em.Router.extend({
             print: function(router) {
             },
             addVoteFor: function(router, candidate) {
+                var cindex = candidate.context.get('index');
                 var c = router.get('typingController');
                 var p = c.get('currentPile');
                 var lastB = p.lastIncompleteBallot();
-                lastB.addVoteAt(candidate.context.get('index'));
+                if (lastB.get('entries').objectAt(cindex).get('order')) {
+                     var bCount = p.get('ballots').content.length;
+                     lastB = p.get('ballots').objectAt(bCount - 1);
+                }
+                lastB.addVoteAt(cindex);
             },
         }),
         connect: Em.Route.extend({
