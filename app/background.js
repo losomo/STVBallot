@@ -1,5 +1,7 @@
+var socket = chrome.socket || chrome.experimental.socket;
+
 function start_server() {
-    chrome.experimental.socket.create('udp', '225.0.0.37', 5353, {
+    socket.create('udp', '225.0.0.37', 5353, {
         onEvent: function(d) {
             var data = chrome.experimental.socket.read(d.socketId);
             console.log(data);
@@ -8,9 +10,9 @@ function start_server() {
         function(socketInfo) {
           // The socket is created, now we want to connect to the service
           var socketId = socketInfo.socketId;
-          chrome.experimental.socket.connect(socketId, function(result) {
+          socket.connect(socketId, function(result) {
             // We are now connected to the socket so send it some data
-            chrome.experimental.socket.write(socketId, arrayBuffer,
+            socket.write(socketId, arrayBuffer,
               function(sendInfo) {
                 console.log("wrote " + sendInfo.bytesWritten);
               }

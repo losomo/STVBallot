@@ -257,7 +257,6 @@ App.TypingController = Em.Controller.extend({
     }.property('pileGroups', 'pileGroups.@each'),
     init: function() {
         this.set('currentPileCaption', this.get('pilesCaptions')[0]);
-        console.log(this.get('currentPileCaption'));
     },
 });
 
