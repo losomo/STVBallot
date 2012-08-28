@@ -8,10 +8,10 @@ function start_server() {
             }
         },
         function(socketInfo) {
-          // The socket is created, now we want to connect to the service
+          console.log('The socket is created, now we want to connect to the service');
           var socketId = socketInfo.socketId;
           socket.connect(socketId, function(result) {
-            // We are now connected to the socket so send it some data
+            console.log('We are now connected to the socket so send it some data');
             socket.write(socketId, arrayBuffer,
               function(sendInfo) {
                 console.log("wrote " + sendInfo.bytesWritten);
