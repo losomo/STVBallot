@@ -15,7 +15,7 @@
   "permissions": [
     "experimental",
     {"socket": [
-        "udp-send-to"
+        "udp-send-to", "udp-bind"
     ]},
     "app.window"
   ],
