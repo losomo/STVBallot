@@ -11,3 +11,23 @@ STVDataBallot.fromGUI = function (ballot) {
         ballot.get('entries').mapProperty('order').map(function(item){return parseInt(item)})
     );
 }
+
+function STVDataPile(ballots) {
+    this.ballots = ballots; // Array of STVDataBallots
+}
+
+STVDataPile.fromGUI = function(pile) {
+    return new STVDataPile(
+        pile.get('ballots').map(function (item) {return STVDataBallot.fromGUI(item)})
+    );
+}
+
+function STVDataPileGroup(piles) {
+    this.piles = piles // Array of STVDataPiles
+}
+STVDataPileGroup.fromGUI = function(piles) {
+    return new STVDataPileGroup(
+        piles.map(function(item) {return STVDataPile.fromGUI(item)})
+    );
+}
+

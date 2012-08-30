@@ -100,12 +100,24 @@ Pile = Em.Object.extend({
 });
 
 Piles = Em.ArrayProxy.extend({
+    ready: function() {
+        return this.every(function(item) {return item.get('pileClosed')}) &&
+        stv.crosscheck(STVDataPileGroup.fromGUI(this)).status == 'ok';
+    }.property('content.@each.pileClosed'),
     toString: function() {
         if (this.content.objectAt(0)) return this.content.objectAt(0).get('name');
         return "empty pileGroup";
     },
     crosscheckstatus: function() {
-        return 'open'; //TODO crosscheck
+        if (this.every(function(item) {return !item.get('pileClosed')})) {
+            return "Open";
+        }
+        else if (this.every(function(item) {return item.get('pileClosed')})) {
+            return stv.crosscheck(STVDataPileGroup.fromGUI(this)).message;
+        }
+        else {
+            return "Partial";
+        }
     }.property('content.@each.pileClosed')
 });
 

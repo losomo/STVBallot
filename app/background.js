@@ -58,7 +58,7 @@ window.addEventListener('message', messageHandler, false);
 var myWin = null;
 chrome.app.runtime.onLaunched.addListener(function() {
   chrome.app.window.create('index.html', {
-    'width': 400,
+    'width': 800,
     'height': 500
   }, function(win) {
        myWin = win;
