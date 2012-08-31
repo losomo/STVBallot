@@ -99,7 +99,7 @@ Pile = Em.Object.extend({
     },
 });
 
-Piles = Em.ArrayProxy.extend({
+PileGroup = Em.ArrayProxy.extend({
     ready: function() {
         return this.every(function(item) {return item.get('pileClosed')}) &&
         stv.crosscheck(STVDataPileGroup.fromGUI(this)).status == 'ok';
@@ -335,7 +335,8 @@ App.Router = Em.Router.extend({
                 var pileGroups = router.get('voteRunningController').get('pileGroups');
                 pileGroups.clear();
                 if (router.get('applicationController').get('appMode') == 'standalone') {
-                    pileGroups.pushObject(Piles.create({ content: [
+                    pileGroups.pushObject(PileGroup.create({ 
+                      content: [
                         Pile.create({
                             name: router.get('applicationController').get('userName'),
                         }),
@@ -365,7 +366,7 @@ App.Router = Em.Router.extend({
                 router.get('applicationController').connectOutlet('typing');
             },
             clearTable: function(router) {
-                if (confirm("Really clear this pile?")) {
+                if (confirm("Really clear this pile?")) { //TODO can't confirm in App
                     router.get('typingController').get('currentPile').get('ballots').clear();
                 }
             },

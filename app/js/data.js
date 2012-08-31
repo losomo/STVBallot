@@ -13,7 +13,7 @@ STVDataBallot.fromGUI = function (ballot) {
 }
 
 function STVDataPile(ballots) {
-    this.ballots = ballots; // Array of STVDataBallots
+    this.ballots = ballots;       // Array of STVDataBallots
 }
 
 STVDataPile.fromGUI = function(pile) {
@@ -23,11 +23,11 @@ STVDataPile.fromGUI = function(pile) {
 }
 
 function STVDataPileGroup(piles) {
-    this.piles = piles // Array of STVDataPiles
+    this.piles = piles; // Array of STVDataPiles
 }
-STVDataPileGroup.fromGUI = function(piles) {
+STVDataPileGroup.fromGUI = function(pileGroup) {
     return new STVDataPileGroup(
-        piles.map(function(item) {return STVDataPile.fromGUI(item)})
+        pileGroup.map(function(item) {return STVDataPile.fromGUI(item)})
     );
 }
 
