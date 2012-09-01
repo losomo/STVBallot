@@ -118,7 +118,15 @@ PileGroup = Em.ArrayProxy.extend({
         else {
             return "Partial";
         }
-    }.property('content.@each.pileClosed')
+    }.property('content.@each.pileClosed'),
+    openPiles: function() {
+        if (this.every(function(item) {return !item.get('pileClosed')})) {
+            return "disabled";
+        }
+        else {
+            return false;
+        }
+    }.property('content.@each.pileClosed'),
 });
 
 PileGroups = Em.ArrayProxy.extend({});
@@ -240,11 +248,15 @@ App.VoteSetupController = Em.Controller.extend({
 });
 
 App.VoteRunningController = Em.Controller.extend({
+    appStateBinding: 'App.router.applicationController.appState',
     pileGroups: null,
     init: function() {
         this._super();
         this.set('pileGroups', PileGroups.create({content: []}));
     },
+    isRunning: function() {
+        return this.get('appState') == 2 ? "disabled" : false;
+    }.property('appState'),
 });
 
 App.TypingController = Em.Controller.extend({
@@ -356,6 +368,26 @@ App.Router = Em.Router.extend({
         }),
         voteRunning: Em.Route.extend({
             route: '/voteRunning',
+            reopenAction: function(router, pileGroupEvent) {
+                var pileGroup = pileGroupEvent.context;
+                router.get('voteRunningController').get('pileGroups').forEach(function(item){
+                    debugger;
+                    if (item === pileGroup) {
+                        pileGroup.forEach(function(pile) {
+                            pile.set('pileClosed', false);
+                        });
+                    }
+                });
+            },
+            exportOstv: function(router) {
+                //TODO export to BLT
+            },
+            exportProtocol: function(router) {
+                //TODO export completed vote
+            },
+            printBallots: function(router) {
+                //TODO print ballots
+            },
             connectOutlets: function(router) {
                 router.get('applicationController').connectOutlet('voteRunning');
             }
@@ -366,9 +398,9 @@ App.Router = Em.Router.extend({
                 router.get('applicationController').connectOutlet('typing');
             },
             clearTable: function(router) {
-                if (confirm("Really clear this pile?")) { //TODO can't confirm in App
+                //if (confirm("Really clear this pile?")) { //TODO can't confirm in App
                     router.get('typingController').get('currentPile').get('ballots').clear();
-                }
+                //}
             },
             addBallot: function(router) {
                 router.get('typingController').get('currentPile').addBallot();
@@ -377,6 +409,7 @@ App.Router = Em.Router.extend({
                 router.get('typingController').get('currentPile').set('pileClosed', true);
             },
             print: function(router) {
+                //TODO export typing protocol
             },
             addVoteFor: function(router, candidate) {
                 var cindex = candidate.context.get('index');

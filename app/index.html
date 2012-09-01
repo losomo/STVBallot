@@ -66,8 +66,12 @@
        <button {{ action print }}{{bindAttr disabled="currentPile.pileOpened"}}>Export protocol</button>
     </script>
     <script data-template-name="vote-running" type="text/x-handlebars">
-       <h2>Vote Running</h2>
-       <button {{ action print }}>Print ballots</button>
+       {{#if isRunning}}
+        <h2>Vote Running</h2>
+       {{else}}
+        <h2>Vote Closed</h2>
+       {{/if}}
+       <button {{ action printBallots }}>Print ballots</button>
        Typing progress:
        <table>
        {{#each g in pileGroups}}
@@ -79,14 +83,14 @@
             </td>
            {{/each}}
             <td>{{g.crosscheckstatus}}</td>
-            <td><button {{action reopen g}}>Reopen</button></td>
+            <td><button {{action reopenAction g}}{{bindAttr disabled="g.openPiles"}}>Reopen</button></td>
            </tr>
        {{/each}}
        </table>
 
        Counting report:
 
-       <button {{ action exportOstv }}>Export to OpenSTV</button>
+       <button {{ action exportOstv }}{{bindAttr disabled="isRunning"}}>Export to OpenSTV</button>
 
        <button {{ action runSTV }}>Compute results</button>
 
@@ -95,7 +99,7 @@
             {{m}}<br/>
        {{/each}}
 
-       <button {{ action exportProtocol }}>Export Protocol</button>
+       <button {{ action exportProtocol }}{{bindAttr disabled="isRunning"}}>Export Protocol</button>
     </script>
     <script data-template-name="vote-setup" type="text/x-handlebars">
        <h2>Vote setup:</h2>
