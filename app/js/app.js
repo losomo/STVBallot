@@ -285,6 +285,10 @@ App.TypingController = Em.Controller.extend({
 });
 
 App.ConnectingController = Em.Controller.extend({
+    searching: null,
+    findServers: function(enable) {
+        //TODO
+    }    
 });
 
 /*  VIEWS  */
@@ -371,7 +375,6 @@ App.Router = Em.Router.extend({
             reopenAction: function(router, pileGroupEvent) {
                 var pileGroup = pileGroupEvent.context;
                 router.get('voteRunningController').get('pileGroups').forEach(function(item){
-                    debugger;
                     if (item === pileGroup) {
                         pileGroup.forEach(function(pile) {
                             pile.set('pileClosed', false);
@@ -387,6 +390,9 @@ App.Router = Em.Router.extend({
             },
             printBallots: function(router) {
                 //TODO print ballots
+            },
+            runSTV: function(router) {
+                //TODO launch computation
             },
             connectOutlets: function(router) {
                 router.get('applicationController').connectOutlet('voteRunning');
@@ -428,7 +434,11 @@ App.Router = Em.Router.extend({
         connect: Em.Route.extend({
             route: '/connect',
             joinSession: function(router) {
+                router.get('connectingController').findServers(false);
                 router.transitionTo('typing');
+            },
+            enter: function(router) {
+                router.get('connectingController').findServers(true);
             },
             connectOutlets: function(router) {
                 router.get('applicationController').connectOutlet('connecting');
