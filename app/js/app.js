@@ -286,9 +286,9 @@ App.TypingController = Em.Controller.extend({
 
 App.ConnectingController = Em.Controller.extend({
     searching: null,
-    findServers: function(enable) {
-        //TODO
-    }    
+    findServers: function() {
+       send_command('search_servers', this.get('searching')); 
+    }.observes('searching')    
 });
 
 /*  VIEWS  */
@@ -434,11 +434,11 @@ App.Router = Em.Router.extend({
         connect: Em.Route.extend({
             route: '/connect',
             joinSession: function(router) {
-                router.get('connectingController').findServers(false);
+                router.get('connectingController').set('searching', false);
                 router.transitionTo('typing');
             },
             enter: function(router) {
-                router.get('connectingController').findServers(true);
+                router.get('connectingController').set('searching', true);
             },
             connectOutlets: function(router) {
                 router.get('applicationController').connectOutlet('connecting');
@@ -448,7 +448,7 @@ App.Router = Em.Router.extend({
             route: '/server_start',
             enter: function(router) {
                 console.log('Starting server');
-                command("start_server");
+                send_command("start_server");
             },
             redirectsTo: 'voteSetup'
         }),
@@ -468,9 +468,10 @@ Em.Handlebars.registerHelper('findBEntry', function(ca, ba, options) {
 });
 
 /* Non-emberjs functions */
-function command(c) {
+function send_command(c, d) {
     App.source.postMessage({
        command: c,
+       data: d,
     }, '*');
 }
 
@@ -480,6 +481,8 @@ function handle_request (data) {
         case 'init':
             console.log("connection with background page initialized");
             break;
+        default:
+            console.warn(data);
     }
 }
 
