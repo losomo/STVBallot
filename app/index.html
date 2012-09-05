@@ -16,34 +16,34 @@
   <![endif]-->
     <script data-template-name="connections" type="text/x-handlebars">
        {{#if isServerMode}}
-          Connections
+          {{t "_Connections"}}
        {{/if}}
     </script>
     <script data-template-name="navigation" type="text/x-handlebars">
-       Navigation
+       {{t "_Navigation"}}
        {{#each t in tabs}}
            <a {{action changeTab t.tabAction}}{{bindAttr class="t.currentClass"}}>{{t.desc}}</a>
        {{/each}}
     </script>
     <script data-template-name="connecting" type="text/x-handlebars">
-       Connecting
-       <button {{ action joinSession }}>Connect</button>
+       {{t "_Connecting"}}
+       <button {{ action joinSession }}>{{t "_Connect"}}</button>
     </script>
     <script data-template-name="typing" type="text/x-handlebars">
        {{view Ember.Select contentBinding="pilesCaptions" selectionBinding="currentPileCaption"}}
-       <button {{ action clearTable }}{{bindAttr disabled="currentPile.pileClosed"}}>Start over</button>
+       <button {{ action clearTable }}{{bindAttr disabled="currentPile.pileClosed"}}>{{t "_Start over"}}</button>
        <table class="typing">
-       <tr> <td>Status</td><!-- indicators row -->
+       <tr> <td>{{t "_Status"}}</td><!-- indicators row -->
            {{#each b in currentPile.ballots}}
                 <td>{{b.errorMessage}}</td>
            {{/each}}
        </tr>
-       <tr> <td>Invalid</td><!-- Invalid row -->
+       <tr> <td>{{t "_Invalid"}}</td><!-- Invalid row -->
            {{#each b in currentPile.ballots}}
                 <td>{{view Ember.Checkbox checkedBinding="b.invalid" disabledBinding="currentPile.pileClosed"}}</td>
            {{/each}}
        </tr>
-       <tr>  <td>Empty</td><!-- "Empty" row -->
+       <tr>  <td>{{t "_Empty"}}</td><!-- "Empty" row -->
            {{#each b in currentPile.ballots}}
                 <td>{{view Ember.Checkbox checkedBinding="b.empty" disabledBinding="currentPile.pileClosed"}}</td>
            {{/each}}
@@ -62,17 +62,17 @@
        </table>
 
        <button {{ action addBallot }}{{bindAttr disabled="currentPile.pileClosed"}}>+</button>
-       <button {{ action done }}{{bindAttr disabled="currentPile.pileClosed"}}>Done</button>
-       <button {{ action print }}{{bindAttr disabled="currentPile.pileOpened"}}>Export protocol</button>
+       <button {{ action done }}{{bindAttr disabled="currentPile.pileClosed"}}>{{t "_Done"}}</button>
+       <button {{ action print }}{{bindAttr disabled="currentPile.pileOpened"}}>{{t "_Export protocol"}}</button>
     </script>
     <script data-template-name="vote-running" type="text/x-handlebars">
        {{#if isRunning}}
-        <h2>Vote Running</h2>
+        <h2>{{t "_Vote Running"}}</h2>
        {{else}}
-        <h2>Vote Closed</h2>
+        <h2>{{t "_Vote Closed"}}</h2>
        {{/if}}
-       <button {{ action printBallots }}>Print ballots</button>
-       Typing progress:
+       <button {{ action printBallots }}>{{t "_Print ballots"}}</button>
+       {{t "_Typing progress"}}:
        <table>
        {{#each g in pileGroups}}
            <tr>
@@ -83,50 +83,50 @@
             </td>
            {{/each}}
             <td>{{g.crosscheckstatus}}</td>
-            <td><button {{action reopenAction g}}{{bindAttr disabled="g.openPiles"}}>Reopen</button></td>
+            <td><button {{action reopenAction g}}{{bindAttr disabled="g.openPiles"}}>{{t "_Reopen"}}</button></td>
            </tr>
        {{/each}}
        </table>
 
-       Counting report:
+       {{t "_Counting report"}}:
 
-       <button {{ action exportOstv }}{{bindAttr disabled="isRunning"}}>Export to OpenSTV</button>
+       <button {{ action exportOstv }}{{bindAttr disabled="isRunning"}}>{{t "_Export to OpenSTV"}}</button>
 
-       <button {{ action runSTV }}>Compute results</button>
+       <button {{ action runSTV }}>{{t "_Compute results"}}</button>
 
-       Results - Mandates:
+       {{t "_Results - Mandates"}}:
        {{#each m in App.mandatesController}}
             {{m}}<br/>
        {{/each}}
 
-       <button {{ action exportProtocol }}{{bindAttr disabled="isRunning"}}>Export Protocol</button>
+       <button {{ action exportProtocol }}{{bindAttr disabled="isRunning"}}>{{t "_Export Protocol"}}</button>
     </script>
     <script data-template-name="vote-setup" type="text/x-handlebars">
-       <h2>Vote setup:</h2>
-       <label>Vote number</label>          {{view Em.TextField valueBinding="voteNo"}}
-       <label>Number of candidates</label> {{view Em.TextField valueBinding="candidateCount"}}
-       <label>Number of mandates</label>   {{view Em.TextField valueBinding="mandateCount"}}
-       <label>Number of ballots</label>    {{view Em.TextField valueBinding="ballotCount"}}
+       <h2>{{t "_Vote setup"}}:</h2>
+       <label>{{t "_Vote number"}}</label>          {{view Em.TextField valueBinding="voteNo"}}
+       <label>{{t "_Number of candidates"}}</label> {{view Em.TextField valueBinding="candidateCount"}}
+       <label>{{t "_Number of mandates"}}</label>   {{view Em.TextField valueBinding="mandateCount"}}
+       <label>{{t "_Number of ballots"}}</label>    {{view Em.TextField valueBinding="ballotCount"}}
        <label>
            {{view Ember.Checkbox checkedBinding="replacements" classNames="stvb-chkbox"}}
-           Elect replacement mandates
+           {{t "_Elect replacement mandates"}}
        </label>
-       <button {{action shuffle }} {{bindAttr disabled="shuffled"}}>Shuffle candidates</button>
-       <button {{action launch }} {{bindAttr disabled="launchState"}}>Launch ballot</button>
-        Candidates to appear here
+       <button {{action shuffle }} {{bindAttr disabled="shuffled"}}>{{t "_Shuffle candidates"}}</button>
+       <button {{action launch }} {{bindAttr disabled="launchState"}}>{{t "_Launch ballot"}}</button>
+        {{t "_Candidate list"}}
        {{#each c in candidates}}
            {{view Em.TextField valueBinding="c.name"}}
            {{view Ember.Select contentBinding="genders" selectionBinding="c.gender"}}
        {{/each}}
     </script>
     <script data-template-name="app-setup" type="text/x-handlebars">
-       Enter your name: {{view Em.TextField valueBinding="userName"}}
+       {{t "_Enter your name"}}: {{view Em.TextField valueBinding="userName"}}
        {{#each btn in buttons}}
            <button {{ action start btn.ba }} {{bindAttr disabled="btnState"}} >{{ btn.desc }}</button>
        {{/each}}
     </script>
     <script  data-template-name="application" type="text/x-handlebars">
-        <h1>Main frame content:</h1>
+        <h1>{{t "_Control panel"}}:</h1>
         {{#if isServerMode}}
             {{view templateName="connections"}}
         {{/if}}
@@ -141,6 +141,7 @@
     <script src="js/libs/handlebars-1.0.0.beta.6.js"></script>
     <script src="js/libs/ember-1.0.pre.js"></script>
     <script src="js/data.js"></script>
+    <script src="js/messages_cs.js"></script>
     <script src="js/stv_czech_greens.js"></script>
     <script src="js/app.js"></script>
 </body>

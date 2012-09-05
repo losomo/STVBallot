@@ -110,13 +110,13 @@ PileGroup = Em.ArrayProxy.extend({
     },
     crosscheckstatus: function() {
         if (this.every(function(item) {return !item.get('pileClosed')})) {
-            return "Open";
+            return "_Open".loc();
         }
         else if (this.every(function(item) {return item.get('pileClosed')})) {
             return stv.crosscheck(STVDataPileGroup.fromGUI(this)).message;
         }
         else {
-            return "Partial";
+            return "_Partial".loc();
         }
     }.property('content.@each.pileClosed'),
     openPiles: function() {
@@ -164,18 +164,18 @@ App.ApplicationController = Em.Controller.extend({
     init: function() {
          this.set('tabs', Em.ArrayProxy.create({
             content: [
-                Tab.create({desc: "Start Vote",    tabAction: "voteSetup"}),
-                Tab.create({desc: "Vote Progress", tabAction: "voteRunning"}),
-                Tab.create({desc: "Ballot Typing", tabAction: "typing"}),
+                Tab.create({desc: "_Start Vote".loc(),    tabAction: "voteSetup"}),
+                Tab.create({desc: "_Vote Progress".loc(), tabAction: "voteRunning"}),
+                Tab.create({desc: "_Ballot Typing".loc(), tabAction: "typing"}),
              ]
         }));
     },
 });
 App.AppSetupController = Em.Controller.extend({
     buttons: [
-       {ba: 'client',     desc: 'Join the committee'},
-       {ba: 'server',     desc: 'Host ballots'},
-       {ba: 'standalone', desc: 'Standalone mode'},
+       {ba: 'client',     desc: '_Join the committee'.loc()},
+       {ba: 'server',     desc: '_Host ballots'.loc()},
+       {ba: 'standalone', desc: '_Standalone mode'.loc()},
     ],
     userNameBinding: 'App.router.applicationController.userName',
     btnState: function() {
@@ -189,7 +189,7 @@ App.VoteSetupController = Em.Controller.extend({
     ballotCount: 8,
     replacements: null,
     candidates: null,
-    genders: ['---','Female','Male'],
+    genders: ['---','_Female'.loc(),'_Male'.loc()],
     updateCandidates: function() {
         var no = this.candidateCount;
         var current_no = this.get('candidates').content.length || 0;
@@ -358,7 +358,7 @@ App.Router = Em.Router.extend({
                         }),
                         Pile.create({
                             name: router.get('applicationController').get('userName'),
-                            note: "crosscheck",
+                            note: "_crosscheck".loc(),
                         })
                     ]}));
                 }
@@ -404,7 +404,7 @@ App.Router = Em.Router.extend({
                 router.get('applicationController').connectOutlet('typing');
             },
             clearTable: function(router) {
-                //if (confirm("Really clear this pile?")) { //TODO can't confirm in App
+                //if (confirm("_Really clear this pile?".loc())) { //TODO can't confirm in App
                     router.get('typingController').get('currentPile').get('ballots').clear();
                 //}
             },
@@ -465,6 +465,10 @@ Em.Handlebars.registerHelper('findBEntry', function(ca, ba, options) {
     options.data.keywords.bentry = bentry;
     options.data.keywords.computedindex = ballot.get('index') + 2;
     return options.fn(this);
+});
+
+Em.Handlebars.registerHelper('t', function(str) {
+    return str.loc();
 });
 
 /* Non-emberjs functions */
