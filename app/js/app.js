@@ -148,6 +148,18 @@ Tab = Em.Object.extend({
     }.property('currentState', 'appMode')
 });
 
+Client = Em.Object.extend({
+    host: null,
+    port: null,
+    name: null,
+    pilesCaptions: null,
+    last_alive: null,
+    init: function() {
+        this._super();
+        this.set('last_alive', new Date());
+        this.set('pilesCaptions', Em.ArrayProxy.create());
+    },
+});
 
 /* CONTROLLERS */
 App.ApplicationController = Em.Controller.extend({
@@ -155,6 +167,7 @@ App.ApplicationController = Em.Controller.extend({
     appMode: null,
     userName: '',
     tabs: null,
+    clients: null,
     isServerMode: function() {
         return this.get('appMode') == 'server';
     }.property('appMode'),
@@ -162,13 +175,15 @@ App.ApplicationController = Em.Controller.extend({
         return this.get('appState') > 1;
     }.property('appState'),
     init: function() {
-         this.set('tabs', Em.ArrayProxy.create({
+        this._super();
+        this.set('tabs', Em.ArrayProxy.create({
             content: [
                 Tab.create({desc: "_Start Vote".loc(),    tabAction: "voteSetup"}),
                 Tab.create({desc: "_Vote Progress".loc(), tabAction: "voteRunning"}),
                 Tab.create({desc: "_Ballot Typing".loc(), tabAction: "typing"}),
              ]
         }));
+        this.set('clients', Em.ArrayProxy.create());
     },
 });
 App.AppSetupController = Em.Controller.extend({
@@ -257,6 +272,9 @@ App.VoteRunningController = Em.Controller.extend({
     isRunning: function() {
         return this.get('appState') == 2 ? "disabled" : false;
     }.property('appState'),
+    updatePileExternally: function(data) {
+        console.log(data); //TODO
+    }
 });
 
 App.TypingController = Em.Controller.extend({
@@ -285,10 +303,18 @@ App.TypingController = Em.Controller.extend({
 });
 
 App.ConnectingController = Em.Controller.extend({
+    userNameBinding: 'App.router.applicationController.userName',
     searching: null,
+    server_ip: null,
     findServers: function() {
        send_command('search_servers', this.get('searching')); 
-    }.observes('searching')    
+    }.observes('searching'),
+    joinSession: function() {
+        send_command('connect_to_host', {
+            server_ip: this.get('server_ip'),
+            name: this.get('userName')
+        });
+    }
 });
 
 /*  VIEWS  */
@@ -434,8 +460,7 @@ App.Router = Em.Router.extend({
         connect: Em.Route.extend({
             route: '/connect',
             joinSession: function(router) {
-                router.get('connectingController').set('searching', false);
-                router.transitionTo('typing');
+                router.get('connectingController').joinSession();
             },
             enter: function(router) {
                 router.get('connectingController').set('searching', true);
@@ -479,11 +504,59 @@ function send_command(c, d) {
     }, '*');
 }
 
+function handle_client_message(message) {
+    var ac = App.router.get('applicationController');
+    var client = ac.clients.find(function (item) {
+        return item.host == message.address && item.port == message.port;
+    });
+    var data = ab2struct(message.data);
+    switch(data.command) {
+        case 'hand_shake':
+            client = Client.create({
+                host: message.address,
+                port: message.port,
+                name: data.name,
+            });
+            ac.clients.pushObject(client);
+            send_command('to_client', {client: client, content: {command: "accepted"}});           
+            break;
+        case 'alive':
+            client.set('last_alive', new Date())
+            break;
+        case 'pile_change':
+            App.router.get('voteRunningController').updatePileExternally(data);
+            break;
+        case 'disconnect':
+            ac.clients.removeObject(client);
+            break;
+        default:
+            console.warn(data);
+    };
+}
+
+function handle_server_message(message) {
+    var data = ab2struct(message.data);
+    switch(data.command) {
+        case 'accepted':
+            App.router.get('connectingController').set('searching', false); 
+            App.router.transitionTo('typing');
+            break;
+        default:
+            console.warn(data);
+    };
+}
+
 function handle_request (data) {
     var command = data.command;
     switch(command) {
         case 'init':
             console.log("connection with background page initialized");
+            break;
+        case 'client_request':
+            handle_client_message(data.message);
+            break;
+        case 'server_request':
+            handle_server_message(data.message);
             break;
         default:
             console.warn(data);
@@ -494,6 +567,20 @@ var messageHandler = function(e) {
   App.source = e.source;
   handle_request(e.data);
 };
+
+function ab2struct(buf) {
+  return JSON.parse(String.fromCharCode.apply(null, new Uint16Array(buf)));
+}
+
+function struct2ab(struct) {
+  var str = JSON.stringify(struct);
+  var buf = new ArrayBuffer(str.length*2); 
+  var bufView = new Uint16Array(buf);
+  for (var i=0, strLen=str.length; i<strLen; i++) {
+    bufView[i] = str.charCodeAt(i);
+  }
+  return buf;
+}
 
 parent.addEventListener('message', messageHandler, false);
 App.initialize();

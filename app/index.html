@@ -17,6 +17,9 @@
     <script data-template-name="connections" type="text/x-handlebars">
        {{#if isServerMode}}
           {{t "_Connections"}}
+          {{#each c in clients}}
+              <div>{{c.name}}</div>
+          {{/each}}
        {{/if}}
     </script>
     <script data-template-name="navigation" type="text/x-handlebars">
@@ -26,7 +29,8 @@
        {{/each}}
     </script>
     <script data-template-name="connecting" type="text/x-handlebars">
-       {{t "_Connecting"}}
+       <div>{{t "_Connecting"}}</div>
+       {{t "_Host IP address"}} {{view Em.TextField valueBinding="server_ip"}}
        <button {{ action joinSession }}>{{t "_Connect"}}</button>
     </script>
     <script data-template-name="typing" type="text/x-handlebars">
