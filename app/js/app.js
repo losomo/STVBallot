@@ -373,22 +373,37 @@ App.Router = Em.Router.extend({
                 router.get('voteSetupController').shuffle();
             },
             launch: function(router) {
-                router.get('applicationController').set('appState', 2);
+                var ac = router.get('applicationController');
+                ac.set('appState', 2);
                 var pileGroups = router.get('voteRunningController').get('pileGroups');
                 pileGroups.clear();
-                if (router.get('applicationController').get('appMode') == 'standalone') {
+                if (ac.get('appMode') == 'standalone') {
                     pileGroups.pushObject(PileGroup.create({ 
                       content: [
                         Pile.create({
-                            name: router.get('applicationController').get('userName'),
+                            name: ac.get('userName'),
                         }),
                         Pile.create({
-                            name: router.get('applicationController').get('userName'),
+                            name: ac.get('userName'),
                             note: "_crosscheck".loc(),
                         })
                     ]}));
                 }
                 else { // TODO create piles in server mode
+                    ac.get('clients').forEach(function (client) {
+                        pileGroups.pushObject(PileGroup.create({ 
+                          content: [
+                            Pile.create({
+                                name: ac.get('userName'),
+                                client: client,
+                            }),
+                            Pile.create({
+                                name: ac.get('userName'),
+                                note: "(" + "_filled by".loc() + + ")",
+                                client: client,
+                            })
+                        ]}));
+                    }
                 }
                 router.transitionTo('voteRunning');
             },
