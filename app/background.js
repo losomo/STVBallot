@@ -59,6 +59,7 @@ function join_server(requesting_window, data) {
 }
 
 function send_to_client(data) {
+   console.log("To client", data);
    socket.sendTo(server_socket, struct2ab(data.content), data.client.host, data.client.port, function(writeInfo) {
        if (writeInfo.bytesWritten < 0) console.error(writeInfo);
    });

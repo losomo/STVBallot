@@ -55,12 +55,18 @@ Pile = Em.Object.extend({
     note: "", // "crosscheck"
     ballots: null,
     pileClosed: false,
+    client: null,
     pileOpened: function () {
         return !this.get('pileClosed');
     }.property('pileClosed'),
     progress: function () {
         return this.get('ballots').content.length - 1;
     }.property('ballots', 'ballots.@each'),
+    announceProgress: function() {
+        if (this.get('client') != null) {
+            send_command('to_server', {command: "pile_change", data: this});
+        }
+    }.observes('ballots', 'ballots.@each', 'pileClosed', 'client'),
     desc: function () {
         return this.get('name') + " " + this.get('note');
     }.property('name', 'note'),
@@ -243,7 +249,7 @@ App.VoteSetupController = Em.Controller.extend({
     shuffle: function() {
         var c = this.get('candidates');
         var i = c.content.length;
-        while (--i) {
+        while (--i > 0) {
             var j = Math.floor(Math.random() * (i + 1));
             var oi = c.objectAt(i);
             var oj = c.objectAt(j);
@@ -307,7 +313,7 @@ App.ConnectingController = Em.Controller.extend({
     searching: null,
     server_ip: null,
     findServers: function() {
-       send_command('search_servers', this.get('searching')); 
+       send_command('search_servers', this.get('searching'));
     }.observes('searching'),
     joinSession: function() {
         send_command('connect_to_host', {
@@ -378,7 +384,7 @@ App.Router = Em.Router.extend({
                 var pileGroups = router.get('voteRunningController').get('pileGroups');
                 pileGroups.clear();
                 if (ac.get('appMode') == 'standalone') {
-                    pileGroups.pushObject(PileGroup.create({ 
+                    pileGroups.pushObject(PileGroup.create({
                       content: [
                         Pile.create({
                             name: ac.get('userName'),
@@ -389,21 +395,27 @@ App.Router = Em.Router.extend({
                         })
                     ]}));
                 }
-                else { // TODO create piles in server mode
+                else {
+                    var crosscheck_map = create_derranged_map(ac.get('clients'));
                     ac.get('clients').forEach(function (client) {
-                        pileGroups.pushObject(PileGroup.create({ 
+                        pileGroups.pushObject(PileGroup.create({
                           content: [
                             Pile.create({
-                                name: ac.get('userName'),
+                                name: client.name,
                                 client: client,
                             }),
                             Pile.create({
-                                name: ac.get('userName'),
-                                note: "(" + "_filled by".loc() + + ")",
-                                client: client,
+                                name: client.name,
+                                note: "(" + "_filled by".loc() + crosscheck_map[client].name  + ")",
+                                client:  crosscheck_map[client],
                             })
                         ]}));
-                    }
+                    });
+                    pileGroups.forEach(function(pileGroup) {
+                        pileGroup.forEach(function(pile) {
+                            send_command('to_client', {client: pile.client, content: {command: "create_pile", content: pile}});
+                        });
+                    });
                 }
                 router.transitionTo('voteRunning');
             },
@@ -533,7 +545,7 @@ function handle_client_message(message) {
                 name: data.name,
             });
             ac.clients.pushObject(client);
-            send_command('to_client', {client: client, content: {command: "accepted"}});           
+            send_command('to_client', {client: client, content: {command: "accepted"}});
             break;
         case 'alive':
             client.set('last_alive', new Date())
@@ -553,8 +565,23 @@ function handle_server_message(message) {
     var data = ab2struct(message.data);
     switch(data.command) {
         case 'accepted':
-            App.router.get('connectingController').set('searching', false); 
+            App.router.get('connectingController').set('searching', false);
             App.router.transitionTo('typing');
+            break;
+        case 'create_pile':
+            console.log(data.content);
+            var pgs = App.router.get('typingController').get('pileGroups');
+            pgs.pushObject(PileGroup.create({
+                content: [
+                    Pile.create(data.content)
+                ]
+            }));
+            break;
+        case 'reopen_pile':
+            // TODO
+            break;
+        case 'disconnect':
+            // TODO
             break;
         default:
             console.warn(data);
@@ -589,12 +616,28 @@ function ab2struct(buf) {
 
 function struct2ab(struct) {
   var str = JSON.stringify(struct);
-  var buf = new ArrayBuffer(str.length*2); 
+  var buf = new ArrayBuffer(str.length*2);
   var bufView = new Uint16Array(buf);
   for (var i=0, strLen=str.length; i<strLen; i++) {
     bufView[i] = str.charCodeAt(i);
   }
   return buf;
+}
+
+function create_derranged_map(clients) {
+    var m = {};
+    var avail = clients.map(function(item) {return item;});
+    var i = avail.length;
+    while (--i > 0) {
+        var j = Math.floor(Math.random() * i);
+        var c = avail[i];
+        avail[i] = avail[j];
+        avail[j] = c;
+    }
+    clients.forEach(function(item, index) {
+        m[item] = avail[index];
+    });
+    return m;
 }
 
 parent.addEventListener('message', messageHandler, false);
