@@ -64,7 +64,8 @@ Pile = Em.Object.extend({
     }.property('ballots', 'ballots.@each'),
     announceProgress: function() {
         if (App.router.get('applicationController').get('appMode') == 'client') {
-            send_command('to_server', {command: "pile_change", data: this});
+            console.log("Change detected", this, this.get('ballots'));
+            send_command('to_server', {command: "pile_change", data: {pile: this, ballots: this.get('ballots').content}});
         }
     }.observes('ballots', 'ballots.@each', 'pileClosed', 'client'),
     desc: function () {
@@ -89,7 +90,7 @@ Pile = Em.Object.extend({
         else {
             this.addBallot();
         }
-    }.observes('ballots.@each.touched', 'ballots.@each.invalid', 'ballots.@each.empty'),
+    }.observes('ballots', 'ballots.@each.touched', 'ballots.@each.invalid', 'ballots.@each.empty'),
     lastIncompleteBallot: function () {
         var bCount = this.get('ballots').content.length;
         if (bCount == 1) {
@@ -278,8 +279,8 @@ App.VoteRunningController = Em.Controller.extend({
     isRunning: function() {
         return this.get('appState') == 2 ? "disabled" : false;
     }.property('appState'),
-    updatePileExternally: function(data) {
-        console.log(data); //TODO
+    updatePileExternally: function(pile, ballots) {
+        console.log("TODO", pile, ballots); //TODO
     }
 });
 
@@ -410,6 +411,10 @@ App.Router = Em.Router.extend({
                                 client:  crosscheck_map[client],
                             })
                         ]}));
+                    });
+                    var candidates = router.get('voteSetupController').get('candidates');
+                    ac.get('clients').forEach(function (client) {
+                        send_command('to_client', {client: client, content: {command: "set_candidates", content: candidates.content}});
                     });
                     pileGroups.forEach(function(pileGroup) {
                         pileGroup.forEach(function(pile) {
@@ -555,7 +560,7 @@ function handle_client_message(message) {
             client.set('last_alive', new Date())
             break;
         case 'pile_change':
-            App.router.get('voteRunningController').updatePileExternally(data);
+            App.router.get('voteRunningController').updatePileExternally(data.pile, data.ballots);
             break;
         case 'disconnect':
             ac.clients.removeObject(client);
@@ -574,7 +579,6 @@ function handle_server_message(message) {
             App.router.transitionTo('typing');
             break;
         case 'create_pile':
-            console.log(data.content);
             var pgs = App.router.get('typingController').get('pileGroups');
             pgs.pushObject(PileGroup.create({
                 content: [
@@ -584,6 +588,11 @@ function handle_server_message(message) {
             break;
         case 'reopen_pile':
             // TODO
+            break;
+        case 'set_candidates':
+            var c = App.router.get('voteSetupController').get('candidates');
+            c.clear();
+            c.pushObjects(data.content.map(function(item) {return Candidate.create(item);}));
             break;
         case 'disconnect':
             // TODO
@@ -605,7 +614,6 @@ function handle_request (data) {
         case 'server_request':
             if (!App.socketId && data.socketId) {
                App.socketId = data.socketId; 
-               console.log(App.socketId);
             }
             handle_server_message(data.message);
             break;

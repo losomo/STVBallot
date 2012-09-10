@@ -112,14 +112,13 @@ function send_to_client(data) {
 }
 
 function send_to_server(socketId, server_host, data) {
-   console.log("To server", socketId, server_host, data);
+   console.log("To server", data);
    socket.sendTo(socketId, struct2ab(data), server_host, 42424, function(writeInfo) {
        if (writeInfo.bytesWritten < 0) console.error(writeInfo);
    });
 }
 
 var messageHandler = function(e) {
-    console.log(e.data);
     var command = e.data.command;
     switch(command) {
         case 'start_server':
