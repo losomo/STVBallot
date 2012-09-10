@@ -529,6 +529,8 @@ function send_command(c, d) {
     App.source.postMessage({
        command: c,
        data: d,
+       socketId: App.socketId,
+       server_host: App.router.get('connectingController').get('server_ip'),
     }, '*');
 }
 
@@ -601,6 +603,10 @@ function handle_request (data) {
             handle_client_message(data.message);
             break;
         case 'server_request':
+            if (!App.socketId && data.socketId) {
+               App.socketId = data.socketId; 
+               console.log(App.socketId);
+            }
             handle_server_message(data.message);
             break;
         default:

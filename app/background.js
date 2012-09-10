@@ -86,7 +86,7 @@ function join_server(requesting_window, data) {
                if (writeInfo.bytesWritten < 0) console.error(writeInfo);
            });
            var rfunc = function(recvFromInfo) {
-               requesting_window.postMessage({command: 'server_request', message: recvFromInfo}, '*');
+               requesting_window.postMessage({command: 'server_request', socketId: socketId, message: recvFromInfo}, '*');
                socket.recvFrom(socketId, rfunc);
            };
            socket.recvFrom(socketId, rfunc);
@@ -95,7 +95,7 @@ function join_server(requesting_window, data) {
        cleanup_timer = setInterval(function(){
            if (requesting_window.closed) {
                socket.destroy(socketId);
-               console.log("join socket released");
+               console.log("client socket released");
                clearInterval(cleanup_timer);
            }
        },
@@ -107,6 +107,13 @@ function join_server(requesting_window, data) {
 function send_to_client(data) {
    console.log("To client", data);
    socket.sendTo(server_socket, struct2ab(data.content), data.client.host, data.client.port, function(writeInfo) {
+       if (writeInfo.bytesWritten < 0) console.error(writeInfo);
+   });
+}
+
+function send_to_server(socketId, server_host, data) {
+   console.log("To server", socketId, server_host, data);
+   socket.sendTo(socketId, struct2ab(data), server_host, 42424, function(writeInfo) {
        if (writeInfo.bytesWritten < 0) console.error(writeInfo);
    });
 }
@@ -123,6 +130,9 @@ var messageHandler = function(e) {
             break;
         case 'to_client':
             send_to_client(e.data.data);
+            break;
+        case 'to_server':
+            send_to_server(e.data.socketId, e.data.server_host, e.data.data);
             break;
         case 'search_servers':
             if (e.data.data) {
