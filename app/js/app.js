@@ -63,7 +63,7 @@ Pile = Em.Object.extend({
         return this.get('ballots').content.length - 1;
     }.property('ballots', 'ballots.@each'),
     announceProgress: function() {
-        if (this.get('client') != null) {
+        if (App.router.get('applicationController').get('appMode') == 'client') {
             send_command('to_server', {command: "pile_change", data: this});
         }
     }.observes('ballots', 'ballots.@each', 'pileClosed', 'client'),
@@ -163,7 +163,7 @@ Client = Em.Object.extend({
     init: function() {
         this._super();
         this.set('last_alive', new Date());
-        this.set('pilesCaptions', Em.ArrayProxy.create());
+        this.set('pilesCaptions', Em.ArrayProxy.create({content: []}));
     },
 });
 
@@ -189,7 +189,7 @@ App.ApplicationController = Em.Controller.extend({
                 Tab.create({desc: "_Ballot Typing".loc(), tabAction: "typing"}),
              ]
         }));
-        this.set('clients', Em.ArrayProxy.create());
+        this.set('clients', Em.ArrayProxy.create({content: []}));
     },
 });
 App.AppSetupController = Em.Controller.extend({
@@ -525,6 +525,7 @@ Em.Handlebars.registerHelper('t', function(str) {
 
 /* Non-emberjs functions */
 function send_command(c, d) {
+    console.log("Sending message", c, d);
     App.source.postMessage({
        command: c,
        data: d,
@@ -537,6 +538,7 @@ function handle_client_message(message) {
         return item.host == message.address && item.port == message.port;
     });
     var data = ab2struct(message.data);
+    console.log("Message from client", data);
     switch(data.command) {
         case 'hand_shake':
             client = Client.create({
@@ -563,6 +565,7 @@ function handle_client_message(message) {
 
 function handle_server_message(message) {
     var data = ab2struct(message.data);
+    console.log("Message from server", data);
     switch(data.command) {
         case 'accepted':
             App.router.get('connectingController').set('searching', false);
