@@ -65,7 +65,7 @@ Pile = Em.Object.extend({
     announceProgress: function() {
         if (App.router.get('applicationController').get('appMode') == 'client') {
             console.log("Change detected", this, this.get('ballots'));
-            send_command('to_server', {command: "pile_change", data: {pile: this, ballots: this.get('ballots').content}});
+            send_command('to_server', {command: "pile_change", data: {pile: STVDataPile.fromGUI(this)}});
         }
     }.observes('ballots', 'ballots.@each', 'pileClosed', 'client'),
     desc: function () {
@@ -279,8 +279,10 @@ App.VoteRunningController = Em.Controller.extend({
     isRunning: function() {
         return this.get('appState') == 2 ? "disabled" : false;
     }.property('appState'),
-    updatePileExternally: function(pile, ballots) {
-        console.log("TODO", pile, ballots); //TODO
+    updatePileExternally: function(pile) {
+        var affected_pile = find_pile(this.get('pileGroups'), pile);
+        affected_pile.set('pileClosed', pile.pileClosed);
+        affected_pile.set('ballots', STVDataPile.toGUI(pile).get('ballots'));
     }
 });
 
@@ -418,7 +420,7 @@ App.Router = Em.Router.extend({
                     });
                     pileGroups.forEach(function(pileGroup) {
                         pileGroup.forEach(function(pile) {
-                            send_command('to_client', {client: pile.client, content: {command: "create_pile", content: pile}});
+                            send_command('to_client', {client: pile.client, content: {command: "create_pile", content: STVDataPile.fromGUI(pile)}});
                         });
                     });
                 }
@@ -560,7 +562,7 @@ function handle_client_message(message) {
             client.set('last_alive', new Date())
             break;
         case 'pile_change':
-            App.router.get('voteRunningController').updatePileExternally(data.pile, data.ballots);
+            App.router.get('voteRunningController').updatePileExternally(data.data.pile);
             break;
         case 'disconnect':
             ac.clients.removeObject(client);
@@ -582,7 +584,7 @@ function handle_server_message(message) {
             var pgs = App.router.get('typingController').get('pileGroups');
             pgs.pushObject(PileGroup.create({
                 content: [
-                    Pile.create(data.content)
+                    STVDataPile.toGUI(data.content)
                 ]
             }));
             break;
@@ -655,6 +657,22 @@ function create_derranged_map(clients) {
         m[item] = avail[index];
     });
     return m;
+}
+
+function find_pile(pileGroups, p) {
+    var r;
+    pileGroups.find(function (pileGroup) {
+        return pileGroup.find(function (pile) {
+            if (pile.get('name') == p.name && pile.get('note') == p.note) {
+                r = pile;
+                return true;
+            }
+            else {
+                return false;
+            }
+        });
+    });
+    return r;
 }
 
 parent.addEventListener('message', messageHandler, false);
