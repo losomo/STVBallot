@@ -20,7 +20,7 @@ STVDataBallot.toGUI = function(b) {
     return Ballot.create({
         invalid: b.invalid,
         empty: b.empty,
-        entries: BEntries.create({content: b.entries.map(function(eorder) {return BEntry.create({order: eorder});})}),
+        entries: BEntries.create({content: b.entries.map(function(eorder) {return BEntry.create({order: eorder || ""});})}),
         touched: b.touched,
         index: b.index,
     });

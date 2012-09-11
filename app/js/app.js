@@ -30,11 +30,9 @@ Ballot = Em.Object.extend({
     init: function() {
         this._super();
         var candidates = App.router.get('voteSetupController').get('candidates');
-        this.set('entries', BEntries.create({content: candidates.map(function(candidate) {
+        if (!this.get('entries')) this.set('entries', BEntries.create({content: candidates.map(function(candidate) {
             return BEntry.create();
         })}));
-        this.set('invalid', false);
-        this.set('empty', false);
     },
     errorMessage: function() {
         return stv.validate(STVDataBallot.fromGUI(this));
@@ -73,7 +71,7 @@ Pile = Em.Object.extend({
     }.property('name', 'note'),
     init: function() {
         this._super();
-        this.set('ballots', Ballots.create({content: []}));
+        if (!this.get('ballots')) this.set('ballots', Ballots.create({content: []}));
     },
     addBallot: function() {
         var bCount = this.get('ballots').content.length;
@@ -281,7 +279,7 @@ App.VoteRunningController = Em.Controller.extend({
     }.property('appState'),
     updatePileExternally: function(pile) {
         var affected_pile = find_pile(this.get('pileGroups'), pile);
-        affected_pile.set('pileClosed', pile.pileClosed);
+        affected_pile.set('pileClosed', pile.pileClosed);                
         affected_pile.set('ballots', STVDataPile.toGUI(pile).get('ballots'));
     }
 });
@@ -409,7 +407,7 @@ App.Router = Em.Router.extend({
                             }),
                             Pile.create({
                                 name: client.name,
-                                note: "(" + "_filled by".loc() + crosscheck_map[client].name  + ")",
+                                note: "(" + "_filled by".loc() + " " + crosscheck_map[client].name  + ")",
                                 client:  crosscheck_map[client],
                             })
                         ]}));
@@ -438,6 +436,9 @@ App.Router = Em.Router.extend({
                     if (item === pileGroup) {
                         pileGroup.forEach(function(pile) {
                             pile.set('pileClosed', false);
+                            if (pile.client) {
+                                send_command('to_client', {client: pile.client, content: {command: "reopen_pile", content: STVDataPile.fromGUI(pile)}});
+                            }
                         });
                     }
                 });
@@ -582,14 +583,18 @@ function handle_server_message(message) {
             break;
         case 'create_pile':
             var pgs = App.router.get('typingController').get('pileGroups');
-            pgs.pushObject(PileGroup.create({
-                content: [
-                    STVDataPile.toGUI(data.content)
-                ]
-            }));
+            var newPile = STVDataPile.toGUI(data.content);
+            pgs.pushObject(PileGroup.create({content: [newPile]}));
+            //pgs.set('currentPile', newPile);
+            App.router.get('typingController').set('currentPileCaption', newPile.get('desc'));
             break;
         case 'reopen_pile':
-            // TODO
+            var d = STVDataPile.toGUI(data.content).get('desc');
+            App.router.get('voteRunningController').get('pileGroups').forEach(function(pileGroup){
+                pileGroup.forEach(function(pile) {
+                    if (pile.get('desc') == d) pile.set('pileClosed', false);
+                });
+            });
             break;
         case 'set_candidates':
             var c = App.router.get('voteSetupController').get('candidates');
