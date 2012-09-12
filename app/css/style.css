@@ -88,15 +88,20 @@ a:hover { color: #036; }
 
 
 b {font-weight: bold}
-input {display: block}
 .typing input {width: 2em}
 td {padding-right: 1em}
-
-
-
-
-
-
+.centeredVertical {width: 15em; margin-left: auto; margin-right: auto; display: block; margin-top: 1em;}
+.centeredVerticalWide {width: 22em; margin-left: auto; margin-right: auto; display: block; margin-top: 1em;}
+#connections {float: left; height: 500px; padding: 3px; overflow: auto;}
+#tabpane {padding: 3px;}
+.sform tr td {padding: 2px;}
+.sform tr td button {width: 100%;}
+.candidates {float: right;}
+.result_pane {float: right;}
+.vote_control {float: right;}
+.progress_table {min-height: 150px;}
+.report {overflow: auto;}
+.done_pane button { margin: 10px; }
 
 
 

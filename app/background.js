@@ -163,8 +163,8 @@ function struct2ab(struct) {
 
 chrome.app.runtime.onLaunched.addListener(function() {
   chrome.app.window.create('index.html', {
-    'width': 500,
-    'height': 300
+    'width': 800,
+    'height': 500
   }, function(win) {
        win.onload = function() {
             win.postMessage({command: 'init'}, '*');

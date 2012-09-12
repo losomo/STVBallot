@@ -193,9 +193,9 @@ App.ApplicationController = Em.Controller.extend({
 });
 App.AppSetupController = Em.Controller.extend({
     buttons: [
-       {ba: 'client',     desc: '_Join the committee'.loc()},
-       {ba: 'server',     desc: '_Host ballots'.loc()},
-       {ba: 'standalone', desc: '_Standalone mode'.loc()},
+       {ba: 'client',     desc: "_Join the committee".loc()},
+       {ba: 'server',     desc: "_Host ballots".loc()},
+       {ba: 'standalone', desc: "_Standalone mode".loc()},
     ],
     userNameBinding: 'App.router.applicationController.userName',
     btnState: function() {
@@ -209,7 +209,7 @@ App.VoteSetupController = Em.Controller.extend({
     ballotCount: 8,
     replacements: null,
     candidates: null,
-    genders: ['---','_Female'.loc(),'_Male'.loc()],
+    genders: ['---',"_Female".loc(),"_Male".loc()],
     updateCandidates: function() {
         var no = this.candidateCount;
         var current_no = this.get('candidates').content.length || 0;
