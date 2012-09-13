@@ -444,7 +444,9 @@ App.Router = Em.Router.extend({
                 });
             },
             exportOstv: function(router) {
-                //TODO export to BLT
+                var pileGroups = router.get('voteRunningController').get('pileGroups');
+                //TODO make setup serializable
+                send_command('download_pilegroup', {groups: pileGroups, setup: router.get('voteSetupController')});
             },
             exportProtocol: function(router) {
                 //TODO export completed vote
@@ -453,6 +455,7 @@ App.Router = Em.Router.extend({
                 //TODO print ballots
             },
             runSTV: function(router) {
+                router.get('applicationController').set('appState', 3);
                 //TODO launch computation
             },
             connectOutlets: function(router) {

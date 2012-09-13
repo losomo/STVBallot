@@ -133,6 +133,24 @@ var messageHandler = function(e) {
         case 'to_server':
             send_to_server(e.data.socketId, e.data.server_host, e.data.data);
             break;
+        case 'download_pilegroup':
+            var setup = e.data.data.setup;
+            var title = "_Vote".loc() + "_" + setup.get('voteNo');
+            var groups = e.data.data.groups.map(function (group) {return STVDataPileGroup.fromGUI(group);});
+            var content = STVDataBLT.fromGroups(groups, title, setup);            
+            var config = {type: 'saveFile', suggestedName: title + ".blt"};
+            chrome.fileSystem.chooseFile(config, function(writableEntry) {
+                var blob = new Blob([content], {type: 'text/plain'});
+                writableEntry.createWriter(function(writer) {
+                        writer.onerror = function(e) {console.error(e);};
+                        writer.onwriteend = function(e) {
+                            console.log(e);
+                            chrome.app.window.create(writeableEntry);
+                        };
+                        writer.write(opt_blob);
+                    }, function(e) {console.error(e);});
+            });
+            break;
         case 'search_servers':
             if (e.data.data) {
                 find_servers(e.source);

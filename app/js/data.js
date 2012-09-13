@@ -63,3 +63,35 @@ STVDataPileGroup.fromGUI = function(pileGroup) {
     );
 }
 
+function STVDataBLT() {}
+
+STVDataBLT.fromGroups = function(groups, title, setup) {
+    var ret = setup.get('candidateCount') + " " + setup.get('mandateCount') + "\n";
+    groups.forEach(function (group) {
+        group.piles.forEach(function (pile) {
+            var found = 0;
+            if (!pile.note) {
+                found += 1;
+                pile.ballots.forEach(function (ballot) {
+                    if (!ballot.invalid) {
+                        if (ballot.empty) {
+                            ret += "1 0\n"
+                        }
+                        else {
+                            ret += "1 " + ballot.get_sorted_orders() + " 0\n";
+                        }
+                    }
+                });                
+            }
+            if (found != 1) throw "Primary pile not found";
+        });
+    });
+    ret += "0\n";
+    setup.get('candidates').forEach(function (candidate) {
+        ret += candidate.get('name');
+        ret += "\n";
+    });
+    ret += title + "\n";
+    console.log(ret);
+    return ret;
+}
