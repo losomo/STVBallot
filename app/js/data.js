@@ -100,11 +100,11 @@ STVDataBLT.fromGroups = function(groups, title, setup) {
     });
     ret += "0\n";
     setup.candidates.forEach(function (candidate) {
+        ret += '"';
         ret += candidate.name;
-        ret += "\n";
+        ret += '"\n';
     });
-    ret += title + "\n";
-    console.log(ret);
+    ret += '"'  + title + '"\n';
     return ret;
 }
 

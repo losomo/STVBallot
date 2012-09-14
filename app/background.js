@@ -136,17 +136,11 @@ var messageHandler = function(e) {
         case 'download_pilegroup':
             var title = e.data.data.title;
             var content = e.data.data.content; 
-            var config = {type: 'saveFile', suggestedName: title + ".blt"};
-            chrome.fileSystem.chooseFile(config, function(writableEntry) {
-                var blob = new Blob([content], {type: 'text/plain'});
-                writableEntry.createWriter(function(writer) {
-                        writer.onerror = function(e) {console.error(e);};
-                        writer.onwriteend = function(e) {
-                            console.log(e);
-                            chrome.app.window.create(writeableEntry);
-                        };
-                        writer.write(opt_blob);
-                    }, function(e) {console.error(e);});
+            display_data({
+                title: title,
+                header: "<pre>",
+                content: content,
+                footer: "</pre>",
             });
             break;
         case 'search_servers':
@@ -162,6 +156,17 @@ var messageHandler = function(e) {
     }
 };
 window.addEventListener('message', messageHandler, false);
+
+function display_data(config) {
+  chrome.app.window.create('download.html', {
+    'width': 500,
+    'height': 300
+  }, function(win) {
+       win.addEventListener('load', function() {
+               win.postMessage(config, '*');
+           }, false);
+  });
+}
 
 function ab2struct(buf) {
   return JSON.parse(String.fromCharCode.apply(null, new Uint16Array(buf)));
