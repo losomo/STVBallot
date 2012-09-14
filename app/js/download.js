@@ -1,7 +1,8 @@
 var content;
 var title;
+var extension;
 function save_file() {
-            var config = {type: 'saveFile', suggestedName: title + ".blt"};
+            var config = {type: 'saveFile', suggestedName: title + extension};
             chrome.fileSystem.chooseFile(config, function(writableEntry) {
                 var blob = new Blob([content], {type: 'text/plain'});
                 writableEntry.createWriter(function(writer) {
@@ -19,6 +20,7 @@ var messageHandler = function(e) {
     title = config.title;
     document.getElementById("title").innerHTML = title;
     content = config.content;
+    extension = config.extension;
     document.getElementById("content").innerHTML = config.header + content + config.footer;
 };
 parent.addEventListener('message', messageHandler, false);

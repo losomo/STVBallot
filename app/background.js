@@ -133,15 +133,8 @@ var messageHandler = function(e) {
         case 'to_server':
             send_to_server(e.data.socketId, e.data.server_host, e.data.data);
             break;
-        case 'download_pilegroup':
-            var title = e.data.data.title;
-            var content = e.data.data.content; 
-            display_data({
-                title: title,
-                header: "<pre>",
-                content: content,
-                footer: "</pre>",
-            });
+        case 'download_data':
+            display_data(e.data.data);
             break;
         case 'search_servers':
             if (e.data.data) {
@@ -159,8 +152,8 @@ window.addEventListener('message', messageHandler, false);
 
 function display_data(config) {
   chrome.app.window.create('download.html', {
-    'width': 500,
-    'height': 300
+    'width': 800,
+    'height': 500
   }, function(win) {
        win.addEventListener('load', function() {
                win.postMessage(config, '*');

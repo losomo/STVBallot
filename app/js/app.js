@@ -448,7 +448,10 @@ App.Router = Em.Router.extend({
                 var groups = pileGroups.map(function (group) {return STVDataPileGroup.fromGUI(group);});
                 var setup = STVDataSetup.fromGUI(router.get('voteSetupController'));
                 var title = "_Vote".loc() + "_" + setup.voteNo;
-                send_command('download_pilegroup', {
+                send_command('download_data', {
+                    header: "<pre>",
+                    footer: "</pre>",
+                    extension: "blt",
                     content: STVDataBLT.fromGroups(groups, title, setup),
                     title: title
                 });
@@ -458,6 +461,15 @@ App.Router = Em.Router.extend({
             },
             printBallots: function(router) {
                 //TODO print ballots
+                var setup = STVDataSetup.fromGUI(router.get('voteSetupController'));
+                var title = "_Vote".loc() + "_" + setup.voteNo;
+                send_command('download_data', {
+                   header: "",
+                   footer: "",
+                   extension: "html",
+                   content: print_ballots(setup, title),
+                   title: title
+                });
             },
             runSTV: function(router) {
                 router.get('applicationController').set('appState', 3);
@@ -686,6 +698,22 @@ function find_pile(pileGroups, p) {
         });
     });
     return r;
+}
+
+function print_ballots(setup, title) {
+    var ret = "";
+    for (var i = 0; i < setup.ballotCount; i++) {
+        ret += '<div class="ballot"><h1>' + title + "</h1>";
+        ret += stv.ballot_header();
+        setup.candidates.forEach(function (candidate) {
+            ret += '<div class="bentry"><span class="square">❏</span><span class="cname">' + candidate.name + "</span></div>";
+        });
+        ret += '<br/><span class="leaders">✂ ' +
+        '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ' +
+        '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ' +
+        '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</span><br/></div>';
+    }
+    return ret;
 }
 
 parent.addEventListener('message', messageHandler, false);

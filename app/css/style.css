@@ -102,10 +102,9 @@ td {padding-right: 1em}
 .progress_table {min-height: 150px;}
 .report {overflow: auto;}
 .done_pane button { margin: 10px; }
-
-
-
-
+.leaders {width: 0; white-space: nowrap;}
+.square {font-size: 300%; line-height: .85; vertical-align: middle;}
+.bentry {margin-left: 3em;}
 
 .ir { display: block; text-indent: -999em; overflow: hidden; background-repeat: no-repeat; text-align: left; direction: ltr; }
 .hidden { display: none; visibility: hidden; }
@@ -141,9 +140,9 @@ td {padding-right: 1em}
   .ir a:after, a[href^="javascript:"]:after, a[href^="#"]:after { content: ""; }  
   pre, blockquote { border: 1px solid #999; page-break-inside: avoid; }
   thead { display: table-header-group; }
-  tr, img { page-break-inside: avoid; }
+  tr, img, .ballot { page-break-inside: avoid; }
   @page { margin: 0.5cm; }
   p, h2, h3 { orphans: 3; widows: 3; }
   h2, h3{ page-break-after: avoid; }
-  #controls {display: none}
+  #controls, #title {display: none}
 }

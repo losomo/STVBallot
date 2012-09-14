@@ -55,3 +55,19 @@ STV.prototype.crosscheck = function(pileGroup) {
     }
     return {status: "ok", message: "ok"};
 }
+
+STV.prototype.ballot_header = function() { return "Pokyny pro hlasování: " +
+    "<ul><li>Označte číslem pořadí kandidátů, ve kterém preferujete jejich zvolení. " +
+    "U&nbsp;kandidáta, kterého upřednostňujete nejvíce, uveďte číslo 1, u&nbsp;kandidáta, " +
+    "kterého považujete za druhého nejlepšího, uveďte číslo 2 atd., až očíslujete " +
+    "podle vašich preferencí pořadí všech kandidátů, jejichž zvolení v&nbsp;tomto pořadí " +
+    "preferujete před zvolením nikoho. Pokud nechcete svůj hlas dát nikomu z" +
+    "&nbsp;kandidátů, neuvedete žádné číslo na hlasovacím lístku.</li>" +
+
+    "<li>Hlas je neplatný, pokud uvedete stejné číslo u&nbsp;dvou kandidátů, pokud " +
+    "nejnižší Vámi uvedené číslo není 1 nebo pokud Vámi uvedené čísla nejsou po " +
+    "sobě jdoucí pořadová čísla.</li>" +
+    
+    "<li>Pokud po volbě nejsou obsazeny všechny mandáty voleného orgánu, konají " +
+    "se nové volby na tyto mandáty.</li></ul>"; 
+}
