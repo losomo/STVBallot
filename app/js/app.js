@@ -445,8 +445,13 @@ App.Router = Em.Router.extend({
             },
             exportOstv: function(router) {
                 var pileGroups = router.get('voteRunningController').get('pileGroups');
-                //TODO make setup serializable
-                send_command('download_pilegroup', {groups: pileGroups, setup: router.get('voteSetupController')});
+                var groups = pileGroups.map(function (group) {return STVDataPileGroup.fromGUI(group);});
+                var setup = STVDataSetup.fromGUI(router.get('voteSetupController'));
+                var title = "_Vote".loc() + "_" + setup.voteNo;
+                send_command('download_pilegroup', {
+                    content: STVDataBLT.fromGroups(groups, title, setup),
+                    title: title
+                });
             },
             exportProtocol: function(router) {
                 //TODO export completed vote

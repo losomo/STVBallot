@@ -134,10 +134,8 @@ var messageHandler = function(e) {
             send_to_server(e.data.socketId, e.data.server_host, e.data.data);
             break;
         case 'download_pilegroup':
-            var setup = e.data.data.setup;
-            var title = "_Vote".loc() + "_" + setup.get('voteNo');
-            var groups = e.data.data.groups.map(function (group) {return STVDataPileGroup.fromGUI(group);});
-            var content = STVDataBLT.fromGroups(groups, title, setup);            
+            var title = e.data.data.title;
+            var content = e.data.data.content; 
             var config = {type: 'saveFile', suggestedName: title + ".blt"};
             chrome.fileSystem.chooseFile(config, function(writableEntry) {
                 var blob = new Blob([content], {type: 'text/plain'});
