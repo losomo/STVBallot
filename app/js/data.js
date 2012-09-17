@@ -26,6 +26,119 @@ STVDataBallot.toGUI = function(b) {
     });
 }
 
+/*
+  takes array of groups, returns a single array of all ballots from primary groups
+*/
+STVDataBallot.combineGroups = function(groups) {
+    var ret = [];
+    groups.forEach(function (group) {
+        var found = 0;
+        group.piles.forEach(function (pile) {
+            if (!pile.note) {
+                found += 1;
+                ret = ret.concat(pile.ballots);       
+            }
+        });
+        if (found != 1) throw "Primary pile not found";
+    });
+    return ret;
+}
+
+STVDataBallot.aggregateBallots = function(ballots) {
+    var ap = {};
+    for (var i = 0; i < ballots.length; i++) {
+        var ballot = ballots[i];
+        var key;
+        if (ballot.invalid) {
+            key = '_invalid';
+        }
+        else if (ballot.empty) {
+            key = '_empty';
+        }
+        else {
+            key = ballot.entries.join(':');
+        }
+        ap[key] |= 0;
+        ap[key] += 1;
+    }
+    return ap;
+}
+
+STVDataBallot.aggregateFirstPreferences = function(aggregatedBallots) {
+    var ret = []; // Array of [ballots_with_1st_preference, 1+candidate_order] ordered by [0], randomly where there is a tie
+    var score = {}; // candidate_order -> ballots_with_1st_preference
+    for (var ab in aggregatedBallots) {
+        if (ab != "_empty" && ab != "_invalid") {
+            var s = aggregatedBallots[ab];
+            var most_preferred = STVDataBallot.get_most_preferred(ab);
+            most_preferred[1].forEach(function(candidate) {
+                score[candidate] |= 0;
+                score[candidate] += s / most_preferred[1].length;
+            });            
+        }
+    }
+    for (var candidate in score) {
+        ret.push([score[candidate], candidate]);
+    }
+    var i = ret.length; // Shuffle to randomize ties
+    while (--i > 0) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var oi = ret[i];
+        ret[i] = ret[j];
+        ret[j] = oi;
+    }
+    return ret.sort(function(a,b){return b[0]-a[0]});
+}
+
+STVDataBallot.get_most_preferred = function(ab) {
+    return ab.split(':').reduce(function(min_count, order, index) {
+                if (order > 0 && !isNaN(order)) {
+                    var min = min_count[0];
+                    if(order == min) {
+                        min_count[1].push(index + 1);
+                    }
+                    else if (order < min) {
+                        min_count = [order, [index + 1]];
+                    }
+                }
+                return min_count;
+            }, [Number.MAX_VALUE, []]); // returns [min_order, [1+index_with_min_order]]
+}
+
+STVDataBallot.removeCandidateFromAggregatedBallots = function(oab, candidate, transfer) {
+    var votes_for_candidate = function(aggrb) {
+        var most_preferred = STVDataBallot.get_most_preferred(aggrb);
+        if (most_preferred[1].some(function(i) {return i == candidate})) {
+            return oab[aggrb] / most_preferred[1].length;
+        }
+        else {
+            return 0;
+        }
+    };
+    var total_for_candidate = 0;
+    if (transfer > 0) {
+        for (var b in oab) {
+             total_for_candidate += votes_for_candidate(b);
+        }
+    }
+    var new_weight = total_for_candidate == 0 ? 1 : (total_for_candidate - transfer) / total_for_candidate;
+    var ab = {};
+    for (var b in oab) {
+        if (b != "_empty" && b != "_invalid") {
+            var for_candidate = votes_for_candidate(b);
+            barray = b.split(':');
+            barray[candidate-1] = 0;
+            if (barray.some(function(x) {return x > 0;})) {
+                var newb = barray.join(':');
+                var new_score = new_weight * for_candidate + (oab[b] - for_candidate);
+                ab[newb] |= 0;
+                ab[newb] += new_score;
+            }
+        }
+    }
+    return ab;
+}
+
 STVDataBallot.prototype.get_sorted_orders = function() {
     // Candidate numbers start at 1 !!!!!!
     var pairs = this.entries.map(function(e, index) {return [index+1, e]}); // [candidate_no, priority]

@@ -107,14 +107,14 @@
        </div>
 
        <div class="clearfix result_pane">
-       {{t "_Results - Mandates"}}:
-       {{#each m in App.mandatesController}}
-            {{m}}<br/>
+       <div>{{t "_Results - Mandates"}}:</div>       
+       {{#each m in mandates}}
+            {{m.name}}<br/>
        {{/each}}
        </div>
 
        {{t "_Counting report"}}:
-       <div class="report">{{ report }}</div>
+       <div class="report">{{{ report }}}</div>
 
        <button {{ action exportProtocol }}{{bindAttr disabled="isRunning"}}>{{t "_Export Protocol"}}</button>
     </script>

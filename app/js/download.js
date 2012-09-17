@@ -2,7 +2,7 @@ var content;
 var title;
 var extension;
 function save_file() {
-            var config = {type: 'saveFile', suggestedName: title + extension};
+            var config = {type: 'saveFile', suggestedName: title + "." + extension};
             chrome.fileSystem.chooseFile(config, function(writableEntry) {
                 var blob = new Blob([content], {type: 'text/plain'});
                 writableEntry.createWriter(function(writer) {
@@ -22,6 +22,9 @@ var messageHandler = function(e) {
     content = config.content;
     extension = config.extension;
     document.getElementById("content").innerHTML = config.header + content + config.footer;
+    if (config.print) {
+        window.print();
+    }
 };
 parent.addEventListener('message', messageHandler, false);
 

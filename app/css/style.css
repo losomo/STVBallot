@@ -115,7 +115,9 @@ td {padding-right: 1em}
 .clearfix:before, .clearfix:after { content: "\0020"; display: block; height: 0; overflow: hidden; }
 .clearfix:after { clear: both; }
 .clearfix { zoom: 1; }
-
+.griddy { border-collapse:collapse; border:1px solid black;}
+.griddy td{border:1px solid black; text-align: right}
+.griddy th{border:1px solid black;}
 
 @media all and (orientation:portrait) {
 

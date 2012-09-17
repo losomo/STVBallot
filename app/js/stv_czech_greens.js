@@ -1,25 +1,9 @@
 function STV() {
 }
 
-STV.aggregatePile = function(pile) {
-    var ap = {};
-    var ballots = pile.ballots;
-    for (var i = 0; i < ballots.length; i++) {
-        var ballot = ballots[i];
-        var key;
-        if (ballot.invalid) {
-            key = '_invalid';
-        }
-        else if (ballot.empty) {
-            key = '_empty';
-        }
-        else {
-            key = ballot.entries.join(':');
-        }
-        if (ap[key] == undefined) ap[key] = 0;
-        ap[key] += 1;
-    }
-    return ap;
+(function() {
+function _r(x) {
+    return new Number(x).toFixed(5);
 }
 
 STV.prototype.validate = function(ballot) {
@@ -39,7 +23,7 @@ STV.prototype.crosscheck = function(pileGroup) {
     var piles = pileGroup.piles;
     var aggregatedPiles = [];
     for (var i = 0; i < piles.length; i++) {
-        aggregatedPiles.push(STV.aggregatePile(piles[i]));
+        aggregatedPiles.push(STVDataBallot.aggregateBallots(piles[i].ballots));
     }
     var first = aggregatedPiles[0];
     var firstkeys = Object.keys(first).sort();
@@ -71,3 +55,55 @@ STV.prototype.ballot_header = function() { return "Pokyny pro hlasování: " +
     "<li>Pokud po volbě nejsou obsazeny všechny mandáty voleného orgánu, konají " +
     "se nové volby na tyto mandáty.</li></ul>"; 
 }
+
+STV.prototype.run = function(setup, ballots, report, done) {
+    var ab = STVDataBallot.aggregateBallots(ballots);
+    var valid_ballots_count = ballots.length - ab['_invalid'];
+    report(
+        "<h1>Výpočet volby: " + setup.voteNo + "</h1>" +
+        "<p>Z " + setup.candidateCount + " kandidátů voleno " + setup.mandateCount + " mandátů, odevzdáno " + ballots.length + " hlasovacích lístků.</p>" +
+        "<p>Neplatných lístků: " + ab['_invalid'] + ", prázdných lístků: " + ab['_empty'] + "</p>" +
+        "<p>Kandidáti:<ol><li>" + setup.candidates.map(function(c){return c.name;}).join("</li><li>") +
+        "</li></ol></p>" + 
+        "<p>Počet platných hlasovacích lístků: " + valid_ballots_count + "</p>"
+    );
+    var quota = valid_ballots_count / (setup.mandateCount + 1) + 0.00001; // a) v) Přílohy 2 Jednacího řádu
+    var mandates = []; // Array of STVDataCandidates
+    report("<p>Kvóta pro zvolení: " + _r(quota) + "</p>");
+    while (mandates.length < setup.mandateCount && Object.keys(ab).length > 0) { // a) iv)
+        report("<p>Shrnutí vyplněných preferencí</p>" + this._reportAB(setup, ab));
+        var fp = STVDataBallot.aggregateFirstPreferences(ab);
+        report("<p>Počet hlasů s nejvyšší preferencí (při shodě v náhodném pořadí):<table>");
+        fp.forEach(function(f) {report("<tr><td>" + _r(f[0]) + "</td><td>" + setup.candidates[f[1]-1].name + "</td></tr>")});
+        report("</table>");
+        if (fp[0][0] >= quota) {
+            mandates.push(setup.candidates[fp[0][1]-1]);
+            ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, fp[0][1], quota);
+            report("<p>Kandidát <b>" + setup.candidates[fp[0][1]-1].name +"</b> zvolen, na další místa se přesouvá " + _r(fp[0][0]-quota) + " hlasů</p>");
+        }
+        else {
+            var last = fp.length - 1;
+            report("<p>Žádný kandidát nepřekračuje kvótu, odstraňuji kandidáta " + setup.candidates[fp[last][1]-1].name + "</p>");
+            ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, fp[0][1], 0);
+        }
+    }   
+    report("<h1>Zvolení kandidáti:</h1><ol><li>" + mandates.map(function(c){return c.name;}).join("</li><li>") + "</li></ol>" +
+        "<p><pre>" + new Date() + "</pre>Výpočet ukončen.</p>");
+    done(mandates);
+}
+
+STV.prototype._reportAB = function(setup, ab) {
+    var ret = '<table class="griddy"><tr><th>Kandidáti:</th><th>';
+    ret += setup.candidates.map(function(c,i){return i+1}).join("</th><th>");
+    ret += "</th></tr>";
+    for (var b in ab) {
+        if (b != "_invalid" && b != "_empty") {
+            ret += "<tr><td>" + _r(ab[b]) + "</td><td>" + 
+                b.split(":").map(function (x){return x>0?x:""}).join("</td><td>")
+                + "</td></tr>";
+        }
+    }
+    ret += "</table>";
+    return ret;
+}
+})()

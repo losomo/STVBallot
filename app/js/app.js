@@ -270,9 +270,13 @@ App.VoteSetupController = Em.Controller.extend({
 App.VoteRunningController = Em.Controller.extend({
     appStateBinding: 'App.router.applicationController.appState',
     pileGroups: null,
+    report: null,
+    mandates: null,
     init: function() {
         this._super();
         this.set('pileGroups', PileGroups.create({content: []}));
+        this.set('report', "");
+        this.set('mandates', Em.ArrayProxy.create({content: []}));
     },
     isRunning: function() {
         return this.get('appState') == 2 ? "disabled" : false;
@@ -281,6 +285,9 @@ App.VoteRunningController = Em.Controller.extend({
         var affected_pile = find_pile(this.get('pileGroups'), pile);
         affected_pile.set('pileClosed', pile.pileClosed);                
         affected_pile.set('ballots', STVDataPile.toGUI(pile).get('ballots'));
+    },
+    report_append: function(msg) {
+        this.set('report', this.get('report') + msg);
     }
 });
 
@@ -382,7 +389,10 @@ App.Router = Em.Router.extend({
             launch: function(router) {
                 var ac = router.get('applicationController');
                 ac.set('appState', 2);
-                var pileGroups = router.get('voteRunningController').get('pileGroups');
+                var vrc = router.get('voteRunningController');
+                vrc.set('report', "");
+                vrc.get('mandates').clear();
+                var pileGroups = vrc.get('pileGroups');
                 pileGroups.clear();
                 if (ac.get('appMode') == 'standalone') {
                     pileGroups.pushObject(PileGroup.create({
@@ -460,20 +470,30 @@ App.Router = Em.Router.extend({
                 //TODO export completed vote
             },
             printBallots: function(router) {
-                //TODO print ballots
                 var setup = STVDataSetup.fromGUI(router.get('voteSetupController'));
-                var title = "_Vote".loc() + "_" + setup.voteNo;
+                var title = "_Vote".loc() + ": " + setup.voteNo;
                 send_command('download_data', {
                    header: "",
                    footer: "",
                    extension: "html",
                    content: print_ballots(setup, title),
-                   title: title
+                   title: title,
+                   print: true,
                 });
             },
             runSTV: function(router) {
                 router.get('applicationController').set('appState', 3);
-                //TODO launch computation
+                var setup = STVDataSetup.fromGUI(router.get('voteSetupController'));
+                var vrc = router.get('voteRunningController');
+                var pileGroups = vrc.get('pileGroups');
+                var groups = pileGroups.map(function (group) {return STVDataPileGroup.fromGUI(group);});                
+                var ballots = STVDataBallot.combineGroups(groups);
+                stv.run(setup, ballots, function(msg) {
+                    vrc.report_append(msg);
+                },
+                function(mandates) {
+                    vrc.get('mandates').pushObjects(mandates);                    
+                });
             },
             connectOutlets: function(router) {
                 router.get('applicationController').connectOutlet('voteRunning');
