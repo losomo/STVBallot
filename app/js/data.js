@@ -64,15 +64,34 @@ STVDataBallot.aggregateBallots = function(ballots) {
     return ap;
 }
 
+STVDataBallot.reportAggregatedBallots = function(setup, ab) {
+    var ret = '<table class="griddy"><tr><th></th><th>';
+    ret += setup.candidates.map(function(c,i){return i+1}).join("</th><th>");
+    ret += "</th></tr>";
+    for (var b in ab) {
+        if (b != "_invalid" && b != "_empty") {
+            ret += "<tr><td>" + STVDataSetup.round(ab[b]) + "</td><td>" + 
+                b.split(":").map(function (x){return x>0?x:""}).join("</td><td>")
+                + "</td></tr>";
+        }
+    }
+    ret += "</table>";
+    return ret;
+}
+
 STVDataBallot.aggregateFirstPreferences = function(aggregatedBallots) {
     var ret = []; // Array of [ballots_with_1st_preference, 1+candidate_order] ordered by [0], randomly where there is a tie
     var score = {}; // candidate_order -> ballots_with_1st_preference
     for (var ab in aggregatedBallots) {
         if (ab != "_empty" && ab != "_invalid") {
             var s = aggregatedBallots[ab];
-            var most_preferred = STVDataBallot.get_most_preferred(ab);
+            ab.split(':').forEach(function(o, i) {
+                if (o > 0) {
+                    score[i+1] |= 0;
+                }
+            });
+            var most_preferred = STVDataBallot.get_most_preferred(ab);            
             most_preferred[1].forEach(function(candidate) {
-                score[candidate] |= 0;
                 score[candidate] += s / most_preferred[1].length;
             });            
         }
@@ -92,7 +111,7 @@ STVDataBallot.aggregateFirstPreferences = function(aggregatedBallots) {
 
 STVDataBallot.get_most_preferred = function(ab) {
     return ab.split(':').reduce(function(min_count, order, index) {
-                if (order > 0 && !isNaN(order)) {
+                if (order > 0) {
                     var min = min_count[0];
                     if(order == min) {
                         min_count[1].push(index + 1);
@@ -188,6 +207,23 @@ STVDataPileGroup.fromGUI = function(pileGroup) {
     );
 }
 
+STVDataPileGroup.reportPrimaryGroups = function(setup, groups) {
+    var ret = "<h1>" + "_Piles data".loc()  +  "</h1>";
+    groups.forEach(function (group) {
+        var found = 0;
+        group.piles.forEach(function (pile) {
+            if (!pile.note) {
+                found += 1;
+                var ab = STVDataBallot.aggregateBallots(pile.ballots);
+                ret += "<h2>" + "_Pile".loc() + " " + pile.name + "</h2>";
+                ret += STVDataBallot.reportAggregatedBallots(setup, ab);
+            }
+        });
+        if (found != 1) throw "Primary pile not found";
+    });
+    return ret;
+}
+
 function STVDataBLT() {}
 
 STVDataBLT.fromGroups = function(groups, title, setup) {
@@ -228,6 +264,10 @@ function STVDataSetup(voteNo, candidateCount, mandateCount, ballotCount, replace
    this.ballotCount = ballotCount;
    this.replacements = replacements; // Boolean
    this.candidates = candidates; // Array of STVDataCandidate
+}
+
+STVDataSetup.round = function (x) {
+    return new Number(x).toFixed(5);
 }
 
 STVDataSetup.fromGUI = function(controller) {

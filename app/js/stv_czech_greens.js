@@ -2,10 +2,6 @@ function STV() {
 }
 
 (function() {
-function _r(x) {
-    return new Number(x).toFixed(5);
-}
-
 STV.prototype.validate = function(ballot) {
     if (ballot.invalid || ballot.empty) return "";    
     var last = 0;
@@ -58,6 +54,8 @@ STV.prototype.ballot_header = function() { return "Pokyny pro hlasování: " +
 
 STV.prototype.run = function(setup, ballots, report, done) {
     var ab = STVDataBallot.aggregateBallots(ballots);
+    ab['_invalid'] |= 0;
+    ab['_empty'] |= 0;
     var valid_ballots_count = ballots.length - ab['_invalid'];
     report(
         "<h1>Výpočet volby: " + setup.voteNo + "</h1>" +
@@ -69,41 +67,33 @@ STV.prototype.run = function(setup, ballots, report, done) {
     );
     var quota = valid_ballots_count / (setup.mandateCount + 1) + 0.00001; // a) v) Přílohy 2 Jednacího řádu
     var mandates = []; // Array of STVDataCandidates
-    report("<p>Kvóta pro zvolení: " + _r(quota) + "</p>");
+    report("<p>Kvóta pro zvolení: " + STVDataSetup.round(quota) + "</p>");
     while (mandates.length < setup.mandateCount && Object.keys(ab).length > 0) { // a) iv)
-        report("<p>Shrnutí vyplněných preferencí</p>" + this._reportAB(setup, ab));
+        report("<p>Shrnutí vyplněných preferencí</p>" + STVDataBallot.reportAggregatedBallots(setup, ab));
         var fp = STVDataBallot.aggregateFirstPreferences(ab);
         report("<p>Počet hlasů s nejvyšší preferencí (při shodě v náhodném pořadí):<table>");
-        fp.forEach(function(f) {report("<tr><td>" + _r(f[0]) + "</td><td>" + setup.candidates[f[1]-1].name + "</td></tr>")});
+        fp.forEach(function(f) {report("<tr><td>" + STVDataSetup.round(f[0]) + "</td><td>" + f[1] + " (" + setup.candidates[f[1]-1].name + ")</td></tr>")});
         report("</table>");
         if (fp[0][0] >= quota) {
             mandates.push(setup.candidates[fp[0][1]-1]);
             ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, fp[0][1], quota);
-            report("<p>Kandidát <b>" + setup.candidates[fp[0][1]-1].name +"</b> zvolen, na další místa se přesouvá " + _r(fp[0][0]-quota) + " hlasů</p>");
+            report("<p>Kandidát <b>" + setup.candidates[fp[0][1]-1].name +"</b> (" + fp[0][1] + ") zvolen, na další místa se přesouvá " + STVDataSetup.round(fp[0][0]-quota) + " hlasů</p>");
         }
         else {
             var last = fp.length - 1;
-            report("<p>Žádný kandidát nepřekračuje kvótu, odstraňuji kandidáta " + setup.candidates[fp[last][1]-1].name + "</p>");
-            ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, fp[0][1], 0);
+            report("<p>Žádný kandidát nepřekračuje kvótu, odstraňuji kandidáta " + setup.candidates[fp[last][1]-1].name + " ("  + fp[last][1] + ")</p>");
+            ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, fp[last][1], 0);
         }
     }   
+    if (mandates.length >= setup.mandateCount) {
+        report("<p>Sčítání ukončeno, neboť stanovený počet mandátů byl obsazen.</p>");
+    }
+    else {
+        report("<p>Sčítání ukončeno, neboť všichni kandidáti byli vyřazeni.</p>");
+    }
     report("<h1>Zvolení kandidáti:</h1><ol><li>" + mandates.map(function(c){return c.name;}).join("</li><li>") + "</li></ol>" +
-        "<p><pre>" + new Date() + "</pre>Výpočet ukončen.</p>");
+        "<p><em>" + new Date() + "</em> Výpočet ukončen.</p>");
     done(mandates);
 }
 
-STV.prototype._reportAB = function(setup, ab) {
-    var ret = '<table class="griddy"><tr><th>Kandidáti:</th><th>';
-    ret += setup.candidates.map(function(c,i){return i+1}).join("</th><th>");
-    ret += "</th></tr>";
-    for (var b in ab) {
-        if (b != "_invalid" && b != "_empty") {
-            ret += "<tr><td>" + _r(ab[b]) + "</td><td>" + 
-                b.split(":").map(function (x){return x>0?x:""}).join("</td><td>")
-                + "</td></tr>";
-        }
-    }
-    ret += "</table>";
-    return ret;
-}
 })()

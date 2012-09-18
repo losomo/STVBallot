@@ -487,8 +487,12 @@ App.Router = Em.Router.extend({
                 var vrc = router.get('voteRunningController');
                 var pileGroups = vrc.get('pileGroups');
                 var groups = pileGroups.map(function (group) {return STVDataPileGroup.fromGUI(group);});                
+                vrc.report_append("<h1>" + "_Vote".loc() + " " + setup.voteNo + "</h1>" +
+                    "<p><em>" + new Date() + "</em> " + "_Computation started".loc() + "</p>");
+                vrc.report_append(STVDataPileGroup.reportPrimaryGroups(setup, groups));
                 var ballots = STVDataBallot.combineGroups(groups);
                 stv.run(setup, ballots, function(msg) {
+                    //console.log(msg);
                     vrc.report_append(msg);
                 },
                 function(mandates) {
