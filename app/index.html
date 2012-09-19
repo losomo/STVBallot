@@ -84,6 +84,8 @@
        <button {{ action exportOstv }}{{bindAttr disabled="isRunning"}}>{{t "_Export to OpenSTV"}}</button>
        <br/>
        <button {{ action runSTV }}>{{t "_Close counting"}}</button>
+       <br/>
+       <button {{ action resetAll }}>{{t "_Prepare new vote"}}</button>
        </div>
 
        <button {{ action printBallots }}>{{t "_Print ballots"}}</button>
@@ -153,10 +155,14 @@
             {{view templateName="connections"}}
         {{/if}}
         <div id="tabpane"> 
-        {{#if tabsEnabled}}
-            {{view templateName="navigation"}}
-        {{/if}}
-        {{outlet}}
+            {{#if tabsEnabled}}
+                {{view templateName="navigation"}}
+            {{/if}}
+            {{outlet}}
+            <div id="popup">{{ popup_msg }}<br/>
+                <button onclick="document.getElementById('popup').style.display='none';document.getElementById('black_overlay').style.display='none'">{{t "_Cancel"}}</button>
+                <button {{ action popupAct }}>OK</button>
+            </div>
         </div>
     </script>
 </head>
@@ -168,5 +174,6 @@
     <script src="js/messages_cs.js"></script>
     <script src="js/stv_czech_greens.js"></script>
     <script src="js/app.js"></script>
+    <div id="black_overlay"></div>
 </body>
 </html>

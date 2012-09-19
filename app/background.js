@@ -152,8 +152,8 @@ window.addEventListener('message', messageHandler, false);
 
 function display_data(config) {
   chrome.app.window.create('download.html', {
-    'width': 800,
-    'height': 500
+    'width':  1000,
+    'height': 600
   }, function(win) {
        win.addEventListener('load', function() {
                win.postMessage(config, '*');

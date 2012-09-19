@@ -173,6 +173,8 @@ App.ApplicationController = Em.Controller.extend({
     userName: '',
     tabs: null,
     clients: null,
+    popup_msg: null,
+    popup_action: null,
     isServerMode: function() {
         return this.get('appMode') == 'server';
     }.property('appMode'),
@@ -209,6 +211,7 @@ App.VoteSetupController = Em.Controller.extend({
     ballotCount: 8,
     replacements: null,
     candidates: null,
+    shuffled: null,
     genders: ['---',"_Female".loc(),"_Male".loc()],
     updateCandidates: function() {
         var no = this.candidateCount;
@@ -229,22 +232,31 @@ App.VoteSetupController = Em.Controller.extend({
         }
     }.observes('candidateCount'),
     launchState: function() {
-        if (this.get('voteNo') > 0 && this.get('candidateCount') > 0 && this.get('mandateCount') > 0 && this.get('ballotCount') > 0) {
+        if (this.get('voteNo') != "" && this.get('candidateCount') > 0 && this.get('mandateCount') > 0 && this.get('ballotCount') > 0) {
+            var names = {};
             var problem = false;
+            var genders = -1;
             this.get('candidates').forEach (function(item) {
-                if (item.get("name").length < 1) {
+                var name = item.get("name");
+                var gender = item.get("gender");
+                if (name.length < 1) {
                     problem = true;
                     return;
                 }
-            });
-            // TODO check unique names, check gender consistency, candidates vs. mandates count, ballot count
+                if (names[name]) problem = true;
+                names[name] = true;
+                if (genders == -1) {
+                    genders = (gender != '---');
+                }
+                else if (genders != (gender != '---')) problem = true;
+            });            
+            if (this.get('candidateCount') < this.get('mandateCount')) problem = true;
             return problem ? 'disabled' : false;
         }
         else {
             return "disabled";
         }
-    }.property('voteNo', 'candidateCount', 'mandateCount', 'ballotCount', 'candidates.@each.name'),
-    shuffled: false,
+    }.property('voteNo', 'candidateCount', 'mandateCount', 'ballotCount', 'candidates.@each.name', 'candidates.@each.gender'),
     shuffle: function() {
         var c = this.get('candidates');
         var i = c.content.length;
@@ -422,9 +434,9 @@ App.Router = Em.Router.extend({
                             })
                         ]}));
                     });
-                    var candidates = router.get('voteSetupController').get('candidates');
+                    var setup = STVDataSetup.fromGUI(router.get('voteSetupController'));
                     ac.get('clients').forEach(function (client) {
-                        send_command('to_client', {client: client, content: {command: "set_candidates", content: candidates.content}});
+                        send_command('to_client', {client: client, content: {command: "set_setup", content: setup}});
                     });
                     pileGroups.forEach(function(pileGroup) {
                         pileGroup.forEach(function(pile) {
@@ -467,7 +479,15 @@ App.Router = Em.Router.extend({
                 });
             },
             exportProtocol: function(router) {
-                //TODO export completed vote
+                var vrc = router.get('voteRunningController');
+                send_command('download_data', {
+                   header: "",
+                   footer: "",
+                   extension: "html",
+                   content: vrc.get('report'),
+                   title: "",
+                   print: true,
+                });
             },
             printBallots: function(router) {
                 var setup = STVDataSetup.fromGUI(router.get('voteSetupController'));
@@ -489,7 +509,7 @@ App.Router = Em.Router.extend({
                 var groups = pileGroups.map(function (group) {return STVDataPileGroup.fromGUI(group);});                
                 vrc.report_append("<h1>" + "_Vote".loc() + " " + setup.voteNo + "</h1>" +
                     "<p><em>" + new Date() + "</em> " + "_Computation started".loc() + "</p>");
-                vrc.report_append(STVDataPileGroup.reportPrimaryGroups(setup, groups));
+                vrc.report_append(STVDataPileGroup.reportGroups(setup, groups, true));
                 var ballots = STVDataBallot.combineGroups(groups);
                 stv.run(setup, ballots, function(msg) {
                     //console.log(msg);
@@ -497,7 +517,32 @@ App.Router = Em.Router.extend({
                 },
                 function(mandates) {
                     vrc.get('mandates').pushObjects(mandates);                    
+                    vrc.report_append("<p><em>" + new Date() + "</em>" + "_Computation done".loc() + ".</p>");
                 });
+            },
+            resetAll: function(router) {
+                var ac = router.get('applicationController');
+                var vsc = router.get('voteSetupController');
+                var n = vsc.get('voteNo');
+                if (parseInt(n) > 0) {
+                    n = parseInt(n) + 1;
+                }
+                else {
+                    var m = /\d+$/;
+                    var l = n.search(m);
+                    if (l >= 0) {
+                        var x = parseInt(n.match(m)[0]);
+                        n = n.replace(m, x+1);
+                    }
+                    else {
+                        n = n + " 2";
+                    }
+                }
+                vsc.set('voteNo', n);
+                console.log(n);
+                ac.set('appState', 0);
+                vsc.set('shuffled', false);
+                router.transitionTo('voteSetup');
             },
             connectOutlets: function(router) {
                 router.get('applicationController').connectOutlet('voteRunning');
@@ -509,9 +554,13 @@ App.Router = Em.Router.extend({
                 router.get('applicationController').connectOutlet('typing');
             },
             clearTable: function(router) {
-                //if (confirm("_Really clear this pile?".loc())) { //TODO can't confirm in App
+                var ac = router.get('applicationController');
+                ac.set('popup_msg', "_Really clear this pile?".loc());
+                ac.set('popup_action', function() {
                     router.get('typingController').get('currentPile').get('ballots').clear();
-                //}
+                });
+                document.getElementById('black_overlay').style.display='block';
+                document.getElementById('popup').style.display='block';
             },
             addBallot: function(router) {
                 router.get('typingController').get('currentPile').addBallot();
@@ -520,7 +569,24 @@ App.Router = Em.Router.extend({
                 router.get('typingController').get('currentPile').set('pileClosed', true);
             },
             print: function(router) {
-                //TODO export typing protocol
+                var setup = STVDataSetup.fromGUI(router.get('voteSetupController'));
+                var vrc = router.get('voteRunningController');
+                var pileGroups = vrc.get('pileGroups');
+                var groups = pileGroups.map(function (group) {return STVDataPileGroup.fromGUI(group);});                
+                var c = "<h1>" + "_Vote".loc() + " " + setup.voteNo + "</h1>" +
+                    "<p><em>" + new Date() + "</em> " + 
+                    "<p>"+ "_Candidates".loc() + ":<ol><li>" + setup.candidates.map(function(c){return c.name;}).join("</li><li>") +
+                    "</li></ol></p>" +
+                    "_Data filled by ".loc() + " " +  router.get('applicationController').get('userName') + "</p>" +
+                    STVDataPileGroup.reportGroups(setup, groups, false);
+                send_command('download_data', {
+                   header: "",
+                   footer: "",
+                   extension: "html",
+                   content: c,
+                   title:  "_Vote".loc() + " " + setup.voteNo,
+                   print: true,
+                });
             },
             addVoteFor: function(router, candidate) {
                 var cindex = candidate.context.get('index');
@@ -559,7 +625,12 @@ App.Router = Em.Router.extend({
         changeTab: function(router, newTab) {
             router.transitionTo(newTab.context);
         }
-    })
+    }),
+    popupAct: function(router) {
+        router.get('applicationController').get('popup_action')();
+        document.getElementById('popup').style.display='none';
+        document.getElementById('black_overlay').style.display='none';
+    }
 });
 
 Em.Handlebars.registerHelper('findBEntry', function(ca, ba, options) {
@@ -640,10 +711,9 @@ function handle_server_message(message) {
                 });
             });
             break;
-        case 'set_candidates':
-            var c = App.router.get('voteSetupController').get('candidates');
-            c.clear();
-            c.pushObjects(data.content.map(function(item) {return Candidate.create(item);}));
+        case 'set_setup':
+            STVDataSetup.toGUI(data.content, App.router.get('voteSetupController'));
+            App.router.get('typingController').get('pileGroups').clear();            
             break;
         case 'disconnect':
             // TODO

@@ -54,8 +54,6 @@ STV.prototype.ballot_header = function() { return "Pokyny pro hlasování: " +
 
 STV.prototype.run = function(setup, ballots, report, done) {
     var ab = STVDataBallot.aggregateBallots(ballots);
-    ab['_invalid'] |= 0;
-    ab['_empty'] |= 0;
     var valid_ballots_count = ballots.length - ab['_invalid'];
     report(
         "<h1>Výpočet volby: " + setup.voteNo + "</h1>" +
@@ -67,7 +65,7 @@ STV.prototype.run = function(setup, ballots, report, done) {
     );
     var quota = valid_ballots_count / (setup.mandateCount + 1) + 0.00001; // a) v) Přílohy 2 Jednacího řádu
     var mandates = []; // Array of STVDataCandidates
-    report("<p>Kvóta pro zvolení: " + STVDataSetup.round(quota) + "</p>");
+    report("<p>Kvóta pro zvolení: " + STVDataSetup.round(quota) + "</p>");    
     while (mandates.length < setup.mandateCount && Object.keys(ab).length > 0) { // a) iv)
         report("<p>Shrnutí vyplněných preferencí</p>" + STVDataBallot.reportAggregatedBallots(setup, ab));
         var fp = STVDataBallot.aggregateFirstPreferences(ab);
@@ -89,10 +87,9 @@ STV.prototype.run = function(setup, ballots, report, done) {
         report("<p>Sčítání ukončeno, neboť stanovený počet mandátů byl obsazen.</p>");
     }
     else {
-        report("<p>Sčítání ukončeno, neboť všichni kandidáti byli vyřazeni.</p>");
+        report("<p>Sčítání ukončeno, neboť všichni kandidáti byli zvoleni nebo vyřazeni.</p>");
     }
-    report("<h1>Zvolení kandidáti:</h1><ol><li>" + mandates.map(function(c){return c.name;}).join("</li><li>") + "</li></ol>" +
-        "<p><em>" + new Date() + "</em> Výpočet ukončen.</p>");
+    report("<h1>Zvolení kandidáti:</h1><ol><li>" + mandates.map(function(c){return c.name;}).join("</li><li>") + "</li></ol>");
     done(mandates);
 }
 
