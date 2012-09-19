@@ -125,6 +125,7 @@ PileGroup = Em.ArrayProxy.extend({
         }
     }.property('content.@each.pileClosed'),
     openPiles: function() {
+        //TODO check appState first
         if (this.every(function(item) {return !item.get('pileClosed')})) {
             return "disabled";
         }
@@ -151,6 +152,7 @@ Tab = Em.Object.extend({
         }
         return "navigation_active";
     }.property('currentState', 'appMode')
+    //TODO "enabled" property based on appState and appMode, use for rendering
 });
 
 Client = Em.Object.extend({
@@ -172,7 +174,7 @@ App.ApplicationController = Em.Controller.extend({
     appMode: null,
     userName: '',
     tabs: null,
-    clients: null,
+    clients: null, //TODO diconnect clients manually in appState 0
     popup_msg: null,
     popup_action: null,
     isServerMode: function() {
@@ -702,6 +704,7 @@ function handle_server_message(message) {
             pgs.pushObject(PileGroup.create({content: [newPile]}));
             //pgs.set('currentPile', newPile);
             App.router.get('typingController').set('currentPileCaption', newPile.get('desc'));
+            //TODO add first ballot
             break;
         case 'reopen_pile':
             var d = STVDataPile.toGUI(data.content).get('desc');
@@ -714,6 +717,7 @@ function handle_server_message(message) {
         case 'set_setup':
             STVDataSetup.toGUI(data.content, App.router.get('voteSetupController'));
             App.router.get('typingController').get('pileGroups').clear();            
+            //TODO set appState
             break;
         case 'disconnect':
             // TODO
