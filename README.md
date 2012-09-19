@@ -1,4 +1,4 @@
-stv-ballot
+STVBallot
 ==========
 
 STV ballot desktop LAN application
