@@ -152,7 +152,6 @@ Tab = Em.Object.extend({
         }
         return "navigation_active";
     }.property('currentState', 'appMode')
-    //TODO "enabled" property based on appState and appMode, use for rendering
 });
 
 Client = Em.Object.extend({
@@ -705,12 +704,13 @@ function handle_server_message(message) {
             App.router.transitionTo('typing');
             break;
         case 'create_pile':
-            var pgs = App.router.get('typingController').get('pileGroups');
+            var tc = App.router.get('typingController');
+            var pgs = tc.get('pileGroups');
             var newPile = STVDataPile.toGUI(data.content);
             pgs.pushObject(PileGroup.create({content: [newPile]}));
             //pgs.set('currentPile', newPile);
-            App.router.get('typingController').set('currentPileCaption', newPile.get('desc'));
-            //TODO add first ballot
+            tc.set('currentPileCaption', newPile.get('desc'));
+            tc.get('currentPile').addBallot();
             break;
         case 'reopen_pile':
             var d = STVDataPile.toGUI(data.content).get('desc');
