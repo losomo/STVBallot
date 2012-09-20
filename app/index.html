@@ -75,16 +75,9 @@
     <script data-template-name="vote-running" type="text/x-handlebars">
        {{#if isRunning}}
         <h2>{{t "_Vote Running"}}</h2>
-       {{else}}
-        <h2>{{t "_Vote Closed"}}</h2>
-       {{/if}}
-       
        <div class="vote_control">
-       <button {{ action exportOstv }}{{bindAttr disabled="isRunning"}}>{{t "_Export to OpenSTV"}}</button>
-       <br/>
        <button {{ action runSTV }}{{bindAttr disabled="cantClose"}}>{{t "_Close counting"}}</button>
        <br/>
-       <button {{ action resetAll }}{{bindAttr disabled="cantReset"}}>{{t "_Prepare new vote"}}</button>
        </div>
 
        <button {{ action printBallots }}>{{t "_Print ballots"}}</button>
@@ -106,7 +99,13 @@
        {{/each}}
        </table>
        </div>
-
+       {{else}}
+        <h2>{{t "_Vote Closed"}}</h2>
+       <div class="vote_control">
+       <button {{ action exportOstv }}>{{t "_Export to OpenSTV"}}</button>
+       <br/>
+       <button {{ action resetAll }}{{bindAttr disabled="cantReset"}}>{{t "_Prepare new vote"}}</button>
+       </div>
        <div class="clearfix result_pane">
        <div>{{t "_Results - Mandates"}}:</div>       
        {{#each m in mandates}}
@@ -118,6 +117,7 @@
        <div class="report">{{{ report }}}</div>
 
        <button {{ action exportProtocol }}{{bindAttr disabled="isRunning"}}>{{t "_Export Protocol"}}</button>
+       {{/if}}
     </script>
     <script data-template-name="vote-setup" type="text/x-handlebars">
        <h2>{{t "_Vote setup"}}:</h2>
@@ -135,7 +135,7 @@
        <tr><td><label>{{t "_Number of mandates"}}</label></td>   <td>{{view Em.TextField valueBinding="mandateCount"}}</td></tr>
        <tr><td><label>{{t "_Number of ballots"}}</label></td>    <td>{{view Em.TextField valueBinding="ballotCount"}}</td></tr>
        <tr><td colspan="2"><label>
-           {{view Ember.Checkbox checkedBinding="replacements" classNames="stvb-chkbox"}}
+           {{view Ember.Checkbox disabled="disabled" checkedBinding="replacements" classNames="stvb-chkbox"}}
            {{t "_Elect replacement mandates"}}
        </label></td></tr>
        <tr><td colspan="2"><button {{action shuffle }} {{bindAttr disabled="shuffled"}}>{{t "_Shuffle candidates"}}</button></td></tr>
