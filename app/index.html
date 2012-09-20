@@ -36,7 +36,7 @@
        <button {{ action joinSession }}>{{t "_Connect"}}</button>
     </script>
     <script data-template-name="typing" type="text/x-handlebars">
-       TODO display voteNo
+       {{t "_Vote"}}: {{ voteNo }}<br/>
        {{view Ember.Select contentBinding="pilesCaptions" selectionBinding="currentPileCaption"}}
        <button {{ action clearTable }}{{bindAttr disabled="currentPile.pileClosed"}}>{{t "_Start over"}}</button>
        <table class="typing">
@@ -84,9 +84,9 @@
        <div class="vote_control">
        <button {{ action exportOstv }}{{bindAttr disabled="isRunning"}}>{{t "_Export to OpenSTV"}}</button>
        <br/>
-       <button {{ action runSTV }}>{{t "_Close counting"}} TODO disable</button>
+       <button {{ action runSTV }}{{bindAttr disabled="cantClose"}}>{{t "_Close counting"}}</button>
        <br/>
-       <button {{ action resetAll }}>{{t "_Prepare new vote"}} TODO disable</button>
+       <button {{ action resetAll }}{{bindAttr disabled="cantReset"}}>{{t "_Prepare new vote"}}</button>
        </div>
 
        <button {{ action printBallots }}>{{t "_Print ballots"}}</button>

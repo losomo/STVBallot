@@ -295,6 +295,12 @@ App.VoteRunningController = Em.Controller.extend({
     isRunning: function() {
         return this.get('appState') == 2 ? "disabled" : false;
     }.property('appState'),
+    cantClose: function() {
+        return this.get('appState') == 2 ? false : "disabled";
+    }.property('appState'),
+    cantReset: function() {
+        return this.get('appState') == 3 ? false : "disabled";
+    }.property('appState'),
     updatePileExternally: function(pile) {
         var affected_pile = find_pile(this.get('pileGroups'), pile);
         affected_pile.set('pileClosed', pile.pileClosed);                
@@ -308,6 +314,7 @@ App.VoteRunningController = Em.Controller.extend({
 App.TypingController = Em.Controller.extend({
     pileGroupsBinding: 'App.router.voteRunningController.pileGroups',
     candidatesBinding: 'App.router.voteSetupController.candidates',
+    voteNoBinding: 'App.router.voteSetupController.voteNo',
     currentPileCaption: null,
     currentPile: function() {
         var cc = this.get('currentPileCaption');

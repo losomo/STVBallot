@@ -75,7 +75,7 @@ STV.prototype.run = function(setup, ballots, report, done) {
         if (fp[0][0] >= quota) {
             mandates.push(setup.candidates[fp[0][1]-1]);
             ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, fp[0][1], quota);
-            report("<p>Kandidát <b>" + setup.candidates[fp[0][1]-1].name +"</b> (" + fp[0][1] + ") zvolen, na další místa se přesouvá " + STVDataSetup.round(fp[0][0]-quota) + " hlasů</p>");
+            report("<p>Kandidát <b>" + setup.candidates[fp[0][1]-1].name +"</b> (" + fp[0][1] + ") zvolen, na další místa se přesouvá " + STVDataSetup.round(fp[0][0]-quota) + " (" + new Number((fp[0][0]-quota)/fp[0][0]*100).toFixed(1)  + " %) hlasů</p>");
         }
         else {
             var last = fp.length - 1;
