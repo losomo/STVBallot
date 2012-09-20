@@ -16,7 +16,7 @@
   <![endif]-->
     <script data-template-name="connections" type="text/x-handlebars">
       <div id="connections">
-      {{t "_Connections"}}
+      <div class="cheader">{{t "_Connections"}}</div>
       {{#each c in clients}}
           <div>{{c.name}}</div>
       {{/each}}
@@ -76,11 +76,11 @@
        {{#if isRunning}}
         <h2>{{t "_Vote Running"}}</h2>
        <div class="vote_control">
-       <button {{ action runSTV }}{{bindAttr disabled="cantClose"}}>{{t "_Close counting"}}</button>
+       <button class="btn btnfixedbr" {{ action runSTV }}{{bindAttr disabled="cantClose"}}>{{t "_Close counting"}}</button>
        <br/>
        </div>
 
-       <button {{ action printBallots }}>{{t "_Print ballots"}}</button>
+       <button class="btn btnfixedtr" {{ action printBallots }}>{{t "_Print ballots"}}</button>
        <div class="progress_table">
        <div>{{t "_Typing progress"}}:</div>
        <table>
@@ -120,14 +120,18 @@
        {{/if}}
     </script>
     <script data-template-name="vote-setup" type="text/x-handlebars">
-       <h2>{{t "_Vote setup"}}:</h2>
+       <h2>{{t "_Vote setup"}}</h2>
        <div class="candidates">
-       <div>{{t "_Candidate list"}}</div>
-       {{#each c in candidates}}
-           {{view Em.TextField valueBinding="c.name"}}
-           {{view Ember.Select contentBinding="genders" selectionBinding="c.gender"}}
-           <br/>
-       {{/each}}
+            {{t "_Candidate list"}}
+           <div class="clist">
+           {{#each c in candidates}}
+               {{view Em.TextField valueBinding="c.name"}}
+               {{view Ember.Select contentBinding="genders" selectionBinding="c.gender"}}
+               <br/>
+           {{/each}}
+           </div>
+           <button class="btn lbtn" {{action shuffle }} {{bindAttr disabled="shuffled"}}>{{t "_Shuffle candidates"}}</button>
+           <button class="btn rbtn" {{action launch }} {{bindAttr disabled="launchState"}}>{{t "_Launch ballot"}}</button>
        </div>
        <table class="sform">
        <tr><td><label>{{t "_Vote number"}}</label></td>          <td>{{view Em.TextField valueBinding="voteNo"}}</td></tr>
@@ -138,8 +142,6 @@
            {{view Ember.Checkbox disabled="disabled" checkedBinding="replacements" classNames="stvb-chkbox"}}
            {{t "_Elect replacement mandates"}}
        </label></td></tr>
-       <tr><td colspan="2"><button {{action shuffle }} {{bindAttr disabled="shuffled"}}>{{t "_Shuffle candidates"}}</button></td></tr>
-       <tr><td colspan="2"><button {{action launch }} {{bindAttr disabled="launchState"}}>{{t "_Launch ballot"}}</button></td></tr>
        </table>
     </script>
     <script data-template-name="app-setup" type="text/x-handlebars">

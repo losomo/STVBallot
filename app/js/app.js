@@ -181,13 +181,12 @@ App.ApplicationController = Em.Controller.extend({
         return this.get('appMode') == 'server';
     }.property('appMode'),
     tabsEnabled: function() {
-        return this.get('appState') > 1;
-    }.property('appState'),
+        return this.get('appMode') == 'standalone' && this.get('appState') > 1;
+    }.property('appState', 'appMode'),
     init: function() {
         this._super();
         this.set('tabs', Em.ArrayProxy.create({
             content: [
-                Tab.create({desc: "_Start Vote".loc(),    tabAction: "voteSetup"}),
                 Tab.create({desc: "_Vote Progress".loc(), tabAction: "voteRunning"}),
                 Tab.create({desc: "_Ballot Typing".loc(), tabAction: "typing"}),
              ]
