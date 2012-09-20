@@ -18,8 +18,11 @@
         "udp-send-to", "udp-bind"
     ]},
     "app.window",
-    "fileSystem",
-    "fileSystemWrite"
+    "fileSystemWrite", "fileSystem"
+/*    {"fileSystem" : [
+        "write"
+    ]}
+*/ 
   ],
   "icons": { "16": "favicon.png", "128": "icon.png"}
 }
