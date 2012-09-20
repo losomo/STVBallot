@@ -15,14 +15,12 @@
   <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
   <![endif]-->
     <script data-template-name="connections" type="text/x-handlebars">
-       {{#if isServerMode}}
-          <div id="connections">
-          {{t "_Connections"}}
-          {{#each c in clients}}
-              <div>{{c.name}}</div>
-          {{/each}}
-          </div>
-       {{/if}}
+      <div id="connections">
+      {{t "_Connections"}}
+      {{#each c in clients}}
+          <div>{{c.name}}</div>
+      {{/each}}
+      </div>
     </script>
     <script data-template-name="navigation" type="text/x-handlebars">
        {{t "_Navigation"}}
@@ -151,7 +149,6 @@
        {{/each}}
     </script>
     <script  data-template-name="application" type="text/x-handlebars">
-        <h1>{{t "_Control panel"}}:</h1>
         {{#if isServerMode}}
             {{view templateName="connections"}}
         {{/if}}
