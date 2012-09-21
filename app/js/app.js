@@ -232,7 +232,7 @@ App.VoteSetupController = Em.Controller.extend({
         }
     }.observes('candidateCount'),
     launchState: function() {
-        if (this.get('voteNo') != "" && this.get('candidateCount') > 0 && this.get('mandateCount') > 0 && this.get('ballotCount') > 0) {
+        if (this.get('voteNo') != "" && parseInt(this.get('candidateCount')) > 0 && parseInt(this.get('mandateCount')) > 0 && parseInt(this.get('ballotCount')) > 0) {
             var names = {};
             var problem = false;
             var genders = -1;
@@ -250,7 +250,7 @@ App.VoteSetupController = Em.Controller.extend({
                 }
                 else if (genders != (gender != '---')) problem = true;
             });            
-            if (this.get('candidateCount') < this.get('mandateCount')) problem = true;
+            if (parseInt(this.get('candidateCount')) < parseInt(this.get('mandateCount'))) problem = true;
             return problem ? 'disabled' : false;
         }
         else {
@@ -805,7 +805,7 @@ function find_pile(pileGroups, p) {
 }
 
 function print_ballots(setup, title) {
-    var ret = "";
+    var ret = '';
     for (var i = 0; i < setup.ballotCount; i++) {
         ret += '<div class="ballot"><h1>' + title + "</h1>";
         ret += stv.ballot_header();
