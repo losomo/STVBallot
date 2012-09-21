@@ -1,0 +1,5 @@
+STVBallot
+Copyright 2012-2013 Václav Novák
+
+This product includes software developed by The Apache Software
+Foundation (http://www.apache.org/).
