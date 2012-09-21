@@ -152,7 +152,6 @@ Tab = Em.Object.extend({
         }
         return "navigation_active";
     }.property('currentState', 'appMode')
-    //TODO "enabled" property based on appState and appMode, use for rendering
 });
 
 Client = Em.Object.extend({
@@ -181,13 +180,12 @@ App.ApplicationController = Em.Controller.extend({
         return this.get('appMode') == 'server';
     }.property('appMode'),
     tabsEnabled: function() {
-        return this.get('appState') > 1;
-    }.property('appState'),
+        return this.get('appMode') == 'standalone' && this.get('appState') > 1;
+    }.property('appState', 'appMode'),
     init: function() {
         this._super();
         this.set('tabs', Em.ArrayProxy.create({
             content: [
-                Tab.create({desc: "_Start Vote".loc(),    tabAction: "voteSetup"}),
                 Tab.create({desc: "_Vote Progress".loc(), tabAction: "voteRunning"}),
                 Tab.create({desc: "_Ballot Typing".loc(), tabAction: "typing"}),
              ]
@@ -295,6 +293,12 @@ App.VoteRunningController = Em.Controller.extend({
     isRunning: function() {
         return this.get('appState') == 2 ? "disabled" : false;
     }.property('appState'),
+    cantClose: function() {
+        return this.get('appState') == 2 ? false : "disabled";
+    }.property('appState'),
+    cantReset: function() {
+        return this.get('appState') == 3 ? false : "disabled";
+    }.property('appState'),
     updatePileExternally: function(pile) {
         var affected_pile = find_pile(this.get('pileGroups'), pile);
         affected_pile.set('pileClosed', pile.pileClosed);                
@@ -308,6 +312,7 @@ App.VoteRunningController = Em.Controller.extend({
 App.TypingController = Em.Controller.extend({
     pileGroupsBinding: 'App.router.voteRunningController.pileGroups',
     candidatesBinding: 'App.router.voteSetupController.candidates',
+    voteNoBinding: 'App.router.voteSetupController.voteNo',
     currentPileCaption: null,
     currentPile: function() {
         var cc = this.get('currentPileCaption');
@@ -699,12 +704,13 @@ function handle_server_message(message) {
             App.router.transitionTo('typing');
             break;
         case 'create_pile':
-            var pgs = App.router.get('typingController').get('pileGroups');
+            var tc = App.router.get('typingController');
+            var pgs = tc.get('pileGroups');
             var newPile = STVDataPile.toGUI(data.content);
             pgs.pushObject(PileGroup.create({content: [newPile]}));
             //pgs.set('currentPile', newPile);
-            App.router.get('typingController').set('currentPileCaption', newPile.get('desc'));
-            //TODO add first ballot
+            tc.set('currentPileCaption', newPile.get('desc'));
+            tc.get('currentPile').addBallot();
             break;
         case 'reopen_pile':
             var d = STVDataPile.toGUI(data.content).get('desc');

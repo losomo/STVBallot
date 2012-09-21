@@ -15,14 +15,12 @@
   <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
   <![endif]-->
     <script data-template-name="connections" type="text/x-handlebars">
-       {{#if isServerMode}}
-          <div id="connections">
-          {{t "_Connections"}}
-          {{#each c in clients}}
-              <div>{{c.name}}</div>
-          {{/each}}
-          </div>
-       {{/if}}
+      <div id="connections">
+      <div class="cheader">{{t "_Connections"}}</div>
+      {{#each c in clients}}
+          <div>{{c.name}}</div>
+      {{/each}}
+      </div>
     </script>
     <script data-template-name="navigation" type="text/x-handlebars">
        {{t "_Navigation"}}
@@ -36,7 +34,7 @@
        <button {{ action joinSession }}>{{t "_Connect"}}</button>
     </script>
     <script data-template-name="typing" type="text/x-handlebars">
-       TODO display voteNo
+       {{t "_Vote"}}: {{ voteNo }}<br/>
        {{view Ember.Select contentBinding="pilesCaptions" selectionBinding="currentPileCaption"}}
        <button {{ action clearTable }}{{bindAttr disabled="currentPile.pileClosed"}}>{{t "_Start over"}}</button>
        <table class="typing">
@@ -77,19 +75,12 @@
     <script data-template-name="vote-running" type="text/x-handlebars">
        {{#if isRunning}}
         <h2>{{t "_Vote Running"}}</h2>
-       {{else}}
-        <h2>{{t "_Vote Closed"}}</h2>
-       {{/if}}
-       
        <div class="vote_control">
-       <button {{ action exportOstv }}{{bindAttr disabled="isRunning"}}>{{t "_Export to OpenSTV"}}</button>
+       <button class="btn btnfixedbr" {{ action runSTV }}{{bindAttr disabled="cantClose"}}>{{t "_Close counting"}}</button>
        <br/>
-       <button {{ action runSTV }}>{{t "_Close counting"}} TODO disable</button>
-       <br/>
-       <button {{ action resetAll }}>{{t "_Prepare new vote"}} TODO disable</button>
        </div>
 
-       <button {{ action printBallots }}>{{t "_Print ballots"}}</button>
+       <button class="btn btnfixedtr" {{ action printBallots }}>{{t "_Print ballots"}}</button>
        <div class="progress_table">
        <div>{{t "_Typing progress"}}:</div>
        <table>
@@ -108,7 +99,13 @@
        {{/each}}
        </table>
        </div>
-
+       {{else}}
+        <h2>{{t "_Vote Closed"}}</h2>
+       <div class="vote_control">
+       <button {{ action exportOstv }}>{{t "_Export to OpenSTV"}}</button>
+       <br/>
+       <button {{ action resetAll }}{{bindAttr disabled="cantReset"}}>{{t "_Prepare new vote"}}</button>
+       </div>
        <div class="clearfix result_pane">
        <div>{{t "_Results - Mandates"}}:</div>       
        {{#each m in mandates}}
@@ -120,16 +117,21 @@
        <div class="report">{{{ report }}}</div>
 
        <button {{ action exportProtocol }}{{bindAttr disabled="isRunning"}}>{{t "_Export Protocol"}}</button>
+       {{/if}}
     </script>
     <script data-template-name="vote-setup" type="text/x-handlebars">
-       <h2>{{t "_Vote setup"}}:</h2>
+       <h2>{{t "_Vote setup"}}</h2>
        <div class="candidates">
-       <div>{{t "_Candidate list"}}</div>
-       {{#each c in candidates}}
-           {{view Em.TextField valueBinding="c.name"}}
-           {{view Ember.Select contentBinding="genders" selectionBinding="c.gender"}}
-           <br/>
-       {{/each}}
+            {{t "_Candidate list"}}
+           <div class="clist">
+           {{#each c in candidates}}
+               {{view Em.TextField valueBinding="c.name"}}
+               {{view Ember.Select contentBinding="genders" selectionBinding="c.gender"}}
+               <br/>
+           {{/each}}
+           </div>
+           <button class="btn lbtn" {{action shuffle }} {{bindAttr disabled="shuffled"}}>{{t "_Shuffle candidates"}}</button>
+           <button class="btn rbtn" {{action launch }} {{bindAttr disabled="launchState"}}>{{t "_Launch ballot"}}</button>
        </div>
        <table class="sform">
        <tr><td><label>{{t "_Vote number"}}</label></td>          <td>{{view Em.TextField valueBinding="voteNo"}}</td></tr>
@@ -137,11 +139,9 @@
        <tr><td><label>{{t "_Number of mandates"}}</label></td>   <td>{{view Em.TextField valueBinding="mandateCount"}}</td></tr>
        <tr><td><label>{{t "_Number of ballots"}}</label></td>    <td>{{view Em.TextField valueBinding="ballotCount"}}</td></tr>
        <tr><td colspan="2"><label>
-           {{view Ember.Checkbox checkedBinding="replacements" classNames="stvb-chkbox"}}
+           {{view Ember.Checkbox disabled="disabled" checkedBinding="replacements" classNames="stvb-chkbox"}}
            {{t "_Elect replacement mandates"}}
        </label></td></tr>
-       <tr><td colspan="2"><button {{action shuffle }} {{bindAttr disabled="shuffled"}}>{{t "_Shuffle candidates"}}</button></td></tr>
-       <tr><td colspan="2"><button {{action launch }} {{bindAttr disabled="launchState"}}>{{t "_Launch ballot"}}</button></td></tr>
        </table>
     </script>
     <script data-template-name="app-setup" type="text/x-handlebars">
@@ -151,7 +151,6 @@
        {{/each}}
     </script>
     <script  data-template-name="application" type="text/x-handlebars">
-        <h1>{{t "_Control panel"}}:</h1>
         {{#if isServerMode}}
             {{view templateName="connections"}}
         {{/if}}

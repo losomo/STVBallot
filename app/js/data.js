@@ -73,8 +73,13 @@ STVDataBallot.reportAggregatedBallots = function(setup, ab) {
     ret += "</th></tr>";
     for (var b in ab) {
         if (b != "_invalid" && b != "_empty") {
+            var lowest = STVDataBallot.get_most_preferred(b)[0];
             ret += "<tr><td>" + STVDataSetup.round(ab[b]) + "</td><td>" + 
-                b.split(":").map(function (x){return x>0?x:""}).join("</td><td>")
+                b.split(":").map(function (x){
+                    return x > 0 ?
+                        (x == lowest ? "<b>" + x + "</b>" : x)
+                        :""
+                }).join("</td><td>")
                 + "</td></tr>";
         }
     }

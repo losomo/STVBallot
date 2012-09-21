@@ -3,7 +3,7 @@
   "description": "STV Ballot",
   "manifest_version": 2,
   "minimum_chrome_version": "23",
-  "version": "0.1.13",
+  "version": "0.2.1",
   "app": {
     "background": {
       "scripts": ["background.js"]
@@ -18,8 +18,11 @@
         "udp-send-to", "udp-bind"
     ]},
     "app.window",
-    "fileSystem",
-    "fileSystemWrite"
+    "fileSystemWrite", "fileSystem"
+/*    {"fileSystem" : [
+        "write"
+    ]}
+*/ 
   ],
   "icons": { "16": "favicon.png", "128": "icon.png"}
 }
