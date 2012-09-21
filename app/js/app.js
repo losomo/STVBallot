@@ -115,24 +115,23 @@ PileGroup = Em.ArrayProxy.extend({
     },
     crosscheckstatus: function() {
         if (this.every(function(item) {return !item.get('pileClosed')})) {
-            return "_Open".loc();
+            return {status: "open", message: "_Open".loc()};
         }
         else if (this.every(function(item) {return item.get('pileClosed')})) {
-            return stv.crosscheck(STVDataPileGroup.fromGUI(this)).message;
+            return stv.crosscheck(STVDataPileGroup.fromGUI(this));
         }
         else {
-            return "_Partial".loc();
+            return {status: "partial", message: "_Partial".loc()};
         }
     }.property('content.@each.pileClosed'),
     openPiles: function() {
-        //TODO check appState first
-        if (this.every(function(item) {return !item.get('pileClosed')})) {
+        if (App.router.get('applicationController').get('appState') != 2 || this.every(function(item) {return !item.get('pileClosed')})) {
             return "disabled";
         }
         else {
             return false;
         }
-    }.property('content.@each.pileClosed'),
+    }.property('content.@each.pileClosed')
 });
 
 PileGroups = Em.ArrayProxy.extend({});
@@ -271,12 +270,15 @@ App.VoteSetupController = Em.Controller.extend({
             oj.set('name', iname);
             oj.set('gender', igeneder);
         }
-        this.set('shuffled', "disabled");
+        this.set('shuffled', true);
     },
     init: function() {
         this._super();
         this.set('candidates', Candidates.create({content: []}));
-    }
+    },
+    cantShuffle: function() {
+        return !this.get('shuffled') && parseInt(this.get('candidateCount')) > 0 ? false : "disabled";
+    }.property('shuffled', 'candidateCount')
 });
 
 App.VoteRunningController = Em.Controller.extend({
@@ -284,6 +286,7 @@ App.VoteRunningController = Em.Controller.extend({
     pileGroups: null,
     report: null,
     mandates: null,
+    ballots_printed: null,
     init: function() {
         this._super();
         this.set('pileGroups', PileGroups.create({content: []}));
@@ -294,8 +297,12 @@ App.VoteRunningController = Em.Controller.extend({
         return this.get('appState') == 2 ? "disabled" : false;
     }.property('appState'),
     cantClose: function() {
-        return this.get('appState') == 2 ? false : "disabled";
-    }.property('appState'),
+        return this.get('appState') == 2 ? 
+        (this.get('pileGroups').every(function(g){
+            return g.get('crosscheckstatus').status == "ok" || g.get('crosscheckstatus').status == "partial";
+        }) ? false : "disabled")
+        : "disabled";
+    }.property('appState', 'pileGroups.@each.crosscheckstatus'),
     cantReset: function() {
         return this.get('appState') == 3 ? false : "disabled";
     }.property('appState'),
@@ -306,7 +313,12 @@ App.VoteRunningController = Em.Controller.extend({
     },
     report_append: function(msg) {
         this.set('report', this.get('report') + msg);
-    }
+    },
+    printBtnStyle: function() {
+        return this.get('ballots_printed') ?
+        "background: #DDDDDD;" :
+        ""
+    }.property('ballots_printed'),
 });
 
 App.TypingController = Em.Controller.extend({
@@ -507,6 +519,7 @@ App.Router = Em.Router.extend({
                    title: title,
                    print: true,
                 });
+                router.get('voteRunningController').set('ballots_printed', true);
             },
             runSTV: function(router) {
                 router.get('applicationController').set('appState', 3);
@@ -723,7 +736,7 @@ function handle_server_message(message) {
         case 'set_setup':
             STVDataSetup.toGUI(data.content, App.router.get('voteSetupController'));
             App.router.get('typingController').get('pileGroups').clear();            
-            //TODO set appState
+            App.router.get('applicationController').set('appState', 2);
             break;
         case 'disconnect':
             // TODO

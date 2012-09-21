@@ -80,7 +80,7 @@
        <br/>
        </div>
 
-       <button class="btn btnfixedtr" {{ action printBallots }}>{{t "_Print ballots"}}</button>
+       <button class="btn btnfixedtr" {{ action printBallots }}{{bindAttr style="printBtnStyle"}}>{{t "_Print ballots"}}</button>
        <div class="progress_table">
        <div>{{t "_Typing progress"}}:</div>
        <table>
@@ -93,7 +93,7 @@
             {{p.progress}}
             </td>
            {{/each}}
-            <td>{{g.crosscheckstatus}}</td>
+            <td>{{g.crosscheckstatus.status}}</td>
             <td><button {{action reopenAction g}}{{bindAttr disabled="g.openPiles"}}>{{t "_Reopen"}}</button></td>
            </tr>
        {{/each}}
@@ -130,7 +130,7 @@
                <br/>
            {{/each}}
            </div>
-           <button class="btn lbtn" {{action shuffle }} {{bindAttr disabled="shuffled"}}>{{t "_Shuffle candidates"}}</button>
+           <button class="btn lbtn" {{action shuffle }} {{bindAttr disabled="cantShuffle"}}>{{t "_Shuffle candidates"}}</button>
            <button class="btn rbtn" {{action launch }} {{bindAttr disabled="launchState"}}>{{t "_Launch ballot"}}</button>
        </div>
        <table class="sform">
