@@ -78,6 +78,13 @@ Pile = Em.Object.extend({
     progress: function () {
         return this.get('ballots').content.length - 1;
     }.property('ballots', 'ballots.@each'),
+    progressstyle: function () {
+        var ccount = App.router.get('applicationController').get('clients').content.length || 1;
+        var total = App.router.get('voteSetupController').get('ballotCount');
+        var ret = this.get('pileClosed') ? "background: #DDD;" : "";
+        ret += "width: " + Math.round((this.get('ballots').content.length - 1) / (total / ccount) * 100) + "%;";
+        return ret;
+    }.property('ballots', 'ballots.@each', 'pileClosed'),
     announceProgress: function() {
         if (App.router.get('applicationController').get('appMode') == 'client') {
             console.log("Change detected", this, this.get('ballots'));
@@ -697,7 +704,7 @@ function send_command(c, d) {
 
 function handle_client_message(message) {
     var ac = App.router.get('applicationController');
-    var client = ac.clients.find(function (item) {
+    var client = ac.get('clients').find(function (item) {
         return item.host == message.address && item.port == message.port;
     });
     var data = ab2struct(message.data);
@@ -709,7 +716,7 @@ function handle_client_message(message) {
                 port: message.port,
                 name: data.name,
             });
-            ac.clients.pushObject(client);
+            ac.get('clients').pushObject(client);
             send_command('to_client', {client: client, content: {command: "accepted"}});
             break;
         case 'alive':
@@ -719,7 +726,7 @@ function handle_client_message(message) {
             App.router.get('voteRunningController').updatePileExternally(data.data.pile);
             break;
         case 'disconnect':
-            ac.clients.removeObject(client);
+            ac.get('clients').removeObject(client);
             break;
         default:
             console.warn(data);

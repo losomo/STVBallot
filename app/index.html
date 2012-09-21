@@ -110,7 +110,9 @@
             <td>{{g}}</td>
            {{#each p in g}}
             <td>
-            {{p.progress}}
+                <div class="cprogrbr progress progress-striped active" {{bindAttr title="p.progress"}}>
+                    <div class="bar" {{bindAttr style="p.progressstyle"}}></div>
+                </div>
             </td>
            {{/each}}
             <td>{{g.crosscheckstatus.status}}</td>
