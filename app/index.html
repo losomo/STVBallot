@@ -1,4 +1,24 @@
 <!doctype html>
+<!--
+/*
+ * Licensed to Václav Novák under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. ElasticSearch licenses this
+ * file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+-->
 <!--[if lt IE 7 ]> <html lang="en" class="ie6"> <![endif]--> <!--[if IE 7 ]>    <html lang="en" class="ie7"> <![endif]--> <!--[if IE 8 ]>    <html lang="en" class="ie8"> <![endif]--> <!--[if IE 9 ]>    <html lang="en" class="ie9"> <![endif]-->
 <!--[if (gt IE 9)|!(IE)]><!--> <html lang="cs"> <!--<![endif]-->
 <head>
@@ -80,7 +100,7 @@
        <br/>
        </div>
 
-       <button class="btn btnfixedtr" {{ action printBallots }}>{{t "_Print ballots"}}</button>
+       <button class="btn btnfixedtr" {{ action printBallots }}{{bindAttr style="printBtnStyle"}}>{{t "_Print ballots"}}</button>
        <div class="progress_table">
        <div>{{t "_Typing progress"}}:</div>
        <table>
@@ -90,10 +110,12 @@
             <td>{{g}}</td>
            {{#each p in g}}
             <td>
-            {{p.progress}}
+                <div class="cprogrbr progress progress-striped active" {{bindAttr title="p.progress"}}>
+                    <div class="bar" {{bindAttr style="p.progressstyle"}}></div>
+                </div>
             </td>
            {{/each}}
-            <td>{{g.crosscheckstatus}}</td>
+            <td>{{g.crosscheckstatus.status}}</td>
             <td><button {{action reopenAction g}}{{bindAttr disabled="g.openPiles"}}>{{t "_Reopen"}}</button></td>
            </tr>
        {{/each}}
@@ -130,7 +152,7 @@
                <br/>
            {{/each}}
            </div>
-           <button class="btn lbtn" {{action shuffle }} {{bindAttr disabled="shuffled"}}>{{t "_Shuffle candidates"}}</button>
+           <button class="btn lbtn" {{action shuffle }} {{bindAttr disabled="cantShuffle"}}>{{t "_Shuffle candidates"}}</button>
            <button class="btn rbtn" {{action launch }} {{bindAttr disabled="launchState"}}>{{t "_Launch ballot"}}</button>
        </div>
        <table class="sform">

@@ -1,3 +1,21 @@
+/*
+ * Licensed to Václav Novák under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. ElasticSearch licenses this
+ * file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 var App = Em.Application.create();
 var stv = new STV();
 
@@ -60,6 +78,13 @@ Pile = Em.Object.extend({
     progress: function () {
         return this.get('ballots').content.length - 1;
     }.property('ballots', 'ballots.@each'),
+    progressstyle: function () {
+        var ccount = App.router.get('applicationController').get('clients').content.length || 1;
+        var total = App.router.get('voteSetupController').get('ballotCount');
+        var ret = this.get('pileClosed') ? "background: #DDD;" : "";
+        ret += "width: " + Math.round((this.get('ballots').content.length - 1) / (total / ccount) * 100) + "%;";
+        return ret;
+    }.property('ballots', 'ballots.@each', 'pileClosed'),
     announceProgress: function() {
         if (App.router.get('applicationController').get('appMode') == 'client') {
             console.log("Change detected", this, this.get('ballots'));
@@ -115,24 +140,23 @@ PileGroup = Em.ArrayProxy.extend({
     },
     crosscheckstatus: function() {
         if (this.every(function(item) {return !item.get('pileClosed')})) {
-            return "_Open".loc();
+            return {status: "open", message: "_Open".loc()};
         }
         else if (this.every(function(item) {return item.get('pileClosed')})) {
-            return stv.crosscheck(STVDataPileGroup.fromGUI(this)).message;
+            return stv.crosscheck(STVDataPileGroup.fromGUI(this));
         }
         else {
-            return "_Partial".loc();
+            return {status: "partial", message: "_Partial".loc()};
         }
     }.property('content.@each.pileClosed'),
     openPiles: function() {
-        //TODO check appState first
-        if (this.every(function(item) {return !item.get('pileClosed')})) {
+        if (App.router.get('applicationController').get('appState') != 2 || this.every(function(item) {return !item.get('pileClosed')})) {
             return "disabled";
         }
         else {
             return false;
         }
-    }.property('content.@each.pileClosed'),
+    }.property('content.@each.pileClosed')
 });
 
 PileGroups = Em.ArrayProxy.extend({});
@@ -232,7 +256,7 @@ App.VoteSetupController = Em.Controller.extend({
         }
     }.observes('candidateCount'),
     launchState: function() {
-        if (this.get('voteNo') != "" && this.get('candidateCount') > 0 && this.get('mandateCount') > 0 && this.get('ballotCount') > 0) {
+        if (this.get('voteNo') != "" && parseInt(this.get('candidateCount')) > 0 && parseInt(this.get('mandateCount')) > 0 && parseInt(this.get('ballotCount')) > 0) {
             var names = {};
             var problem = false;
             var genders = -1;
@@ -250,7 +274,7 @@ App.VoteSetupController = Em.Controller.extend({
                 }
                 else if (genders != (gender != '---')) problem = true;
             });            
-            if (this.get('candidateCount') < this.get('mandateCount')) problem = true;
+            if (parseInt(this.get('candidateCount')) < parseInt(this.get('mandateCount'))) problem = true;
             return problem ? 'disabled' : false;
         }
         else {
@@ -271,12 +295,15 @@ App.VoteSetupController = Em.Controller.extend({
             oj.set('name', iname);
             oj.set('gender', igeneder);
         }
-        this.set('shuffled', "disabled");
+        this.set('shuffled', true);
     },
     init: function() {
         this._super();
         this.set('candidates', Candidates.create({content: []}));
-    }
+    },
+    cantShuffle: function() {
+        return !this.get('shuffled') && parseInt(this.get('candidateCount')) > 0 ? false : "disabled";
+    }.property('shuffled', 'candidateCount')
 });
 
 App.VoteRunningController = Em.Controller.extend({
@@ -284,6 +311,7 @@ App.VoteRunningController = Em.Controller.extend({
     pileGroups: null,
     report: null,
     mandates: null,
+    ballots_printed: null,
     init: function() {
         this._super();
         this.set('pileGroups', PileGroups.create({content: []}));
@@ -294,8 +322,12 @@ App.VoteRunningController = Em.Controller.extend({
         return this.get('appState') == 2 ? "disabled" : false;
     }.property('appState'),
     cantClose: function() {
-        return this.get('appState') == 2 ? false : "disabled";
-    }.property('appState'),
+        return this.get('appState') == 2 ? 
+        (this.get('pileGroups').every(function(g){
+            return g.get('crosscheckstatus').status == "ok" || g.get('crosscheckstatus').status == "partial";
+        }) ? false : "disabled")
+        : "disabled";
+    }.property('appState', 'pileGroups.@each.crosscheckstatus'),
     cantReset: function() {
         return this.get('appState') == 3 ? false : "disabled";
     }.property('appState'),
@@ -306,7 +338,12 @@ App.VoteRunningController = Em.Controller.extend({
     },
     report_append: function(msg) {
         this.set('report', this.get('report') + msg);
-    }
+    },
+    printBtnStyle: function() {
+        return this.get('ballots_printed') ?
+        "background: #DDDDDD;" :
+        ""
+    }.property('ballots_printed'),
 });
 
 App.TypingController = Em.Controller.extend({
@@ -507,6 +544,7 @@ App.Router = Em.Router.extend({
                    title: title,
                    print: true,
                 });
+                router.get('voteRunningController').set('ballots_printed', true);
             },
             runSTV: function(router) {
                 router.get('applicationController').set('appState', 3);
@@ -666,7 +704,7 @@ function send_command(c, d) {
 
 function handle_client_message(message) {
     var ac = App.router.get('applicationController');
-    var client = ac.clients.find(function (item) {
+    var client = ac.get('clients').find(function (item) {
         return item.host == message.address && item.port == message.port;
     });
     var data = ab2struct(message.data);
@@ -678,7 +716,7 @@ function handle_client_message(message) {
                 port: message.port,
                 name: data.name,
             });
-            ac.clients.pushObject(client);
+            ac.get('clients').pushObject(client);
             send_command('to_client', {client: client, content: {command: "accepted"}});
             break;
         case 'alive':
@@ -688,7 +726,7 @@ function handle_client_message(message) {
             App.router.get('voteRunningController').updatePileExternally(data.data.pile);
             break;
         case 'disconnect':
-            ac.clients.removeObject(client);
+            ac.get('clients').removeObject(client);
             break;
         default:
             console.warn(data);
@@ -723,7 +761,7 @@ function handle_server_message(message) {
         case 'set_setup':
             STVDataSetup.toGUI(data.content, App.router.get('voteSetupController'));
             App.router.get('typingController').get('pileGroups').clear();            
-            //TODO set appState
+            App.router.get('applicationController').set('appState', 2);
             break;
         case 'disconnect':
             // TODO
@@ -805,7 +843,7 @@ function find_pile(pileGroups, p) {
 }
 
 function print_ballots(setup, title) {
-    var ret = "";
+    var ret = '';
     for (var i = 0; i < setup.ballotCount; i++) {
         ret += '<div class="ballot"><h1>' + title + "</h1>";
         ret += stv.ballot_header();
