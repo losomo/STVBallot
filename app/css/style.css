@@ -152,7 +152,7 @@ td {padding-right: 1em}
 .square {font-size: 300%; line-height: .85; vertical-align: middle;}
 .bentry {margin-left: 3em;}
 em {font-style: italic}
-.clist {height: 390px; width: 250px; overflow: auto;}
+.clist {height: 390px; width: 280px; overflow: auto;}
 .candidates { margin-right: 15px; }
 
 .ir { display: block; text-indent: -999em; overflow: hidden; background-repeat: no-repeat; text-align: left; direction: ltr; }

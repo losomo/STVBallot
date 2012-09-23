@@ -1,0 +1,22 @@
+{
+    "candidates": [
+        "Alžběta",
+        "Bernard",
+        "Cecílie",
+        "David",
+        "Erik",
+        "Filipa",
+        "Gustav",
+        "Hedvika",
+        "Ivana"
+    ],
+    "mandates": 5,
+    "ballots_ab": {
+        "1:2:3:4:5:0:0:0:0":    52,
+        "0:0:0:0:0:1:2:3:0":    28,
+        "0:0:0:0:0:0:0:0:1":    21
+    },
+    "expected": [
+        "Alžběta", "Filipa", "Ivana", "Bernard", "Cecílie"
+    ]
+}

@@ -1,0 +1,17 @@
+{
+    "candidates": [
+        "Alena",
+        "Barbora"
+    ],
+    "mandates": 1,
+    "ballots_ab": {
+        "_empty": 14,
+        "1:2":    40,
+        "1:0":    59,
+        "2:1":    40,
+        "0:1":    47 
+    },
+    "expected": [
+        "Alena"
+    ]
+}
