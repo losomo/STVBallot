@@ -149,6 +149,19 @@ PileGroup = Em.ArrayProxy.extend({
             return {status: "partial", message: "_Partial".loc()};
         }
     }.property('content.@each.pileClosed'),
+    statusimg: function() {
+        var s = this.get('crosscheckstatus');
+        switch (s.status) {
+            case "open":
+                return "img/gray.png";
+            case "partial":
+                return "img/yellow.png";
+            case "ok":
+                return "img/green.png";
+            case "error":
+                return "img/red.png";
+        }
+    }.property('crosscheckstatus'),
     openPiles: function() {
         if (App.router.get('applicationController').get('appState') != 2 || this.every(function(item) {return !item.get('pileClosed')})) {
             return "disabled";
@@ -206,6 +219,9 @@ App.ApplicationController = Em.Controller.extend({
     tabsEnabled: function() {
         return this.get('appMode') == 'standalone' && this.get('appState') > 1;
     }.property('appState', 'appMode'),
+    connectionsEnabled: function() {
+        return this.get('appState') == 1;
+    }.property('appState'),
     init: function() {
         this._super();
         this.set('tabs', Em.ArrayProxy.create({
@@ -333,8 +349,8 @@ App.VoteRunningController = Em.Controller.extend({
     }.property('appState'),
     updatePileExternally: function(pile) {
         var affected_pile = find_pile(this.get('pileGroups'), pile);
-        affected_pile.set('pileClosed', pile.pileClosed);                
         affected_pile.set('ballots', STVDataPile.toGUI(pile).get('ballots'));
+        affected_pile.set('pileClosed', pile.pileClosed);                
     },
     report_append: function(msg) {
         this.set('report', this.get('report') + msg);
@@ -441,6 +457,9 @@ App.Router = Em.Router.extend({
             route: '/voteSetup',
             shuffle: function(router) {
                 router.get('voteSetupController').shuffle();
+            },
+            disconnect: function(router, client) {
+                //TODO
             },
             launch: function(router) {
                 var ac = router.get('applicationController');
@@ -749,6 +768,7 @@ function handle_server_message(message) {
             //pgs.set('currentPile', newPile);
             tc.set('currentPileCaption', newPile.get('desc'));
             tc.get('currentPile').addBallot();
+            // TODO dismiss waiting modal overlay
             break;
         case 'reopen_pile':
             var d = STVDataPile.toGUI(data.content).get('desc');

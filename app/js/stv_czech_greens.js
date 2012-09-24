@@ -44,11 +44,14 @@ STV.prototype.crosscheck = function(pileGroup) {
     for (var i = 1; i < aggregatedPiles.length; i++) {
         var ipile = aggregatedPiles[i];
         var ikeys = Object.keys(ipile).sort();
-        if (ikeys.length != firstkeys.length) return {status: "error", message: "length mismatch"};
+        if (ikeys.length != firstkeys.length) {
+            console.log(pileGroup, ipile, first);
+            return {status: "error", message: "Různá velikost hromádek"};
+        }
         for (var j = 0; j < firstkeys.length; j++) {
             var key = firstkeys[j];
-            if (key != ikeys[j]) return {status: "error", message: "Expected " + key};
-            if (first[key] != ipile[key]) return {status: "error", message: "Mismatch in " + key};
+            if (key != ikeys[j]) return {status: "error", message: "Očekáváno " + key};
+            if (first[key] != ipile[key]) return {status: "error", message: "Neshoda " + key};
         }
     }
     return {status: "ok", message: "ok"};

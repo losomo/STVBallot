@@ -168,7 +168,7 @@ em {font-style: italic}
 .griddy td{border:1px solid black; text-align: right}
 .griddy th{border:1px solid black;}
 body {background: url(../img/background.png) repeat-x #DCF8DC;}
-.btn {border-radius: 6px; margin-top: 10px; padding: 10px 5px 10px 5px;}
+.btn {margin-top: 10px; padding: 10px 5px 10px 5px;}
 .rbtn {float: right;}
 .lbtn {float: left;}
 .btn:enabled {background-color: #86C72D;}

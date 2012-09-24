@@ -36,10 +36,16 @@
   <![endif]-->
     <script data-template-name="connections" type="text/x-handlebars">
       <div id="connections">
-      <div class="cheader">{{t "_Connections"}}</div>
-      {{#each c in clients}}
-          <div>{{c.name}}</div>
-      {{/each}}
+          <div class="cheader">{{t "_Connections"}}</div>
+          <table>
+          {{#each c in clients}}
+              <tr><td>{{c.name}}</td><td>
+               {{#if connectionsEnabled}}
+              <img title="{{t "_Disconnect"}}" alt="disconnect" height="12" width="12" src="img/cancel_round.png" style="cursor: pointer;" {{action disconnect c}}/>
+               {{/if }}
+              </td></tr>
+          {{/each}}
+          </table>
       </div>
     </script>
     <script data-template-name="navigation" type="text/x-handlebars">
@@ -115,7 +121,7 @@
                 </div>
             </td>
            {{/each}}
-            <td>{{g.crosscheckstatus.status}}</td>
+            <td><img height="16" width="16" {{bindAttr title="g.crosscheckstatus.message"}} {{bindAttr src="g.statusimg"}}/></td>
             <td><button {{action reopenAction g}}{{bindAttr disabled="g.openPiles"}}>{{t "_Reopen"}}</button></td>
            </tr>
        {{/each}}

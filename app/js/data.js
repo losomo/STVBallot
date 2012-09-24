@@ -241,7 +241,7 @@ STVDataPileGroup.reportGroups = function(setup, groups, primary) {
             if (!primary || !pile.note) {
                 found += 1;
                 var ab = STVDataBallot.aggregateBallots(pile.ballots);
-                ret += "<h2>" + "_Pile".loc() + " " + pile.name + "</h2>";
+                ret += "<h3>" + "_Pile".loc() + " " + pile.name + "</h3>";
                 ret += STVDataBallot.reportAggregatedBallots(setup, ab);
                 ret += "_Number of invalid".loc() + ": " + ab['_invalid'] + ", " + "_number of empty".loc() + ": " + ab['_empty'];
             }

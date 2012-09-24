@@ -57,7 +57,7 @@ fs.readdirSync('.').sort().forEach(function(fname) {
                ok = false;
            }
            if (ok) {
-               console.log(fname + " OK");
+               console.error(fname + " OK");
                //console.log(msgs);
            }
            else {               
