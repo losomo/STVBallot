@@ -284,6 +284,56 @@ STVDataBLT.fromGroups = function(groups, title, setup) {
     return ret;
 }
 
+STVDataBLT.bltToCase = function(blt) {
+    var lines = blt.toString().replace(/\r|"/g,'').split('\n');
+    var header = lines.shift().split(' ').map(function(n){return parseInt(n)});
+    var inC = false;
+    var ab = {};
+    while(!inC && lines.length > 0) {
+        var line = lines.shift();
+        if (line == "0") {
+            inC = true;
+        }
+        else {
+            // parse ballot
+            var l = line.split(' ');
+            l.pop(); // remove 0
+            var count = parseInt(l.shift());
+            var key;
+            if (l.length == 0) {
+                key = "_empty"; // empty ballots
+            }
+            else {
+                var orders = {};
+                l.forEach(function(cand_index, order_0) {
+                    orders[cand_index] = order_0 + 1;
+                });
+                var k = [];
+                for (var i = 0; i < header[0]; i++) {
+                    k.push(orders[i+1] || 0);
+                }
+                key = k.join(':');
+            }
+            if (!ab[key]) ab[key] = 0;
+            ab[key] += count;
+        }
+    }
+    var candidates = [];
+    for (var i = 0; i < header[0]; i++) {
+        candidates.push(lines.shift());
+    }
+    var name = lines.shift();
+    if (lines.length > 1) throw "Unexpected lines", lines;
+    return {
+        "candidates": candidates,
+        "mandates": header[1],
+        "ballots_ab": ab,
+        "name": name,
+        "expected": [         
+        ]
+    }
+}
+
 function STVDataSetup(voteNo, candidateCount, mandateCount, ballotCount, replacements, candidates) {
    this.voteNo = voteNo; // Not necessarily a number
    this.candidateCount = parseInt(candidateCount);

@@ -1,0 +1,17 @@
+{
+  "candidates": [
+    "A",
+    "B",
+    "C",
+    "D"
+  ],
+  "mandates": 3,
+  "ballots_ab": {
+    "1:0:2:0": 50,
+    "0:1:0:2": 50
+  },
+  "name": "Test 11",
+  "expected": [
+    ["A", "B"]
+  ]
+}

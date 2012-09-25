@@ -628,6 +628,7 @@ App.Router = Em.Router.extend({
             },
             addBallot: function(router) {
                 router.get('typingController').get('currentPile').addBallot();
+                $('#tytab[0]').fixedHeaderTable({ fixedColumn: true });
             },
             done: function(router) {
                 router.get('typingController').get('currentPile').set('pileClosed', true);

@@ -1,0 +1,15 @@
+{
+  "candidates": [
+    "A",
+    "B",
+    "Prazdny"
+  ],
+  "mandates": 2,
+  "ballots_ab": {
+    "1:0:0": 30,
+    "0:1:0": 30,
+    "0:0:1": 40
+  },
+  "name": "Test 10",
+  "expected": []
+}
