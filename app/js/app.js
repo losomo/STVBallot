@@ -52,6 +52,9 @@ Ballot = Em.Object.extend({
             return BEntry.create();
         })}));
     },
+    index_1: function() {
+        return 1 + this.get('index');
+    }.property('index'),
     errorMessage: function() {
         return stv.validate(STVDataBallot.fromGUI(this));
     }.property('empty', 'invalid', 'entries.@each.order'),
@@ -628,7 +631,6 @@ App.Router = Em.Router.extend({
             },
             addBallot: function(router) {
                 router.get('typingController').get('currentPile').addBallot();
-                $('#tytab[0]').fixedHeaderTable({ fixedColumn: true });
             },
             done: function(router) {
                 router.get('typingController').get('currentPile').set('pileClosed', true);

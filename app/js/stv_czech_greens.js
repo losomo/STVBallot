@@ -117,7 +117,7 @@ STV.prototype.run = function(setup, ballots, report, done) {
     else {
         report("<p>Sčítání ukončeno, neboť všichni kandidáti byli zvoleni nebo vyřazeni.</p>");
     }
-    report("<h1>Zvolení kandidáti:</h1><ol><li>" + mandates.map(function(c){return c.name;}).join("</li><li>") + "</li></ol>");
+    report("<h1>Zvolení kandidáti:</h1><ul><li>" + mandates.map(function(c){return c.name;}).join("</li><li>") + "</li></ul>");
     done(mandates);
 }
 

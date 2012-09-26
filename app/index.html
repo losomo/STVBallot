@@ -30,7 +30,6 @@
 
   <link rel="shortcut icon" href="favicon.png">
   <link rel="stylesheet" href="css/style.css?v=0.0.1">
-  <link rel="stylesheet" href="css/defaultTheme.css">
 
   <!--[if lt IE 9]>
   <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -50,9 +49,9 @@
       </div>
     </script>
     <script data-template-name="navigation" type="text/x-handlebars">
-       {{t "_Navigation"}}
+       {{t "_Go to"}}
        {{#each t in tabs}}
-           <a {{action changeTab t.tabAction}}{{bindAttr class="t.currentClass"}}>{{t.desc}}</a>
+           <button {{action changeTab t.tabAction}}{{bindAttr class="t.currentClass"}}>{{t.desc}}</button>
        {{/each}}
     </script>
     <script data-template-name="connecting" type="text/x-handlebars">
@@ -62,44 +61,52 @@
     </script>
     <script data-template-name="typing" type="text/x-handlebars">
        <div class="typingOutlet">
-       <h2 style="margin-bottom: 5px;">{{t "_Vote"}}: {{ voteNo }}</h2>
-       {{view Ember.Select contentBinding="pilesCaptions" selectionBinding="currentPileCaption"}}<button {{ action clearTable }}{{bindAttr disabled="currentPile.pileClosed"}}>{{t "_Start over"}}</button>
-       <table id="tytab" class="typing">
-       <tr> <td>{{t "_Status"}}</td><!-- indicators row -->
-           {{#each b in currentPile.ballots}}
-                <td>{{b.errorMessage}}</td>
-           {{/each}}
-       </tr>
-       <tr> <td>{{t "_Invalid"}}</td><!-- Invalid row -->
-           {{#each b in currentPile.ballots}}
-                <td>{{view Ember.Checkbox checkedBinding="b.invalid" disabledBinding="currentPile.pileClosed"}}</td>
-           {{/each}}
-       </tr>
-       <tr>  <td>{{t "_Empty"}}</td><!-- "Empty" row -->
-           {{#each b in currentPile.ballots}}
-                <td>{{view Ember.Checkbox checkedBinding="b.empty" disabledBinding="currentPile.pileClosed"}}</td>
-           {{/each}}
-       </tr>
-       <!-- Candidates -->
-       {{#each c in candidates}}
-       <tr>
-           <td><button class="addVoteFor" {{action addVoteFor c}}>{{c.name}}}</button></td>
-           {{#each b in currentPile.ballots}}
-               {{#findBEntry c b}}
-                    <td>{{view Em.TextField tabindexBinding="computedindex" valueBinding="bentry.order" disabledBinding="currentPile.pileClosed"}}</td>
-               {{/findBEntry}}
-           {{/each}}
-       </tr>
-       {{/each}}
-       <tr><td>
-       <button class="addBallot" {{ action addBallot }}{{bindAttr disabled="currentPile.pileClosed"}}>+</button>
-       </td></tr>
-       </table>
-
-       <div class="done_pane btnfixedbr">
-       <button style="min-width: 120px;" class="btn" {{ action done }}{{bindAttr disabled="currentPile.pileClosed"}}>{{t "_Done"}}</button>
-       <button style="min-width: 120px;" class="btn" {{ action print }}{{bindAttr disabled="currentPile.pileOpened"}}>{{t "_Export protocol"}}</button>
-       </div>
+           <h2 style="margin-bottom: 5px;">{{t "_Vote"}}: {{ voteNo }}</h2>
+           {{view Ember.Select contentBinding="pilesCaptions" selectionBinding="currentPileCaption"}}<button {{ action clearTable }}{{bindAttr disabled="currentPile.pileClosed"}}>{{t "_Start over"}}</button>
+           <div class="typingwrapper">
+               <table class="typing">
+               <tbody>
+                   <tr> <td class="headcol">{{t "_Status"}}</td><!-- indicators row -->
+                       {{#each b in currentPile.ballots}}
+                            <td style="padding-right: 5px;">{{b.errorMessage}}</td>
+                       {{/each}}
+                   </tr>
+                   <tr> <td class="headcol">{{t "_Invalid"}}</td><!-- Invalid row -->
+                       {{#each b in currentPile.ballots}}
+                            <td>{{view Ember.Checkbox checkedBinding="b.invalid" disabledBinding="currentPile.pileClosed"}}</td>
+                       {{/each}}
+                   </tr>
+                   <tr>  <td class="headcol">{{t "_Empty"}}</td><!-- "Empty" row -->
+                       {{#each b in currentPile.ballots}}
+                            <td>{{view Ember.Checkbox checkedBinding="b.empty" disabledBinding="currentPile.pileClosed"}}</td>
+                       {{/each}}
+                   </tr>
+                   <!-- Candidates -->
+                   {{#each c in candidates}}
+                   <tr>
+                       <td class="headcol"><button class="addVoteFor" {{action addVoteFor c}}{{bindAttr title="c.name"}}>{{c.name}}</button></td>
+                       {{#each b in currentPile.ballots}}
+                           {{#findBEntry c b}}
+                                <td>{{view Em.TextField tabindexBinding="computedindex" valueBinding="bentry.order" disabledBinding="currentPile.pileClosed"}}</td>
+                           {{/findBEntry}}
+                       {{/each}}
+                   </tr>
+                   {{/each}}
+                   <tr>
+                      <td class="headcol">
+                       <button class="addBallot" {{ action addBallot }}{{bindAttr disabled="currentPile.pileClosed"}}>+</button>
+                   </td>
+                       {{#each b in currentPile.ballots}}
+                         <td>{{b.index_1}}</td>
+                       {{/each}}
+                   </tr>
+               </tbody>
+               </table>
+           </div>
+           <div class="done_pane btnfixedbr">
+               <button style="min-width: 120px;" class="btn" {{ action done }}{{bindAttr disabled="currentPile.pileClosed"}}>{{t "_Done"}}</button>
+               <button style="min-width: 120px;" class="btn" {{ action print }}{{bindAttr disabled="currentPile.pileOpened"}}>{{t "_Export protocol"}}</button>
+           </div>
        </div>
     </script>
     <script data-template-name="vote-running" type="text/x-handlebars">
@@ -136,11 +143,11 @@
        <div class="clearfix result_pane">
        <h4>{{t "_Results - Mandates"}}</h4>       
            <div class="mandates">
-            <ol>
+            <ul>
             {{#each m in mandates}}
                 <li>{{m.name}}</li>
             {{/each}}
-            </ol>
+            </ul>
            </div>
        </div>
 
@@ -201,7 +208,6 @@
 </head>
 <body>
     <script src="js/libs/jquery-1.7.2.min.js"></script>
-    <script src="js/libs/jquery.fixedheadertable.js"></script>
     <script src="js/libs/handlebars-1.0.0.beta.6.js"></script>
     <script src="js/libs/ember-1.0.pre.js"></script>
     <script src="js/data.js"></script>
