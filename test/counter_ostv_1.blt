@@ -1,0 +1,9 @@
+4 4
+7 1 2 3 4 0
+2 4 0
+0
+"A"
+"B"
+"C"
+"D"
+"Example 1: votes transferring point, should be ABCD, is ADBC"

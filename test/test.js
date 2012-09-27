@@ -5,7 +5,7 @@ eval(fs.readFileSync('../app/js/stv_czech_greens.js')+'');
 
 var stv = new STV();
 
-fs.readdirSync('.').sort().forEach(function(fname) {
+function test(fname, debug) {
     if (fname.match('\.json$')) {
         var test = JSON.parse(fs.readFileSync(fname));
 
@@ -58,12 +58,25 @@ fs.readdirSync('.').sort().forEach(function(fname) {
            }
            if (ok) {
                console.error(fname + " OK");
-               //console.log(msgs);
+               if (debug) console.log(envelope(msgs));
            }
            else {               
-               console.log(msgs);
+               console.log(envelope(msgs));
                console.error("Failed " + fname);
            }
         });
     }
-});
+}
+
+function envelope(msg) {
+    return '<!DOCTYPE html><html><head><meta charset="utf8"/></head><body>' + msg
+    + "</body></html>";
+}
+
+var fname = process.argv[2];
+if (fname) {
+    test(fname, true);
+}
+else {
+    fs.readdirSync('.').sort().forEach(test, false);
+}
