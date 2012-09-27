@@ -613,6 +613,7 @@ App.Router = Em.Router.extend({
                 console.log(n);
                 ac.set('appState', 0);
                 vsc.set('shuffled', false);
+                router.get('voteRunningController').set('ballots_printed', false);
                 router.transitionTo('voteSetup');
             },
             connectOutlets: function(router) {

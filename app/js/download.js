@@ -19,10 +19,21 @@
 var content;
 var title;
 var extension;
+
+function envelope(c, ext) {
+    if (ext == "html") {
+        return '<!DOCTYPE html><html><head><meta charset="utf8"/></head><body>' + c
+        + "</body></html>";
+    }
+    else {
+        return c;
+    }
+}
+
 function save_file() {
             var config = {type: 'saveFile', suggestedName: title + "." + extension};
             chrome.fileSystem.chooseFile(config, function(writableEntry) {
-                var blob = new Blob([content], {type: 'text/plain'});
+                var blob = new Blob([envelope(content, extension)], {type: 'text/plain'});
                 writableEntry.createWriter(function(writer) {
                         writer.onerror = function(e) {console.error(e);};
                         writer.onwriteend = function(e) {
