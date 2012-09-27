@@ -61,6 +61,7 @@
     </script>
     <script data-template-name="typing" type="text/x-handlebars">
        <div class="typingOutlet">
+           <div {{bindAttr style="obstruct_style"}}/>
            <h2 style="margin-bottom: 5px;">{{t "_Vote"}}: {{ voteNo }}</h2>
            {{view Ember.Select contentBinding="pilesCaptions" selectionBinding="currentPileCaption"}}<button {{ action clearTable }}{{bindAttr disabled="currentPile.pileClosed"}}>{{t "_Start over"}}</button>
            <div class="typingwrapper">

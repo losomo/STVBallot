@@ -369,6 +369,7 @@ App.TypingController = Em.Controller.extend({
     pileGroupsBinding: 'App.router.voteRunningController.pileGroups',
     candidatesBinding: 'App.router.voteSetupController.candidates',
     voteNoBinding: 'App.router.voteSetupController.voteNo',
+    appStateBinding: 'App.router.applicationController.appState',
     currentPileCaption: null,
     currentPile: function() {
         var cc = this.get('currentPileCaption');
@@ -386,6 +387,9 @@ App.TypingController = Em.Controller.extend({
         });
         return a;
     }.property('pileGroups', 'pileGroups.@each'),
+    obstruct_style: function () {
+        return this.get('appState') == 2 ? "display: none;" : "position: absolute; top: 0%; left: 0%; width: 100%; height: 100%; background-color: black; z-index: 1001; opacity: .60";
+    }.property('appState'),
     init: function() {
         this.set('currentPileCaption', this.get('pilesCaptions')[0]);
     },
@@ -771,7 +775,7 @@ function handle_server_message(message) {
             //pgs.set('currentPile', newPile);
             tc.set('currentPileCaption', newPile.get('desc'));
             tc.get('currentPile').addBallot();
-            // TODO dismiss waiting modal overlay
+            App.router.get('applicationController').set('appState', 2);
             break;
         case 'reopen_pile':
             var d = STVDataPile.toGUI(data.content).get('desc');
