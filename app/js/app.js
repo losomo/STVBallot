@@ -220,7 +220,7 @@ App.ApplicationController = Em.Controller.extend({
         return this.get('appMode') == 'server';
     }.property('appMode'),
     tabsEnabled: function() {
-        return this.get('appMode') == 'standalone' && this.get('appState') > 1;
+        return this.get('appMode') == 'standalone' && this.get('appState') == 2;
     }.property('appState', 'appMode'),
     connectionsEnabled: function() {
         return this.get('appState') == 1;

@@ -63,7 +63,9 @@
        <div class="typingOutlet">
            <div {{bindAttr style="obstruct_style"}}/>
            <h2 style="margin-bottom: 5px;">{{t "_Vote"}}: {{ voteNo }}</h2>
-           {{view Ember.Select contentBinding="pilesCaptions" selectionBinding="currentPileCaption"}}<button {{ action clearTable }}{{bindAttr disabled="currentPile.pileClosed"}}>{{t "_Start over"}}</button>
+           <table><tr><td>{{view Ember.Select contentBinding="pilesCaptions" selectionBinding="currentPileCaption"}}</td>
+           <td><button {{ action clearTable }}{{bindAttr disabled="currentPile.pileClosed"}}>{{t "_Start over"}}</button></td>
+           </tr></table>
            <div class="typingwrapper">
                <table class="typing">
                <tbody>
@@ -82,6 +84,7 @@
                             <td>{{view Ember.Checkbox checkedBinding="b.empty" disabledBinding="currentPile.pileClosed"}}</td>
                        {{/each}}
                    </tr>
+                   <tr style="height: 5px;"><td></td></tr>
                    <!-- Candidates -->
                    {{#each c in candidates}}
                    <tr>
@@ -201,8 +204,10 @@
             {{/if}}
             {{outlet}}
             <div id="popup"><div class="popup_msg">{{ popup_msg }}</div>
+            <div class="popup_ctrls">
                 <button onclick="document.getElementById('popup').style.display='none';document.getElementById('black_overlay').style.display='none'">{{t "_Cancel"}}</button>
                 <button {{ action popupAct }}>OK</button>
+            </div>
             </div>
         </div>
     </script>

@@ -94,16 +94,12 @@ STV.prototype.run = function(setup, ballots, report, done) {
         fp.forEach(function(f) {report("<tr><td>" + STVDataSetup.round(f[0]) + "</td><td>" + f[1] + " (" + setup.candidates[f[1]-1].name + ")</td></tr>")});
         report("</table>");
         var has_elected = false;
-        for (var i = 0; i < fp.length; i++) {
-            if (fp[i][0] >= quota) {
-                mandates.push(setup.candidates[fp[i][1]-1]);
-                ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, fp[i][1], quota);
-                report("<p>Kandidát <b>" + setup.candidates[fp[i][1]-1].name +"</b> (" + fp[i][1] + ") zvolen, na další místa se přesouvá " + STVDataSetup.round(fp[i][0]-quota) + " (" + new Number((fp[i][0]-quota)/fp[i][0]*100).toFixed(1)  + " %) hlasů</p>");
-                has_elected = true;
-            }
-            else {
-                break;
-            }
+        var i = 0; // alternative algorithm: cycle for all i < fp.length in one round
+        if (fp[i][0] >= quota) {
+            mandates.push(setup.candidates[fp[i][1]-1]);
+            ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, fp[i][1], quota);
+            report("<p>Kandidát <b>" + setup.candidates[fp[i][1]-1].name +"</b> (" + fp[i][1] + ") zvolen, na další místa se přesouvá " + STVDataSetup.round(fp[i][0]-quota) + " (" + new Number((fp[i][0]-quota)/fp[i][0]*100).toFixed(1)  + " %) hlasů</p>");
+            has_elected = true;
         }
         if (!has_elected) {
             var last = fp.length - 1;
