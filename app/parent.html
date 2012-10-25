@@ -1,3 +1,5 @@
+<!doctype html>
+<!--
 /*
  * Licensed to Václav Novák under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,9 +18,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-chrome.app.runtime.onLaunched.addListener(function() {
-  chrome.app.window.create('parent.html', {
-    'width': 800,
-    'height': 500
-  });
-});
+-->
+<!--[if lt IE 7 ]> <html lang="en" class="ie6"> <![endif]--> <!--[if IE 7 ]>    <html lang="en" class="ie7"> <![endif]--> <!--[if IE 8 ]>    <html lang="en" class="ie8"> <![endif]--> <!--[if IE 9 ]>    <html lang="en" class="ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html lang="cs"> <!--<![endif]-->
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>STV Ballot</title>
+  <link rel="shortcut icon" href="favicon.png">
+</head>
+<body>
+    <script src="js/parent.js"></script>
+    <iframe src="inner.html" style="position: absolute; height: 100%; width: 100%; position: absolute; top: 0px; left: 0px; margin: 0px; padding: 0px;"/>
+</body>
+</html>
+

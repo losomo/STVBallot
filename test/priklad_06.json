@@ -1,0 +1,19 @@
+{
+  "candidates": [
+    "A",
+    "B",
+    "c",
+    "d"
+  ],
+  "mandates": 2,
+  "ballots_ab": {
+    "1:2:0:3":  19,
+    "0:0:1:2":   8,
+    "0:0:2:1":   3
+  },
+  "name": "Priklad 6 http://www.votingmatters.org.uk/ISSUE9/P1.HTM",
+  "expected": [
+    "A",
+    "c"
+  ]
+}

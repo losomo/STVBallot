@@ -721,7 +721,7 @@ Em.Handlebars.registerHelper('t', function(str) {
 /* Non-emberjs functions */
 function send_command(c, d) {
     console.log("Sending message", c, d);
-    App.source.postMessage({
+    window.parent.postMessage({
        command: c,
        data: d,
        socketId: App.socketId,
@@ -802,9 +802,6 @@ function handle_server_message(message) {
 function handle_request (data) {
     var command = data.command;
     switch(command) {
-        case 'init':
-            console.log("connection with background page initialized");
-            break;
         case 'client_request':
             handle_client_message(data.message);
             break;
@@ -820,7 +817,6 @@ function handle_request (data) {
 }
 
 var messageHandler = function(e) {
-  App.source = e.source;
   handle_request(e.data);
 };
 
@@ -886,5 +882,5 @@ function print_ballots(setup, title) {
     return ret;
 }
 
-parent.addEventListener('message', messageHandler, false);
+window.addEventListener('message', messageHandler, false);
 App.initialize();

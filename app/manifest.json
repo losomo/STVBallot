@@ -3,14 +3,14 @@
   "description": "STV Ballot",
   "manifest_version": 2,
   "minimum_chrome_version": "23",
-  "version": "0.2.9",
+  "version": "0.3.0",
   "app": {
     "background": {
       "scripts": ["background.js"]
     }
   },
   "sandbox": {
-     "pages": ["index.html"]
+     "pages": ["inner.html"]
   },
   "permissions": [
     "experimental",
@@ -18,11 +18,10 @@
         "udp-send-to", "udp-bind"
     ]},
     "app.window",
-    "fileSystemWrite", "fileSystem"
-/*    {"fileSystem" : [
+/*    "fileSystemWrite", "fileSystem" */
+    {"fileSystem" : [
         "write"
-    ]}
-*/ 
+    ]} 
   ],
-  "icons": { "16": "favicon.png", "128": "icon.png"}
+  "icons": { "16": "favicon.png", "128": "icon.png" }
 }
