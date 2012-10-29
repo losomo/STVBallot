@@ -18,7 +18,7 @@
  */
 chrome.app.runtime.onLaunched.addListener(function() {
   chrome.app.window.create('parent.html', {
-    'width': 800,
+    'width': 850,
     'height': 500
   });
 });

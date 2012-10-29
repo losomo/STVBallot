@@ -33,16 +33,10 @@ function start_server(requesting_window) {
             };
             socket.recvFrom(server_socket, rfunc);
         });
-        var cleanup_timer;
-        cleanup_timer = setInterval(function(){
-                if (requesting_window.closed) {
-                    socket.destroy(server_socket);
-                    console.log("server socket released");
-                    clearInterval(cleanup_timer);
-                }
-            },
-            5000
-        );
+        chrome.runtime.onSuspend.addListener(function(){
+            socket.destroy(server_socket);
+            console.log("server socket released");
+        });
     });
     // PUBLISH SERVICE
     socket.create('udp', {}, function(createInfo) {
@@ -55,16 +49,10 @@ function start_server(requesting_window) {
             };
             socket.recvFrom(publish_socket, rfunc);
         });
-        var cleanup_timer;
-        cleanup_timer = setInterval(function(){
-                if (requesting_window.closed) {
-                    socket.destroy(publish_socket);
-                    console.log("publish socket released");
-                    clearInterval(cleanup_timer);
-                }
-            },
-            5000
-        );
+        chrome.runtime.onSuspend.addListener(function(){
+            socket.destroy(publish_socket);
+            console.log("publish socket released");
+        });
     });
 }
 
@@ -72,7 +60,7 @@ function find_servers(requesting_window) {
     socket.create('udp', {}, function(socketInfo) {
        var socketId = socketInfo.socketId;
        socket.bind(socketId, "0.0.0.0", 0, function(res) {
-           if(res !== 0) {               
+           if(res !== 0) {
             throw('cannot bind socket');
            }
            socket.sendTo(socketId, struct2ab({command: "discovering"}), '225.255.255.255', 42425, function(writeInfo) {
@@ -80,24 +68,18 @@ function find_servers(requesting_window) {
                console.log(writeInfo);
            });
        });
-       var cleanup_timer;
-       cleanup_timer = setInterval(function(){
-           if (requesting_window.closed) {
-               socket.destroy(socketId);
-               console.log("search socket released");
-               clearInterval(cleanup_timer);
-           }
-       },
-           5000
-       );
-    });  
+       chrome.runtime.onSuspend.addListener(function(){
+           socket.destroy(socketId);
+           console.log("search socket released");
+       });
+    });
 }
 
 function join_server(requesting_window, data) {
     socket.create('udp', {}, function(socketInfo) {
        var socketId = socketInfo.socketId;
        socket.bind(socketId, "0.0.0.0", 0, function(res) {
-           if(res !== 0) {               
+           if(res !== 0) {
             throw('cannot bind socket');
            }
            socket.sendTo(socketId, struct2ab({command: "hand_shake", name: data.name}), data.server_ip, 42424, function(writeInfo) {
@@ -109,17 +91,11 @@ function join_server(requesting_window, data) {
            };
            socket.recvFrom(socketId, rfunc);
        });
-       var cleanup_timer;
-       cleanup_timer = setInterval(function(){
-           if (requesting_window.closed) {
-               socket.destroy(socketId);
-               console.log("client socket released");
-               clearInterval(cleanup_timer);
-           }
-       },
-           5000
-       );
-    });  
+       chrome.runtime.onSuspend.addListener(function(){
+           socket.destroy(socketId);
+           console.log("client socket released");
+       });
+    });
 }
 
 function send_to_client(data) {
@@ -185,7 +161,7 @@ function ab2struct(buf) {
 
 function struct2ab(struct) {
   var str = JSON.stringify(struct);
-  var buf = new ArrayBuffer(str.length*2); 
+  var buf = new ArrayBuffer(str.length*2);
   var bufView = new Uint16Array(buf);
   for (var i=0, strLen=str.length; i<strLen; i++) {
     bufView[i] = str.charCodeAt(i);

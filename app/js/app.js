@@ -26,9 +26,20 @@ Candidate = Em.Object.extend({
     name: null,
     gender: null,
     index: null,
+    acceptable_positions: null, // ArrayProxy of booleans
     toString: function () {
         return this.index + " ~ " + this.name + " (" + this.gender + ")";
-    }
+    },
+    init: function() {
+        this.set('acceptable_positions', Em.ArrayProxy.create({content: []}));
+    },
+    setOrderedMandates: function(om) {
+        var a = this.get('acceptable_positions');
+        a.clear();
+        for (var i = 0; i < om; i++) {
+            a.pushObject(true);
+        }
+    },
 });
 
 BEntry = Em.Object.extend({
@@ -252,20 +263,24 @@ App.VoteSetupController = Em.Controller.extend({
     candidateCount: null,
     mandateCount: 3,
     ballotCount: 8,
-    replacements: null,
     candidates: null,
     shuffled: null,
+    m_max: null,
+    f_max: null,
+    orderedCount: null,
     genders: ['---',"_Female".loc(),"_Male".loc()],
     updateCandidates: function() {
         var no = this.candidateCount;
         var current_no = this.get('candidates').content.length || 0;
         if (no > current_no) {
             for (var i = current_no; i < no; i++) {
-                this.get('candidates').pushObject(Candidate.create({
+                var candidate = Candidate.create({
                     name:   String.fromCharCode(65 + i),
                     gender: '---',
-                    index: i,
-                }));
+                    index: i
+                });
+                candidate.setOrderedMandates(this.get('orderedCount'));
+                this.get('candidates').pushObject(candidate);
             }
         }
         else if (no < current_no) {
@@ -274,11 +289,17 @@ App.VoteSetupController = Em.Controller.extend({
             }
         }
     }.observes('candidateCount'),
+    updateOrderedMandates: function() {
+        var vsc = this;
+        vsc.get('candidates').forEach (function(candidate) {
+                candidate.setOrderedMandates(vsc.get('orderedCount'));
+        });
+    }.observes('orderedCount'),
     launchState: function() {
         if (this.get('voteNo') != "" && parseInt(this.get('candidateCount')) > 0 && parseInt(this.get('mandateCount')) > 0 && parseInt(this.get('ballotCount')) > 0) {
             var names = {};
             var problem = false;
-            var genders = -1;
+            var genders = (parseInt(this.get('m_max')) > 0 || parseInt(this.get('f_max')) > 0) ? true : false;
             this.get('candidates').forEach (function(item) {
                 var name = item.get("name");
                 var gender = item.get("gender");
@@ -288,18 +309,16 @@ App.VoteSetupController = Em.Controller.extend({
                 }
                 if (names[name]) problem = true;
                 names[name] = true;
-                if (genders == -1) {
-                    genders = (gender != '---');
-                }
-                else if (genders != (gender != '---')) problem = true;
-            });            
+                if (genders != (gender != '---')) problem = true;
+            });
             if (parseInt(this.get('candidateCount')) < parseInt(this.get('mandateCount'))) problem = true;
+            if (parseInt(this.get('orderedCount')) > parseInt(this.get('mandateCount'))) problem = true;
             return problem ? 'disabled' : false;
         }
         else {
             return "disabled";
         }
-    }.property('voteNo', 'candidateCount', 'mandateCount', 'ballotCount', 'candidates.@each.name', 'candidates.@each.gender'),
+    }.property('voteNo', 'candidateCount', 'mandateCount', 'ballotCount', 'candidates.@each.name', 'candidates.@each.gender', 'orderedCount', 'f_max', 'm_max'),
     shuffle: function() {
         var c = this.get('candidates');
         var i = c.content.length;
@@ -341,7 +360,7 @@ App.VoteRunningController = Em.Controller.extend({
         return this.get('appState') == 2 ? "disabled" : false;
     }.property('appState'),
     cantClose: function() {
-        return this.get('appState') == 2 ? 
+        return this.get('appState') == 2 ?
         (this.get('pileGroups').every(function(g){
             return g.get('crosscheckstatus').status == "ok" || g.get('crosscheckstatus').status == "partial";
         }) ? false : "disabled")
@@ -353,7 +372,7 @@ App.VoteRunningController = Em.Controller.extend({
     updatePileExternally: function(pile) {
         var affected_pile = find_pile(this.get('pileGroups'), pile);
         affected_pile.set('ballots', STVDataPile.toGUI(pile).get('ballots'));
-        affected_pile.set('pileClosed', pile.pileClosed);                
+        affected_pile.set('pileClosed', pile.pileClosed);
     },
     report_append: function(msg) {
         this.set('report', this.get('report') + msg);
@@ -577,7 +596,7 @@ App.Router = Em.Router.extend({
                 var setup = STVDataSetup.fromGUI(router.get('voteSetupController'));
                 var vrc = router.get('voteRunningController');
                 var pileGroups = vrc.get('pileGroups');
-                var groups = pileGroups.map(function (group) {return STVDataPileGroup.fromGUI(group);});                
+                var groups = pileGroups.map(function (group) {return STVDataPileGroup.fromGUI(group);});
                 vrc.report_append("<h1>" + "_Vote".loc() + " " + setup.voteNo + "</h1>" +
                     "<p><em>" + new Date() + "</em> " + "_Computation started".loc() + "</p>");
                 vrc.report_append(STVDataPileGroup.reportGroups(setup, groups, true));
@@ -587,7 +606,7 @@ App.Router = Em.Router.extend({
                     vrc.report_append(msg);
                 },
                 function(mandates) {
-                    vrc.get('mandates').pushObjects(mandates);                    
+                    vrc.get('mandates').pushObjects(mandates);
                     vrc.report_append("<p><em>" + new Date() + "</em>" + "_Computation done".loc() + ".</p>");
                 });
             },
@@ -644,9 +663,9 @@ App.Router = Em.Router.extend({
                 var setup = STVDataSetup.fromGUI(router.get('voteSetupController'));
                 var vrc = router.get('voteRunningController');
                 var pileGroups = vrc.get('pileGroups');
-                var groups = pileGroups.map(function (group) {return STVDataPileGroup.fromGUI(group);});                
+                var groups = pileGroups.map(function (group) {return STVDataPileGroup.fromGUI(group);});
                 var c = "<h1>" + "_Vote".loc() + " " + setup.voteNo + "</h1>" +
-                    "<p><em>" + new Date() + "</em> " + 
+                    "<p><em>" + new Date() + "</em> " +
                     "<p>"+ "_Candidates".loc() + ":<ol><li>" + setup.candidates.map(function(c){return c.name;}).join("</li><li>") +
                     "</li></ol></p>" +
                     "_Data filled by ".loc() + " " +  router.get('applicationController').get('userName') + "</p>" +
@@ -788,7 +807,7 @@ function handle_server_message(message) {
             break;
         case 'set_setup':
             STVDataSetup.toGUI(data.content, App.router.get('voteSetupController'));
-            App.router.get('typingController').get('pileGroups').clear();            
+            App.router.get('typingController').get('pileGroups').clear();
             App.router.get('applicationController').set('appState', 2);
             break;
         case 'disconnect':
@@ -807,7 +826,7 @@ function handle_request (data) {
             break;
         case 'server_request':
             if (!App.socketId && data.socketId) {
-               App.socketId = data.socketId; 
+               App.socketId = data.socketId;
             }
             handle_server_message(data.message);
             break;

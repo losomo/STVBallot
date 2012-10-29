@@ -33,7 +33,6 @@ Ember.STRINGS = {
     '_Data filled by '            : 'Data vyplnil ',
     '_Disconnect'                 : 'Odpojit',
     '_Done'                       : 'Hotovo',
-    '_Elect replacement mandates' : 'Zvolit náhradníky',
     '_empty'                      : 'prázdný',
     '_Empty'                      : 'Prázdný',
     '_Enter your name'            : 'Zadejte své jméno',

@@ -145,7 +145,7 @@
        {{else}}
         <h2>{{t "_Vote Closed"}}</h2>
        <div class="clearfix result_pane">
-       <h4>{{t "_Results - Mandates"}}</h4>       
+       <h4>{{t "_Results - Mandates"}}</h4>
            <div class="mandates">
             <ul>
             {{#each m in mandates}}
@@ -169,9 +169,13 @@
             {{t "_Candidate list"}}
            <div class="clist">
            {{#each c in candidates}}
+               <div class="clistrow">
                {{view Em.TextField valueBinding="c.name"}}
                {{view Ember.Select contentBinding="genders" selectionBinding="c.gender"}}
-               <br/>
+               {{#each p in c.acceptable_positions}}
+                   {{view Ember.Checkbox checkedBinding="p"}}
+               {{/each}}
+               </div>
            {{/each}}
            </div>
            <button class="btn lbtn" {{action shuffle }} {{bindAttr disabled="cantShuffle"}}>{{t "_Shuffle candidates"}}</button>
@@ -182,10 +186,9 @@
        <tr><td><label>{{t "_Number of candidates"}}</label></td> <td>{{view Em.TextField valueBinding="candidateCount"}}</td></tr>
        <tr><td><label>{{t "_Number of mandates"}}</label></td>   <td>{{view Em.TextField valueBinding="mandateCount"}}</td></tr>
        <tr><td><label>{{t "_Number of ballots"}}</label></td>    <td>{{view Em.TextField valueBinding="ballotCount"}}</td></tr>
-       <tr><td colspan="2"><label>
-           {{view Ember.Checkbox disabled="disabled" checkedBinding="replacements" classNames="stvb-chkbox"}}
-           {{t "_Elect replacement mandates"}}
-       </label></td></tr>
+       <tr><td><label>{{t "_Maximal no. of men"}}</label></td>   <td>{{view Em.TextField valueBinding="m_max"}}</td></tr>
+       <tr><td><label>{{t "_Maximal no. of women"}}</label></td> <td>{{view Em.TextField valueBinding="f_max"}}</td></tr>
+       <tr><td><label>{{t "_Number of ordered positions"}}</label></td> <td>{{view Em.TextField valueBinding="orderedCount"}}</td></tr>
        </table>
     </script>
     <script data-template-name="app-setup" type="text/x-handlebars">
@@ -198,7 +201,7 @@
         {{#if isServerMode}}
             {{view templateName="connections"}}
         {{/if}}
-        <div id="tabpane"> 
+        <div id="tabpane">
             {{#if tabsEnabled}}
                 {{view templateName="navigation"}}
             {{/if}}
