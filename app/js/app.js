@@ -268,7 +268,7 @@ App.VoteSetupController = Em.Controller.extend({
     m_max: null,
     f_max: null,
     orderedCount: null,
-    genders: ['---',"_Female".loc(),"_Male".loc()],
+    genders: [{caption: '---', code: ''}, {caption: "_Female".loc(), code: 'F'},{caption: "_Male".loc(), code: 'M'}],
     updateCandidates: function() {
         var no = this.candidateCount;
         var current_no = this.get('candidates').content.length || 0;
@@ -276,7 +276,7 @@ App.VoteSetupController = Em.Controller.extend({
             for (var i = current_no; i < no; i++) {
                 var candidate = Candidate.create({
                     name:   String.fromCharCode(65 + i),
-                    gender: '---',
+                    gender: '',
                     index: i
                 });
                 candidate.setOrderedMandates(this.get('orderedCount'));
@@ -309,7 +309,8 @@ App.VoteSetupController = Em.Controller.extend({
                 }
                 if (names[name]) problem = true;
                 names[name] = true;
-                if (genders != (gender != '---')) problem = true;
+                
+                if (gender && genders != (gender.code != '')) problem = true;
             });
             if (parseInt(this.get('candidateCount')) < parseInt(this.get('mandateCount'))) problem = true;
             if (parseInt(this.get('orderedCount')) > parseInt(this.get('mandateCount'))) problem = true;
@@ -564,6 +565,19 @@ App.Router = Em.Router.extend({
                     footer: "</pre>",
                     extension: "blt",
                     content: STVDataBLT.fromGroups(groups, title, setup),
+                    title: title
+                });
+            },
+            exportCase: function(router) {
+                var pileGroups = router.get('voteRunningController').get('pileGroups');
+                var groups = pileGroups.map(function (group) {return STVDataPileGroup.fromGUI(group);});
+                var setup = STVDataSetup.fromGUI(router.get('voteSetupController'));
+                var title = "_Vote".loc() + "_" + setup.voteNo;
+                send_command('download_data', {
+                    header: "<pre>",
+                    footer: "</pre>",
+                    extension: "json",
+                    content: STVDataJSON.fromGroups(setup, groups),
                     title: title
                 });
             },

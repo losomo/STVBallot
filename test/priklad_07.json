@@ -5,6 +5,13 @@
     "C"
   ],
   "mandates": 2,
+  "m_max": 1,
+  "genders": [
+    "F",
+    "F",
+    "M"
+  ],
+  "ordered": 2,
   "ballots_ab": {
     "1:0:3":  6,
     "0:1:0":  4,

@@ -334,13 +334,17 @@ STVDataBLT.bltToCase = function(blt) {
     }
 }
 
-function STVDataSetup(voteNo, candidateCount, mandateCount, ballotCount, replacements, candidates) {
-   this.voteNo = voteNo; // Not necessarily a number
-   this.candidateCount = parseInt(candidateCount);
-   this.mandateCount = parseInt(mandateCount);
-   this.ballotCount = parseInt(ballotCount);
-   this.replacements = replacements; // Boolean
-   this.candidates = candidates; // Array of STVDataCandidate
+function STVDataSetup(voteNo, candidateCount, mandateCount, ballotCount, replacements, candidates, genders, m_max, f_max, orderedCount) {
+    this.voteNo = voteNo; // Not necessarily a number
+    this.candidateCount = parseInt(candidateCount);
+    this.mandateCount = parseInt(mandateCount);
+    this.ballotCount = parseInt(ballotCount);
+    this.replacements = replacements; // Boolean
+    this.candidates = candidates; // Array of STVDataCandidate
+    this.genders = genders; // Array of 'M' / 'F'
+    this.m_max = parseInt(m_max);
+    this.f_max = parseInt(f_max);
+    this.orderedCount = parseInt(orderedCount);
 }
 
 STVDataSetup.round = function (x) {
@@ -354,7 +358,11 @@ STVDataSetup.fromGUI = function(controller) {
         controller.get('mandateCount'),
         controller.get('ballotCount'),
         controller.get('replacements'),
-        controller.get('candidates').map(function(candidate) {return STVDataCandidate.fromGUI(candidate);})
+        controller.get('candidates').map(function(candidate) {return STVDataCandidate.fromGUI(candidate);}),
+        controller.get('candidates').map(function(candidate) {return candidate.get('gender').code;}),
+        controller.get('m_max'),
+        controller.get('f_max'),
+        controller.get('orderedCount')
     );
 };
 

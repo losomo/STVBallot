@@ -160,6 +160,7 @@
 
        <button {{ action exportProtocol }}{{bindAttr disabled="isRunning"}}>{{t "_Export protocol"}}</button>
        <button {{ action exportOstv }}>{{t "_Export to OpenSTV"}}</button>
+       <button {{ action exportCase }}>{{t "_Export to JSON"}}</button>
        <button class="btn btnfixedbr" {{ action resetAll }}{{bindAttr disabled="cantReset"}}>{{t "_Prepare new vote"}}</button>
        {{/if}}
     </script>
@@ -171,7 +172,7 @@
            {{#each c in candidates}}
                <div class="clistrow">
                {{view Em.TextField valueBinding="c.name"}}
-               {{view Ember.Select contentBinding="genders" selectionBinding="c.gender"}}
+               {{view Ember.Select contentBinding="genders" selectionBinding="c.gender" optionLabelPath="content.caption" optionValuePath="content.code"}}
                {{#each p in c.acceptable_positions}}
                    {{view Ember.Checkbox checkedBinding="p"}}
                {{/each}}
