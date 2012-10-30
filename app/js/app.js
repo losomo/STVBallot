@@ -26,7 +26,7 @@ Candidate = Em.Object.extend({
     name: null,
     gender: null,
     index: null,
-    acceptable_positions: null, // ArrayProxy of booleans
+    acceptable_positions: null, // ArrayProxy of Objects with boolean flag
     toString: function () {
         return this.index + " ~ " + this.name + " (" + this.gender + ")";
     },
@@ -37,7 +37,7 @@ Candidate = Em.Object.extend({
         var a = this.get('acceptable_positions');
         a.clear();
         for (var i = 0; i < om; i++) {
-            a.pushObject(true);
+            a.pushObject(Ember.Object.create({"accepted": true}));
         }
     },
 });
@@ -564,7 +564,7 @@ App.Router = Em.Router.extend({
                     header: "<pre>",
                     footer: "</pre>",
                     extension: "blt",
-                    content: STVDataBLT.fromGroups(groups, title, setup),
+                    content: STVDataFormats.bltFromGroups(title, setup, groups),
                     title: title
                 });
             },
@@ -577,7 +577,7 @@ App.Router = Em.Router.extend({
                     header: "<pre>",
                     footer: "</pre>",
                     extension: "json",
-                    content: STVDataJSON.fromGroups(setup, groups),
+                    content: STVDataFormats.jsonFromGroups(title, setup, groups),
                     title: title
                 });
             },
@@ -643,7 +643,6 @@ App.Router = Em.Router.extend({
                     }
                 }
                 vsc.set('voteNo', n);
-                console.log(n);
                 ac.set('appState', 0);
                 vsc.set('shuffled', false);
                 router.get('voteRunningController').set('ballots_printed', false);

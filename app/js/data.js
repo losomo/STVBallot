@@ -32,7 +32,7 @@ STVDataBallot.fromGUI = function (ballot) {
         ballot.get('touched'),
         parseInt(ballot.get('index'))
     );
-}
+};
 
 STVDataBallot.toGUI = function(b) {
     return Ballot.create({
@@ -42,7 +42,7 @@ STVDataBallot.toGUI = function(b) {
         touched: b.touched,
         index: b.index,
     });
-}
+};
 
 /*
   takes array of groups, returns a single array of all ballots from primary groups
@@ -60,7 +60,7 @@ STVDataBallot.combineGroups = function(groups) {
         if (found != 1) throw "Primary pile not found";
     });
     return ret;
-}
+};
 
 STVDataBallot.aggregateBallots = function(ballots) {
     var ap = {
@@ -77,13 +77,13 @@ STVDataBallot.aggregateBallots = function(ballots) {
             key = '_empty';
         }
         else {
-            key = ballot.entries.join(':');
+            key = ballot.entries.join(':').replace(/NaN/g,'0');
         }
         if (!ap[key]) ap[key] = 0;
         ap[key] += 1;
     }
     return ap;
-}
+};
 
 STVDataBallot.reportAggregatedBallots = function(setup, ab) {
     var ret = '<table class="griddy"><tr><th></th><th>';
@@ -103,7 +103,7 @@ STVDataBallot.reportAggregatedBallots = function(setup, ab) {
     }
     ret += "</table>";
     return ret;
-}
+};
 
 STVDataBallot.aggregateFirstPreferences = function(aggregatedBallots) {
     var ret = []; // Array of [ballots_with_1st_preference, 1+candidate_order] ordered by [0], randomly where there is a tie
@@ -133,7 +133,7 @@ STVDataBallot.aggregateFirstPreferences = function(aggregatedBallots) {
         ret[j] = oi;
     }
     return ret.sort(function(a,b){return b[0]-a[0]});
-}
+};
 
 STVDataBallot.get_most_preferred = function(ab) {
     return ab.split(':').reduce(function(min_count, order, index) {
@@ -148,7 +148,7 @@ STVDataBallot.get_most_preferred = function(ab) {
                 }
                 return min_count;
             }, [Number.MAX_VALUE, []]); // returns [min_order, [1+index_with_min_order]]
-}
+};
 
 STVDataBallot.removeCandidateFromAggregatedBallots = function(oab, candidate, transfer) {
     var votes_for_candidate = function(aggrb) {
@@ -182,7 +182,7 @@ STVDataBallot.removeCandidateFromAggregatedBallots = function(oab, candidate, tr
         }
     }
     return ab;
-}
+};
 
 STVDataBallot.prototype.get_sorted_orders = function() {
     // Candidate numbers start at 1 !!!!!!
@@ -190,11 +190,11 @@ STVDataBallot.prototype.get_sorted_orders = function() {
     return pairs.filter(function(e) {return e[1] > 0;})
         .sort(function(a, b) {return a[1] - b[1];})
         .map(function(e) {return e[0]});
-}
+};
 
 STVDataBallot.prototype.isReal = function() {
     return this.empty || this.invalid || this.touched;
-}
+};
 
 function STVDataPile(name, note, ballots, pileClosed, client) {
     this.name = name;
@@ -212,7 +212,7 @@ STVDataPile.fromGUI = function(pile) {
         pile.get('pileClosed'),
         pile.get('client')
     );
-}
+};
 
 STVDataPile.toGUI = function(p) {
     return Pile.create({
@@ -222,16 +222,17 @@ STVDataPile.toGUI = function(p) {
         pileClosed: p.pileClosed,
         client: p.client
     });
-}
+};
 
 function STVDataPileGroup(piles) {
     this.piles = piles; // Array of STVDataPiles
 }
+
 STVDataPileGroup.fromGUI = function(pileGroup) {
     return new STVDataPileGroup(
         pileGroup.map(function(item) {return STVDataPile.fromGUI(item)})
     );
-}
+};
 
 STVDataPileGroup.reportGroups = function(setup, groups, primary) {
     var ret = "<h1>" + "_Piles data".loc()  +  "</h1>";
@@ -249,11 +250,11 @@ STVDataPileGroup.reportGroups = function(setup, groups, primary) {
         if (primary && found != 1) throw "Primary pile not found";
     });
     return ret;
-}
+};
 
-function STVDataBLT() {}
+function STVDataFormats() {}
 
-STVDataBLT.fromGroups = function(groups, title, setup) {
+STVDataFormats.bltFromGroups = function(title, setup, groups) {
     var ret = setup.candidateCount + " " + setup.mandateCount + "\n";
     groups.forEach(function (group) {
         var found = 0;
@@ -282,9 +283,9 @@ STVDataBLT.fromGroups = function(groups, title, setup) {
     });
     ret += '"'  + title + '"\n';
     return ret;
-}
+};
 
-STVDataBLT.bltToCase = function(blt) {
+STVDataFormats.bltToCase = function(blt) {
     var lines = blt.toString().replace(/\r|"/g,'').split('\n');
     var header = lines.shift().split(' ').map(function(n){return parseInt(n)});
     var inC = false;
@@ -332,7 +333,24 @@ STVDataBLT.bltToCase = function(blt) {
         "expected": [         
         ]
     }
-}
+};
+
+STVDataFormats.jsonFromGroups = function(title, setup, groups) {
+    var ballots = STVDataBallot.combineGroups(groups);
+    console.log(setup.candidates);
+    return JSON.stringify({
+        "candidates": setup.candidates.mapProperty('name'),
+        "acceptable_positions": setup.candidates.mapProperty('acceptable_positions'),
+        "mandates": setup.mandateCount,
+        "m_max": parseInt(setup.m_max),
+        "f_max": parseInt(setup.f_max),
+        "genders": setup.candidates.mapProperty('gender').mapProperty('code'),
+        "ordered": parseInt(setup.orderedCount),
+        "ballots_ab": STVDataBallot.aggregateBallots(ballots),
+        "name": title,
+        "expected": []
+    }, null, "  ");
+};
 
 function STVDataSetup(voteNo, candidateCount, mandateCount, ballotCount, replacements, candidates, genders, m_max, f_max, orderedCount) {
     this.voteNo = voteNo; // Not necessarily a number
@@ -349,7 +367,7 @@ function STVDataSetup(voteNo, candidateCount, mandateCount, ballotCount, replace
 
 STVDataSetup.round = function (x) {
     return new Number(x).toFixed(5);
-}
+};
 
 STVDataSetup.fromGUI = function(controller) {
     return new STVDataSetup(
@@ -377,13 +395,14 @@ STVDataSetup.toGUI = function(setup, controller) {
     }));
 };
 
-function STVDataCandidate(name, gender) {
+function STVDataCandidate(name, gender, acceptable_positions) {
     this.name = name;
     this.gender = gender;
+    this.acceptable_positions = acceptable_positions;
 }
 
 STVDataCandidate.fromGUI = function (c) {
-    return new STVDataCandidate(c.get('name'), c.get('gender'));
+    return new STVDataCandidate(c.get('name'), c.get('gender'), c.get('acceptable_positions').content.mapProperty('accepted'));
 };
 
 STVDataCandidate.toGUI = function (c, i) {

@@ -114,6 +114,7 @@ function send_to_server(socketId, server_host, data) {
 
 var messageHandler = function(e) {
     var command = e.data.command;
+    console.log(command);
     switch(command) {
         case 'start_server':
             start_server(e.source);
@@ -142,15 +143,16 @@ var messageHandler = function(e) {
             console.warn(e.data);
     }
 };
-window.addEventListener('message', messageHandler, false);
+window.parent.addEventListener('message', messageHandler, false);
 
 function display_data(config) {
+    console.log("popping up");
   chrome.app.window.create('download.html', {
     'width':  1000,
     'height': 600
   }, function(win) {
-       win.addEventListener('load', function() {
-               win.postMessage(config, '*');
+       win.contentWindow.addEventListener('load', function() {
+               win.contentWindow.postMessage(config, '*');
            }, false);
   });
 }

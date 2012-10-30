@@ -12,6 +12,11 @@
     "M"
   ],
   "ordered": 2,
+  "acceptable_positions": [
+    [true, true],
+    [true, true],
+    [false, false]
+  ],
   "ballots_ab": {
     "1:0:3":  6,
     "0:1:0":  4,
