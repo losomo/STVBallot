@@ -53,10 +53,10 @@ var mHandler = function(e) {
     extension = config.extension;
     document.getElementById("content").innerHTML = config.header + content + config.footer;
     if (config.print) {
-        window.print();
+        //window.print();
+        console.error("Printing disabled");
     }
 };
-//window.addEventListener('message', mHandler, false);
 
 window.addEventListener('load', function() {
         document.getElementById("print").onclick = function() {
@@ -65,5 +65,5 @@ window.addEventListener('load', function() {
         document.getElementById("save").onclick = function() {
             save_file();
         };
+        mHandler({data: window.config});
     }, false);
-

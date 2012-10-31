@@ -151,9 +151,7 @@ function display_data(config) {
     'width':  1000,
     'height': 600
   }, function(win) {
-       win.contentWindow.addEventListener('load', function() {
-               win.contentWindow.postMessage(config, '*');
-           }, false);
+       win.contentWindow.config = config;
   });
 }
 
