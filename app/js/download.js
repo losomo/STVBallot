@@ -44,9 +44,10 @@ function save_file() {
             });
 }
 
-var messageHandler = function(e) {
+var mHandler = function(e) {
     var config = e.data;
     title = config.title;
+    console.log(title);
     document.getElementById("title").innerHTML = title;
     content = config.content;
     extension = config.extension;
@@ -55,7 +56,7 @@ var messageHandler = function(e) {
         window.print();
     }
 };
-parent.addEventListener('message', messageHandler, false);
+//window.addEventListener('message', mHandler, false);
 
 window.addEventListener('load', function() {
         document.getElementById("print").onclick = function() {

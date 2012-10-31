@@ -143,7 +143,7 @@ var messageHandler = function(e) {
             console.warn(e.data);
     }
 };
-window.parent.addEventListener('message', messageHandler, false);
+window.addEventListener('message', messageHandler, false);
 
 function display_data(config) {
     console.log("popping up");

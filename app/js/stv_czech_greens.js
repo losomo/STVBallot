@@ -90,11 +90,12 @@ STV.prototype.run = function(setup, ballots, report, done) {
     while (mandates.length < setup.mandateCount && Object.keys(ab).length > 0) { // a) iv)
         report("<p>Shrnutí vyplněných preferencí</p>" + STVDataBallot.reportAggregatedBallots(setup, ab));
         var fp = STVDataBallot.aggregateFirstPreferences(ab);
+        if (fp.length == 0) break;
         report("<p>Počet hlasů s nejvyšší preferencí (při shodě v náhodném pořadí):<table>");
         fp.forEach(function(f) {report("<tr><td>" + STVDataSetup.round(f[0]) + "</td><td>" + f[1] + " (" + setup.candidates[f[1]-1].name + ")</td></tr>")});
         report("</table>");
         var has_elected = false;
-        var i = 0; // alternative algorithm: cycle for all i < fp.length in one round
+        var i = 0; // alternative algorithm could be: cycle for all i < fp.length in one round
         if (fp[i][0] >= quota) {
             mandates.push(setup.candidates[fp[i][1]-1]);
             ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, fp[i][1], quota);
