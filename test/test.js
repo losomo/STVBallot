@@ -23,7 +23,10 @@ function test(fname, debug) {
             voteNo: "Test vote " + fname,
             candidateCount: test.candidates.length,
             mandateCount: test.mandates,
-            candidates: test.candidates.map(function(c) {return {name: c, gender: '---'};})
+            candidates: test.candidates.map(function(c, i) {return {name: c, gender: test.genders[i], acceptable_positions: test.acceptable_positions[i]};}),
+            f_max: test.f_max,
+            m_max: test.m_max,
+            orderedCount: test.ordered
         }, ballots, function(msg) {
             msgs += msg;
         }, function(mandates) {
