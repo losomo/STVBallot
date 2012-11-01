@@ -105,7 +105,7 @@ STVDataBallot.reportAggregatedBallots = function(setup, ab) {
     return ret;
 };
 
-STVDataBallot.aggregateFirstPreferences = function(aggregatedBallots) {
+STVDataBallot.aggregateFirstPreferences = function(aggregatedBallots, setup, tie_order) {
     var ret = []; // Array of [ballots_with_1st_preference, 1+candidate_order] ordered by [0], randomly where there is a tie
     var score = {}; // candidate_order -> ballots_with_1st_preference
     for (var ab in aggregatedBallots) {
@@ -125,14 +125,22 @@ STVDataBallot.aggregateFirstPreferences = function(aggregatedBallots) {
     for (var candidate in score) {
         ret.push([score[candidate], candidate]);
     }
-    var i = ret.length; // Shuffle to randomize ties
-    while (--i > 0) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var oi = ret[i];
-        ret[i] = ret[j];
-        ret[j] = oi;
+    var tindex = {};
+    if (tie_order == null) {
+        var i = ret.length; // Shuffle to randomize ties
+        while (--i > 0) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var oi = ret[i];
+            ret[i] = ret[j];
+            ret[j] = oi;
+        }
     }
-    return ret.sort(function(a,b){return b[0]-a[0]});
+    else {
+        tie_order.forEach(function(to, i) {
+            tie_order[to[1]] = i;
+        });
+    }
+    return ret.sort(function(a,b){return b[0]-a[0] == 0 ? tindex[b] - tindex[a] : b[0]-a[0]});
 };
 
 STVDataBallot.get_most_preferred = function(ab) {
@@ -183,6 +191,31 @@ STVDataBallot.removeCandidateFromAggregatedBallots = function(oab, candidate, tr
     }
     return ab;
 };
+
+STVDataBallot.clone_ab = function(obj) {
+    if (null == obj || "object" != typeof obj) return obj;
+    if (obj instanceof Date) {
+        var copy = new Date();
+        copy.setTime(obj.getTime());
+        return copy;
+    }
+    if (obj instanceof Array) {
+        var copy = [];
+        var len = obj.length;
+        for (var i = 0; i < len; ++i) {
+            copy[i] = STVDataBallot.clone_ab(obj[i]);
+        }
+        return copy;
+    }
+    if (obj instanceof Object) {
+        var copy = {};
+        for (var attr in obj) {
+            if (obj.hasOwnProperty(attr)) copy[attr] = STVDataBallot.clone_ab(obj[attr]);
+        }
+        return copy;
+    }
+    throw new Error("Unable to copy obj! Its type isn't supported.");
+}
 
 STVDataBallot.prototype.get_sorted_orders = function() {
     // Candidate numbers start at 1 !!!!!!
