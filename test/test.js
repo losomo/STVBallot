@@ -27,8 +27,8 @@ function test(fname, debug) {
                 var genders = test.genders;
                 var ap = test.acceptable_positions;
                 return {
-                    name: c, 
-                    gender: genders == null ? '' : genders[i], 
+                    name: c,
+                    gender: genders == null ? '' : genders[i],
                     acceptable_positions: ap == null ? [] : ap[i]
                 };
             }),
@@ -73,7 +73,7 @@ function test(fname, debug) {
                    console.log(envelope(msgs));
                }
            }
-           else {               
+           else {
                console.log(envelope(msgs));
                console.error("Failed " + fname);
            }

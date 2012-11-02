@@ -21,13 +21,13 @@ function STV() {
 
 (function() {
 STV.prototype.validate = function(ballot) {
-    if (ballot.invalid || ballot.empty) return "";    
+    if (ballot.invalid || ballot.empty) return "";
     var last = 0;
     var sorted = ballot.entries.sort();
     for (var i = 0; i < sorted.length; i++) {
         var e = sorted[i];
         if (e) {
-            if (e != ++last) return e > last ? 'Chybí pořadí: ' + last : 'Duplicitní pořadí: ' + e;           
+            if (e != ++last) return e > last ? 'Chybí pořadí: ' + last : 'Duplicitní pořadí: ' + e;
         }
     }
     return "ok";
@@ -68,14 +68,14 @@ STV.prototype.ballot_header = function() { return "Pokyny pro hlasování: " +
     "<li>Hlas je neplatný, pokud uvedete stejné číslo u&nbsp;dvou kandidátů, pokud " +
     "nejnižší Vámi uvedené číslo není 1 nebo pokud Vámi uvedené čísla nejsou po " +
     "sobě jdoucí pořadová čísla.</li>" +
-    
+
     "<li>Pokud po volbě nejsou obsazeny všechny mandáty voleného orgánu, konají " +
-    "se nové volby na tyto mandáty.</li></ul>"; 
+    "se nové volby na tyto mandáty.</li></ul>";
 }
 
 function stv_round(setup, ab, report, quota, original_fp) {
     var mandates = []; // Array of STVDataCandidates
-    report("<p>Kvóta pro zvolení: " + STVDataSetup.round(quota) + "</p>");    
+    report("<p>Kvóta pro zvolení: " + STVDataSetup.round(quota) + "</p>");
     while (mandates.length < setup.mandateCount && Object.keys(ab).length > 0) { // a) iv)
         report("<p>Shrnutí vyplněných preferencí</p>" + STVDataBallot.reportAggregatedBallots(setup, ab));
         var fp = STVDataBallot.aggregateFirstPreferences(ab, setup, original_fp);
@@ -96,7 +96,7 @@ function stv_round(setup, ab, report, quota, original_fp) {
             report("<p>Žádný kandidát nepřekračuje kvótu, odstraňuji kandidáta " + setup.candidates[fp[last][1]-1].name + " ("  + fp[last][1] + ")</p>");
             ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, fp[last][1], 0);
         }
-    }   
+    }
     if (mandates.length >= setup.mandateCount) {
         report("<p>Sčítání ukončeno, neboť stanovený počet mandátů byl obsazen.</p>");
     }
@@ -116,13 +116,13 @@ STV.prototype.run = function(setup, ballots, report, done) {
         "<h1>Výpočet volby: " + setup.voteNo + "</h1>" +
         "<p>Z " + setup.candidateCount + " kandidátů voleno " + setup.mandateCount + " mandátů, z toho " + setup.orderedCount + " pozic s pořadím. Odevzdáno " + ballots.length + " hlasovacích lístků.<br/>" +
         "Neplatných lístků: " + ab['_invalid'] + ", prázdných lístků: " + ab['_empty'] + "</p>" +
-        "<p>Kandidáti:<table><tr>" + setup.candidates.map(function(c){return "<td>" + c.gender + "</td><td>" + c.name + "</td><td>" + c.acceptable_positions.map(function(p){return p?'✓':'✗';}) + "</td>";}).join("</tr><tr>") +        
-        "</tr></table></p>" + 
+        "<p>Kandidáti:<table><tr>" + setup.candidates.map(function(c){return "<td>" + c.gender + "</td><td>" + c.name + "</td><td>" + c.acceptable_positions.map(function(p){return p?'✓':'✗';}) + "</td>";}).join("</tr><tr>") +
+        "</tr></table></p>" +
         "<p>Maximální počet mužů: " + (setup.m_max > 0 ? setup.m_max : 'neomezen')  + ", " +
         "maximální počet žen: " + (setup.f_max > 0 ? setup.f_max : 'neomezen') + "<br/>" +
         "Počet platných hlasovacích lístků: " + valid_ballots_count + "</p>"
     );
-    var quota = valid_ballots_count / (setup.mandateCount + 1) + 0.00001; 
+    var quota = valid_ballots_count / (setup.mandateCount + 1) + 0.00001;
     var mandates = stv_round(setup, ab, report, quota, original_fp);
     done(mandates);
 }

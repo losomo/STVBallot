@@ -54,7 +54,7 @@ STVDataBallot.combineGroups = function(groups) {
         group.piles.forEach(function (pile) {
             if (!pile.note) {
                 found += 1;
-                ret = ret.concat(pile.ballots);       
+                ret = ret.concat(pile.ballots);
             }
         });
         if (found != 1) throw "Primary pile not found";
@@ -92,7 +92,7 @@ STVDataBallot.reportAggregatedBallots = function(setup, ab) {
     for (var b in ab) {
         if (b != "_invalid" && b != "_empty") {
             var lowest = STVDataBallot.get_most_preferred(b)[0];
-            ret += "<tr><td>" + STVDataSetup.round(ab[b]) + "</td><td>" + 
+            ret += "<tr><td>" + STVDataSetup.round(ab[b]) + "</td><td>" +
                 b.split(":").map(function (x){
                     return x > 0 ?
                         (x == lowest ? "<b>" + x + "</b>" : x)
@@ -116,10 +116,10 @@ STVDataBallot.aggregateFirstPreferences = function(aggregatedBallots, setup, tie
                     if (!score[i+1]) score[i+1] = 0;
                 }
             });
-            var most_preferred = STVDataBallot.get_most_preferred(ab);            
+            var most_preferred = STVDataBallot.get_most_preferred(ab);
             most_preferred[1].forEach(function(candidate) {
                 score[candidate] += s / most_preferred[1].length;
-            });            
+            });
         }
     }
     for (var candidate in score) {
@@ -303,7 +303,7 @@ STVDataFormats.bltFromGroups = function(title, setup, groups) {
                             ret += "1 " + ballot.get_sorted_orders().join(" ") + " 0\n";
                         }
                     }
-                });                
+                });
             }
         });
         if (found != 1) throw "Primary pile not found";
@@ -363,7 +363,7 @@ STVDataFormats.bltToCase = function(blt) {
         "mandates": header[1],
         "ballots_ab": ab,
         "name": name,
-        "expected": [         
+        "expected": [
         ]
     }
 };
@@ -438,7 +438,7 @@ STVDataCandidate.fromGUI = function (c) {
 
 STVDataCandidate.toGUI = function (c, i) {
     return Candidate.create({
-        name: c.name, 
+        name: c.name,
         gender: c.gender,
         index: i
     });

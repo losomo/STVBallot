@@ -309,7 +309,7 @@ App.VoteSetupController = Em.Controller.extend({
                 }
                 if (names[name]) problem = true;
                 names[name] = true;
-                
+
                 if (gender && genders != (gender.code != '')) problem = true;
             });
             if (parseInt(this.get('candidateCount')) < parseInt(this.get('mandateCount'))) problem = true;
