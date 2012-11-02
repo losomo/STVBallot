@@ -18,7 +18,6 @@
         "udp-send-to", "udp-bind"
     ]},
     "app.window",
-/*    "fileSystemWrite", "fileSystem" */
     {"fileSystem" : [
         "write"
     ]}

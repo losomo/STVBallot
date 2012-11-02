@@ -377,7 +377,7 @@ STVDataFormats.jsonFromGroups = function(title, setup, groups, mandates) {
         "mandates": setup.mandateCount,
         "m_max": parseInt(setup.m_max),
         "f_max": parseInt(setup.f_max),
-        "genders": setup.candidates.mapProperty('gender').mapProperty('code'),
+        "genders": setup.candidates.mapProperty('gender'),
         "ordered": parseInt(setup.orderedCount),
         "ballots_ab": STVDataBallot.aggregateBallots(ballots),
         "name": title,
@@ -385,14 +385,13 @@ STVDataFormats.jsonFromGroups = function(title, setup, groups, mandates) {
     }, null, "  ");
 };
 
-function STVDataSetup(voteNo, candidateCount, mandateCount, ballotCount, replacements, candidates, genders, m_max, f_max, orderedCount) {
+function STVDataSetup(voteNo, candidateCount, mandateCount, ballotCount, replacements, candidates, m_max, f_max, orderedCount) {
     this.voteNo = voteNo; // Not necessarily a number
     this.candidateCount = parseInt(candidateCount);
     this.mandateCount = parseInt(mandateCount);
     this.ballotCount = parseInt(ballotCount);
     this.replacements = replacements; // Boolean
     this.candidates = candidates; // Array of STVDataCandidate
-    this.genders = genders; // Array of 'M' / 'F'
     this.m_max = parseInt(m_max);
     this.f_max = parseInt(f_max);
     this.orderedCount = parseInt(orderedCount);
@@ -410,7 +409,6 @@ STVDataSetup.fromGUI = function(controller) {
         controller.get('ballotCount'),
         controller.get('replacements'),
         controller.get('candidates').map(function(candidate) {return STVDataCandidate.fromGUI(candidate);}),
-        controller.get('candidates').map(function(candidate) {return candidate.get('gender').code;}),
         controller.get('m_max'),
         controller.get('f_max'),
         controller.get('orderedCount')
@@ -435,7 +433,7 @@ function STVDataCandidate(name, gender, acceptable_positions) {
 }
 
 STVDataCandidate.fromGUI = function (c) {
-    return new STVDataCandidate(c.get('name'), c.get('gender'), c.get('acceptable_positions').content.mapProperty('accepted'));
+    return new STVDataCandidate(c.get('name'), c.get('gender').code, c.get('acceptable_positions').content.mapProperty('accepted'));
 };
 
 STVDataCandidate.toGUI = function (c, i) {
