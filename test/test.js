@@ -23,7 +23,15 @@ function test(fname, debug) {
             voteNo: "Test vote " + fname,
             candidateCount: test.candidates.length,
             mandateCount: test.mandates,
-            candidates: test.candidates.map(function(c, i) {return {name: c, gender: test.genders[i], acceptable_positions: test.acceptable_positions[i]};}),
+            candidates: test.candidates.map(function(c, i) {
+                var genders = test.genders;
+                var ap = test.acceptable_positions;
+                return {
+                    name: c, 
+                    gender: genders == null ? '' : genders[i], 
+                    acceptable_positions: ap == null ? [] : ap[i]
+                };
+            }),
             f_max: test.f_max,
             m_max: test.m_max,
             orderedCount: test.ordered
@@ -61,7 +69,9 @@ function test(fname, debug) {
            }
            if (ok) {
                console.error(fname + " OK");
-               if (debug) console.log(envelope(msgs));
+               if (debug) {
+                   console.log(envelope(msgs));
+               }
            }
            else {               
                console.log(envelope(msgs));
@@ -81,5 +91,5 @@ if (fname) {
     test(fname, true);
 }
 else {
-    fs.readdirSync('.').sort().forEach(test, false);
+    fs.readdirSync('.').sort().forEach(function(fname) {test(fname, false)});
 }
