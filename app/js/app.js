@@ -572,12 +572,13 @@ App.Router = Em.Router.extend({
                 var pileGroups = router.get('voteRunningController').get('pileGroups');
                 var groups = pileGroups.map(function (group) {return STVDataPileGroup.fromGUI(group);});
                 var setup = STVDataSetup.fromGUI(router.get('voteSetupController'));
+                var mandates = router.get('voteRunningController').get('mandates').mapProperty('name');
                 var title = "_Vote".loc() + "_" + setup.voteNo;
                 send_command('download_data', {
                     header: "<pre>",
                     footer: "</pre>",
                     extension: "json",
-                    content: STVDataFormats.jsonFromGroups(title, setup, groups),
+                    content: STVDataFormats.jsonFromGroups(title, setup, groups, mandates),
                     title: title
                 });
             },

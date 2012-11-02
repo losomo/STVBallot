@@ -368,7 +368,7 @@ STVDataFormats.bltToCase = function(blt) {
     }
 };
 
-STVDataFormats.jsonFromGroups = function(title, setup, groups) {
+STVDataFormats.jsonFromGroups = function(title, setup, groups, mandates) {
     var ballots = STVDataBallot.combineGroups(groups);
     console.log(setup.candidates);
     return JSON.stringify({
@@ -381,7 +381,7 @@ STVDataFormats.jsonFromGroups = function(title, setup, groups) {
         "ordered": parseInt(setup.orderedCount),
         "ballots_ab": STVDataBallot.aggregateBallots(ballots),
         "name": title,
-        "expected": []
+        "expected": mandates
     }, null, "  ");
 };
 
