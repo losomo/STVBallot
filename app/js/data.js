@@ -392,9 +392,9 @@ function STVDataSetup(voteNo, candidateCount, mandateCount, ballotCount, replace
     this.ballotCount = parseInt(ballotCount);
     this.replacements = replacements; // Boolean
     this.candidates = candidates; // Array of STVDataCandidate
-    this.m_max = parseInt(m_max);
-    this.f_max = parseInt(f_max);
-    this.orderedCount = parseInt(orderedCount);
+    this.m_max = parseInt(m_max || 0);
+    this.f_max = parseInt(f_max || 0);
+    this.orderedCount = parseInt(orderedCount || 0);
 }
 
 STVDataSetup.round = function (x) {

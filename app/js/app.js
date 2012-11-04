@@ -622,7 +622,7 @@ App.Router = Em.Router.extend({
                 },
                 function(mandates) {
                     vrc.get('mandates').pushObjects(mandates);
-                    vrc.report_append("<p><em>" + new Date() + "</em>" + "_Computation done".loc() + ".</p>");
+                    vrc.report_append("<p><em>" + new Date() + "</em> " + "_Computation done".loc() + ".</p>");
                 });
             },
             resetAll: function(router) {
