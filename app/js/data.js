@@ -158,10 +158,10 @@ STVDataBallot.get_most_preferred = function(ab) {
             }, [Number.MAX_VALUE, []]); // returns [min_order, [1+index_with_min_order]]
 };
 
-STVDataBallot.removeCandidateFromAggregatedBallots = function(oab, candidate, transfer) {
+STVDataBallot.removeCandidateFromAggregatedBallots = function(oab, corder, transfer, soft_remove) {
     var votes_for_candidate = function(aggrb) {
         var most_preferred = STVDataBallot.get_most_preferred(aggrb);
-        if (most_preferred[1].some(function(i) {return i == candidate})) {
+        if (most_preferred[1].some(function(i) {return i == corder})) {
             return oab[aggrb] / most_preferred[1].length;
         }
         else {
@@ -179,8 +179,8 @@ STVDataBallot.removeCandidateFromAggregatedBallots = function(oab, candidate, tr
     for (var b in oab) {
         if (b != "_empty" && b != "_invalid") {
             var for_candidate = votes_for_candidate(b);
-            barray = b.split(':');
-            barray[candidate-1] = 0;
+            var barray = b.split(':');
+            barray[corder-1] = soft_remove ? 100 * barray.length + barray[corder-1] : 0;
             if (barray.some(function(x) {return x > 0;})) {
                 var newb = barray.join(':');
                 var new_score = new_weight * for_candidate + (oab[b] - for_candidate);
@@ -215,6 +215,45 @@ STVDataBallot.clone_ab = function(obj) {
         return copy;
     }
     throw new Error("Unable to copy obj! Its type isn't supported.");
+}
+
+STVDataBallot.reinsert_to_ab = function(oab, candidate_orders, candidates) {
+    var ab = {};
+    for (var b in oab) {
+        if (b != "_empty" && b != "_invalid") {
+            var barray = b.split(':');
+            candidates.forEach(function(candidate) {
+                if (candidate_orders[candidate] > 0) {
+                    barray[candidate_orders[candidate]-1] = barray[candidate_orders[candidate]-1] - 100 * barray.length;
+                }
+            });
+            var newb = barray.join(':');
+            if (!ab[newb]) ab[newb] = 0;
+            ab[newb] += oab[b];
+        }
+    }
+    return ab;
+}
+
+STVDataBallot.remove_gender_violators_from_ab = function(oab, setup, candidate_orders, mandates) {
+    var ab = oab;
+    var m_count = 0;
+    var f_count = 0;
+    mandates.forEach(function (mandate) {
+        if (mandate.gender == 'M') m_count++;
+        if (mandate.gender == 'F') f_count++;
+    });
+    var rm_m = m_count >= setup.m_max;
+    var rm_f = f_count >= setup.f_max;
+    setup.candidates.forEach(function(candidate, i) {
+        if (candidate.gender == 'M' && rm_m || candidate.gender == 'F' && rm_f) 
+            ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, i+1, 0, false);
+    });
+    return ab;
+}
+
+STVDataBallot.remove_non_candidates = function() {
+    // TODO
 }
 
 STVDataBallot.prototype.get_sorted_orders = function() {
