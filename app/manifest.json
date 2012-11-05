@@ -3,7 +3,7 @@
   "description": "STV Ballot",
   "manifest_version": 2,
   "minimum_chrome_version": "23",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "app": {
     "background": {
       "scripts": ["background.js"]

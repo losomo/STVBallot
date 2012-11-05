@@ -87,17 +87,21 @@ function stv_round(op) {
         op.report("</table>");
         var has_elected = false;
         var i = 0;
-        while (fp[i][0] >= op.quota && !op.deathmatch) {            
-            if (op.admissible_candidates != null) {                
-                if (!op.admissible_candidates.some(function(c, i) { // suboptimal, could have used hash instead
+        while (fp[i][0] >= op.quota && !op.deathmatch) {
+            if (op.admissible_candidates != null) {
+                if (!op.admissible_candidates.some(function(c) { // suboptimal, could have used hash instead
                     return c.name == op.setup.candidates[fp[i][1]-1].name;
                 })) {
+                    op.report("<p>" + op.setup.candidates[fp[i][1]-1].name + " nemůže být zvolen v kroce i), ignoruji.</p>");
                     i++;
                     continue;
                 }
+                else {
+                    op.report(op.setup.candidates[fp[i][1]-1].name + " je volitelný v kroce i).");
+                }
             }
             mandates.push(op.setup.candidates[fp[i][1]-1]);
-            op.ab = STVDataBallot.removeCandidateFromAggregatedBallots(op.ab, fp[i][1], op.quota, op.soft_remove);
+            op.ab = STVDataBallot.removeCandidateFromAggregatedBallots(op.ab, fp[i][1], op.quota, false);
             op.report("<p>Kandidát <b>" + op.setup.candidates[fp[i][1]-1].name +"</b> (" + fp[i][1] +
                 ") zvolen, na další místa se přesouvá " + STVDataSetup.round(fp[i][0]-op.quota) +
                 " (" + new Number((fp[i][0]-op.quota)/fp[i][0]*100).toFixed(1)  + " %) hlasů</p>");
@@ -108,7 +112,7 @@ function stv_round(op) {
             var last = fp.length - 1;
             last_alive = [op.setup.candidates[fp[last][1]-1], fp[last][0]];
             op.report("<p>Žádný kandidát není zvolen, odstraňuji kandidáta " + last_alive[0].name + " ("  + fp[last][1] + ")</p>");
-            op.ab = STVDataBallot.removeCandidateFromAggregatedBallots(op.ab, fp[last][1], 0, false);
+            op.ab = STVDataBallot.removeCandidateFromAggregatedBallots(op.ab, fp[last][1], 0, op.soft_remove);
         }
     }
     if (op.deathmatch) {
@@ -182,7 +186,6 @@ STV.prototype.run = function(setup, ballots, report, done) {
             });
             report("</p>");
         });
-        report("<h2>Zvolení kandidáti:</h2><ul><li>" + mandates.map(function(c){return c.name;}).join("</li><li>") + "</li></ul>");
     }
     else {
         // top-down STV
@@ -193,7 +196,6 @@ STV.prototype.run = function(setup, ballots, report, done) {
             if (round <= setup.orderedCount) {
                 report("<h5>Výpočet pro obsazení pozice č. " + round + "</h5>");
                 round_quota = valid_ballots_count / (round + 1) + 0.00001;
-                STVDataBallot.remove_non_candidates(new_ab, setup, round);
             }
             else {
                 report("<h5>Kolo č. " + round + "</h5>");
@@ -202,14 +204,18 @@ STV.prototype.run = function(setup, ballots, report, done) {
             // krok i)
             if (round > 1) {
                 report("Krok i: odstranění již zvolených kandidátů");
-                stv_round({
+                var op_step1 = {
                     "soft_remove": true, "admissible_candidates": mandates, "setup": setup, "ab": new_ab, "report": report, "quota": round_quota, "original_fp": original_fp
-                });
+                };
+                stv_round(op_step1);
+                new_ab = op_step1["ab"];
             // krok ii)
                 new_ab = STVDataBallot.reinsert_to_ab(new_ab, candidate_orders, mandates);
+                report("<p>Preference po vrácení kandidátů vyřazených v kroku i)</p>" + STVDataBallot.reportAggregatedBallots(setup, new_ab));
             }
-            new_ab = STVDataBallot.remove_gender_violators_from_ab(new_ab, setup, candidate_orders, mandates);
-            report("Krok ii: volba mandátu");
+            new_ab = STVDataBallot.remove_gender_violators_from_ab(new_ab, setup, report, candidate_orders, mandates);
+            report("Krok ii: volba mandátu<br/>");
+            new_ab = STVDataBallot.remove_non_candidates(new_ab, setup, round, report);
             var new_mandates = stv_round({
                 "deathmatch": true, "setup": setup, "ab": new_ab, "report": report, "quota": round_quota, "original_fp": original_fp
             });
@@ -222,6 +228,7 @@ STV.prototype.run = function(setup, ballots, report, done) {
             }
         }
     }
+    report("<h2>Zvolení kandidáti:</h2><ul><li>" + mandates.map(function(c){return c.name;}).join("</li><li>") + "</li></ul>");
     done(mandates);
 }
 

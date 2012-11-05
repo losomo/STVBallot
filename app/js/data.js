@@ -112,7 +112,7 @@ STVDataBallot.aggregateFirstPreferences = function(aggregatedBallots, setup, tie
         if (ab != "_empty" && ab != "_invalid") {
             var s = aggregatedBallots[ab];
             ab.split(':').forEach(function(o, i) {
-                if (o > 0) {
+                if (o > 0 && o < setup.candidates.length * 100) {
                     if (!score[i+1]) score[i+1] = 0;
                 }
             });
@@ -235,7 +235,7 @@ STVDataBallot.reinsert_to_ab = function(oab, candidate_orders, candidates) {
     return ab;
 }
 
-STVDataBallot.remove_gender_violators_from_ab = function(oab, setup, candidate_orders, mandates) {
+STVDataBallot.remove_gender_violators_from_ab = function(oab, setup, report, candidate_orders, mandates) {
     var ab = oab;
     var m_count = 0;
     var f_count = 0;
@@ -246,14 +246,25 @@ STVDataBallot.remove_gender_violators_from_ab = function(oab, setup, candidate_o
     var rm_m = m_count >= setup.m_max;
     var rm_f = f_count >= setup.f_max;
     setup.candidates.forEach(function(candidate, i) {
-        if (candidate.gender == 'M' && rm_m || candidate.gender == 'F' && rm_f) 
+        if (candidate.gender == 'M' && rm_m || candidate.gender == 'F' && rm_f) {
             ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, i+1, 0, false);
+            report("Vyřazen z důvodu genderové kvóty: " + candidate.name + "<br/>");
+        }
     });
     return ab;
 }
 
-STVDataBallot.remove_non_candidates = function() {
-    // TODO
+STVDataBallot.remove_non_candidates = function(oab, setup, round, report) {
+    var ab = oab;
+    setup.candidates.forEach(function(candidate, cindex) {
+        if(candidate.acceptable_positions != null) {
+            if (!candidate.acceptable_positions[round-1]) {
+                report("Kandidát " + candidate.name + " nekandiduje v kole " + round + ", vyřazuji.<br/>");
+                ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, cindex+1, 0, false);
+            }
+        }
+    });
+    return ab;
 }
 
 STVDataBallot.prototype.get_sorted_orders = function() {
