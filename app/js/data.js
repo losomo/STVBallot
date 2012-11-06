@@ -180,7 +180,7 @@ STVDataBallot.removeCandidateFromAggregatedBallots = function(oab, corder, trans
         if (b != "_empty" && b != "_invalid") {
             var for_candidate = votes_for_candidate(b);
             var barray = b.split(':');
-            barray[corder-1] = soft_remove ? 100 * barray.length + barray[corder-1] : 0;
+            barray[corder-1] = soft_remove ? 100 * barray.length + parseInt(barray[corder-1]) : 0;
             if (barray.some(function(x) {return x > 0;})) {
                 var newb = barray.join(':');
                 var new_score = new_weight * for_candidate + (oab[b] - for_candidate);
@@ -217,16 +217,16 @@ STVDataBallot.clone_ab = function(obj) {
     throw new Error("Unable to copy obj! Its type isn't supported.");
 }
 
-STVDataBallot.reinsert_to_ab = function(oab, candidate_orders, candidates) {
+STVDataBallot.reinsert_to_ab = function(oab) {
     var ab = {};
     for (var b in oab) {
         if (b != "_empty" && b != "_invalid") {
             var barray = b.split(':');
-            candidates.forEach(function(candidate) {
-                if (candidate_orders[candidate] > 0) {
-                    barray[candidate_orders[candidate]-1] = barray[candidate_orders[candidate]-1] - 100 * barray.length;
+            for (var i = 0; i < barray.length; i++) {
+                if (barray[i] > 100 * barray.length) {
+                    barray[i] = barray[i] - 100 * barray.length;
                 }
-            });
+            }
             var newb = barray.join(':');
             if (!ab[newb]) ab[newb] = 0;
             ab[newb] += oab[b];
@@ -254,13 +254,17 @@ STVDataBallot.remove_gender_violators_from_ab = function(oab, setup, report, can
     return ab;
 }
 
-STVDataBallot.remove_non_candidates = function(oab, setup, round, report) {
+STVDataBallot.remove_non_candidates = function(oab, setup, round, mandates, report, soft_remove) {
     var ab = oab;
     setup.candidates.forEach(function(candidate, cindex) {
         if(candidate.acceptable_positions != null && candidate.acceptable_positions.length > 0) {
             if (!candidate.acceptable_positions[round-1]) {
-                report("Kandidát " + candidate.name + " nekandiduje v kole " + round + ", vyřazuji.<br/>");
-                ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, cindex+1, 0, false);
+                if (!mandates.some(function(m) { // suboptimal, could have used hash instead
+                    return candidate.name == m.name;
+                })) {
+                    report("<br/>Kandidát " + candidate.name + " nekandiduje v kole " + round + ", vyřazuji.<br/>");
+                    ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, cindex+1, 0, soft_remove);
+                }
             }
         }
     });

@@ -36,6 +36,7 @@ function test(fname, debug) {
             m_max: test.m_max,
             orderedCount: test.ordered
         }, ballots, function(msg) {
+            //console.error(msg);
             msgs += msg;
         }, function(mandates) {
            var ok = true;
