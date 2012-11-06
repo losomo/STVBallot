@@ -215,7 +215,9 @@ STV.prototype.run = function(setup, ballots, report, done) {
             }
             new_ab = STVDataBallot.remove_gender_violators_from_ab(new_ab, setup, report, candidate_orders, mandates);
             report("Krok ii: volba mandátu<br/>");
-            new_ab = STVDataBallot.remove_non_candidates(new_ab, setup, round, report);
+            if (round <= setup.orderedCount) {
+                new_ab = STVDataBallot.remove_non_candidates(new_ab, setup, round, report);
+            }
             var new_mandates = stv_round({
                 "deathmatch": true, "setup": setup, "ab": new_ab, "report": report, "quota": round_quota, "original_fp": original_fp
             });

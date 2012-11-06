@@ -257,7 +257,7 @@ STVDataBallot.remove_gender_violators_from_ab = function(oab, setup, report, can
 STVDataBallot.remove_non_candidates = function(oab, setup, round, report) {
     var ab = oab;
     setup.candidates.forEach(function(candidate, cindex) {
-        if(candidate.acceptable_positions != null) {
+        if(candidate.acceptable_positions != null && candidate.acceptable_positions.length > 0) {
             if (!candidate.acceptable_positions[round-1]) {
                 report("Kandidát " + candidate.name + " nekandiduje v kole " + round + ", vyřazuji.<br/>");
                 ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, cindex+1, 0, false);

@@ -1,0 +1,36 @@
+{
+  "candidates": [
+    "A",
+    "B",
+    "C",
+    "d",
+    "e"
+  ],
+  "acceptable_positions": [
+    [],
+    [],
+    [],
+    [],
+    []
+  ],
+  "mandates": 2,
+  "m_max": 1,
+  "f_max": 1,
+  "genders": [
+    "M",
+    "M",
+    "M",
+    "F",
+    "F"
+  ],
+  "ordered": 0,
+  "ballots_ab": {
+    "_invalid": 0,
+    "_empty": 0,
+    "1:0:0:2:0": 9,
+    "0:1:2:0:3": 8,
+    "0:2:1:0:3": 3
+  },
+  "name": "Volba_1",
+  "expected": ["B", "d"]
+}
