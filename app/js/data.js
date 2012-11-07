@@ -180,7 +180,7 @@ STVDataBallot.removeCandidateFromAggregatedBallots = function(oab, corder, trans
         if (b != "_empty" && b != "_invalid") {
             var for_candidate = votes_for_candidate(b);
             var barray = b.split(':');
-            barray[corder-1] = soft_remove ? 100 * barray.length + parseInt(barray[corder-1]) : 0;
+            barray[corder-1] = soft_remove && barray[corder-1] > 0 ? 100 * barray.length + parseInt(barray[corder-1]) : 0;
             if (barray.some(function(x) {return x > 0;})) {
                 var newb = barray.join(':');
                 var new_score = new_weight * for_candidate + (oab[b] - for_candidate);

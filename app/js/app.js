@@ -329,10 +329,13 @@ App.VoteSetupController = Em.Controller.extend({
             var oj = c.objectAt(j);
             var iname = oi.get('name');
             var igeneder = oi.get('gender');
+            var iacceptable_positions = oi.get('acceptable_positions');
             oi.set('name', oj.get('name'));
             oi.set('gender', oj.get('gender'));
+            oi.set('acceptable_positions', oj.get('acceptable_positions'));
             oj.set('name', iname);
             oj.set('gender', igeneder);
+            oj.set('acceptable_positions', iacceptable_positions);
         }
         this.set('shuffled', true);
     },
