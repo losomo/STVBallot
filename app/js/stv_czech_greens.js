@@ -219,7 +219,7 @@ STV.prototype.run = function(setup, ballots, report, done) {
             }
             // krok i)
             if (round > 1) {
-                report("Krok i: odstranění již zvolených kandidátů");
+                report("Krok i: odstranění již zvolených kandidátů (" + mandates.map(function(m){return m.name;}).join(", ") + ")");
                 new_ab = STVDataBallot.remove_non_candidates(new_ab, setup, round - 1, mandates, report, true);
                 var op_step1 = {
                     "soft_remove": true, "admissible_candidates": mandates, "setup": setup, "ab": new_ab, "report": report, "quota": round_quota, "original_fp": original_fp

@@ -144,8 +144,9 @@ STVDataBallot.aggregateFirstPreferences = function(aggregatedBallots, setup, tie
 };
 
 STVDataBallot.get_most_preferred = function(ab) {
-    return ab.split(':').reduce(function(min_count, order, index) {
-                if (order > 0) {
+    var barray = ab.split(':');
+    return barray.reduce(function(min_count, order, index) {
+                if (order > 0 && order < barray.length * 100) {
                     var min = min_count[0];
                     if(order == min) {
                         min_count[1].push(index + 1);
