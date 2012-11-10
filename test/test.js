@@ -32,13 +32,13 @@ function test(fname, debug) {
                     acceptable_positions: ap == null ? [] : ap[i]
                 };
             }),
-            f_max: test.f_max,
-            m_max: test.m_max,
-            orderedCount: test.ordered
+            f_max: test.f_max || 0,
+            m_max: test.m_max || 0,
+            orderedCount: test.ordered || 0
         }, ballots, function(msg) {
             //console.error(msg);
             msgs += msg;
-        }, function(mandates) {
+        }, function(mandates, replacements) {
            var ok = true;
            test.expected.forEach(function(ex) {
                var x = {};
@@ -63,10 +63,19 @@ function test(fname, debug) {
                        break;
                    }
                }
-           });
+           });           
            if (mandates.length > 0) {
                console.error("Expected nothing, got " + JSON.stringify(mandates.map(function(m){return m.name})));
                ok = false;
+           }
+           if (test.expected_replacements != null && test.expected_replacements.length > 0) {
+                var rnames = replacements.map(function(rr){return rr.map(function(r){return r.name})});
+                if (test.expected_replacements < rnames || rnames < test.expected_replacements) { // http://stackoverflow.com/a/5115066/331271
+                    console.error(rnames);
+                    console.error(test.expected_replacements);
+                    console.error("Error in replacements");                    
+                    ok = false;
+                }
            }
            if (ok) {
                console.error(fname + " OK");

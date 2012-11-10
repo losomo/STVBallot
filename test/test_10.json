@@ -2,7 +2,7 @@
   "candidates": [
     "A",
     "B",
-    "Prazdny"
+    "Jiří Prázdnina"
   ],
   "mandates": 2,
   "ballots_ab": {
@@ -11,5 +11,8 @@
     "0:0:1": 40
   },
   "name": "Test 10",
-  "expected": []
+  "expected": ["Jiří Prázdnina"],
+    "expected_replacements": [
+        [""]
+    ]
 }

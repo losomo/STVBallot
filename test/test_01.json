@@ -16,7 +16,13 @@
   "expected": [
     "A",
     "B",
-    "C",
-    "D"
-  ]
+    "D",
+    "C"
+  ],
+    "expected_replacements": [
+        [],
+        [],
+        [],
+        []
+    ]
 }

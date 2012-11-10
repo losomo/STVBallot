@@ -13,9 +13,9 @@
   ],
   "ordered": 2,
   "acceptable_positions": [
-    [true, true],
-    [true, true],
-    [false, false]
+    [true, true, true],
+    [true, true, true],
+    [true, true, true]
   ],
   "ballots_ab": {
     "1:0:3":  6,
@@ -24,7 +24,11 @@
   },
   "name": "Priklad 7",
   "expected": [
-    "A",
-    "C"
-  ]
+    "B",
+    "A"
+  ],
+    "expected_replacements": [
+        [],
+        ["C"]
+    ]
 }

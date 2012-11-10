@@ -17,6 +17,13 @@
         "0:0:0:0:0:0:0:0:1":    21
     },
     "expected": [
-        "Alžběta", "Filipa", "Ivana", "Bernard", "Cecílie"
+        "Alžběta", "Bernard", "Filipa", "Ivana", "Cecílie"
+    ],
+    "expected_replacements": [
+        ["David"],
+        ["David"],
+        ["Gustav"],
+        [],
+        ["David"]
     ]
 }

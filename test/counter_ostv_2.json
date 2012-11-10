@@ -19,5 +19,11 @@
     "D",
     "E",
     "B"
-  ]
+  ],
+    "expected_replacements": [
+        ["C"],
+        ["F"],
+        ["F"],
+        ["C"]
+    ]
 }

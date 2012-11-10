@@ -13,8 +13,14 @@
   "name": "Example 1: votes transferring point, should be ABCD, is ADBC",
   "expected": [
     "A",
-    "D",
     "B",
-    "C"
-  ]
+    "C",
+    "D"
+  ],
+    "expected_replacements": [
+        [],
+        [],
+        [],
+        []
+    ]
 }

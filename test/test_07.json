@@ -15,9 +15,16 @@
   "name": "Test 7",
   "expected": [
     "A",
-    "D",
     "B",
+    "D",
     "C",
     "E"
-  ]
+  ],
+    "expected_replacements": [
+        [],
+        [],
+        [],
+        [],
+        []
+    ]
 }

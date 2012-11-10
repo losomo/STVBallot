@@ -12,5 +12,9 @@
   "expected": [
     "A",
     "B"
-  ]
+  ],
+    "expected_replacements": [
+        [],
+        []
+    ]
 }

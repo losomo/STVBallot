@@ -244,8 +244,8 @@ STVDataBallot.remove_gender_violators_from_ab = function(oab, setup, report, can
         if (mandate.gender == 'M') m_count++;
         if (mandate.gender == 'F') f_count++;
     });
-    var rm_m = m_count >= setup.m_max;
-    var rm_f = f_count >= setup.f_max;
+    var rm_m = setup.m_max > 0 && m_count >= setup.m_max;
+    var rm_f = setup.f_max > 0 && f_count >= setup.f_max;
     setup.candidates.forEach(function(candidate, i) {
         if (candidate.gender == 'M' && rm_m || candidate.gender == 'F' && rm_f) {
             ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, i+1, 0, false);
@@ -257,13 +257,19 @@ STVDataBallot.remove_gender_violators_from_ab = function(oab, setup, report, can
 
 STVDataBallot.remove_non_candidates = function(oab, setup, round, mandates, report, soft_remove) {
     var ab = oab;
+    var ap_index = round > setup.orderedCount ? setup.orderedCount : round - 1;
     setup.candidates.forEach(function(candidate, cindex) {
         if(candidate.acceptable_positions != null && candidate.acceptable_positions.length > 0) {
-            if (!candidate.acceptable_positions[round-1]) {
+            if (!candidate.acceptable_positions[ap_index]) {
                 if (!mandates.some(function(m) { // suboptimal, could have used hash instead
                     return candidate.name == m.name;
                 })) {
-                    report("<br/>Kandidát " + candidate.name + " nekandiduje v kole " + round + ", vyřazuji.<br/>");
+                    if (round > setup.orderedCount) {
+                        report("<br/>Kandidát " + candidate.name + " nekandiduje na nečíslované pozice, vyřazuji.<br/>");
+                    }
+                    else {
+                        report("<br/>Kandidát " + candidate.name + " nekandiduje v kole " + round + ", vyřazuji.<br/>");
+                    }
                     ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, cindex+1, 0, soft_remove);
                 }
             }

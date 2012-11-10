@@ -13,5 +13,8 @@
     },
     "expected": [
         "Alena"
+    ],
+    "expected_replacements": [
+        ["Barbora"]
     ]
 }

@@ -19,9 +19,16 @@
   "name": "Priklad 3",
   "expected": [
     "A",
+    "B",
     "F",
     "I",
-    "B",
     "C"
-  ]
+  ],
+    "expected_replacements": [
+        ["D"],
+        ["D"],
+        ["G"],
+        [""],
+        ["D"]
+    ]
 }

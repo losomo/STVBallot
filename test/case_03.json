@@ -14,5 +14,9 @@
     },
     "expected": [
         "Alžběta", "Bernard"
+    ],
+    "expected_replacements": [
+        [],
+        []
     ]
 }

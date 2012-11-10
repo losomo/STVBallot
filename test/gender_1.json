@@ -32,5 +32,9 @@
     "0:2:1:0:3": 3
   },
   "name": "Volba_1",
-  "expected": ["B", "d"]
+  "expected": ["B", "d"],
+    "expected_replacements": [
+        ["C", "e", "A"],
+        []
+    ]
 }

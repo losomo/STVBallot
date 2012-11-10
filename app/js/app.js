@@ -36,8 +36,10 @@ Candidate = Em.Object.extend({
     setOrderedMandates: function(om) {
         var a = this.get('acceptable_positions');
         a.clear();
-        for (var i = 0; i < om; i++) {
-            a.pushObject(Ember.Object.create({"accepted": true}));
+        if (om > 0) {
+            for (var i = 0; i <= om; i++) {
+                a.pushObject(Ember.Object.create({"accepted": true}));
+            }
         }
     },
 });
@@ -623,7 +625,7 @@ App.Router = Em.Router.extend({
                     //console.log(msg);
                     vrc.report_append(msg);
                 },
-                function(mandates) {
+                function(mandates, replacements) {
                     vrc.get('mandates').pushObjects(mandates);
                     vrc.report_append("<p><em>" + new Date() + "</em> " + "_Computation done".loc() + ".</p>");
                 });
