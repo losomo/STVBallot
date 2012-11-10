@@ -355,12 +355,14 @@ App.VoteRunningController = Em.Controller.extend({
     pileGroups: null,
     report: null,
     mandates: null,
+    replacements: null,
     ballots_printed: null,
     init: function() {
         this._super();
         this.set('pileGroups', PileGroups.create({content: []}));
         this.set('report', "");
         this.set('mandates', Em.ArrayProxy.create({content: []}));
+        this.set('replacements', Em.ArrayProxy.create({content: []}));
     },
     isRunning: function() {
         return this.get('appState') == 2 ? "disabled" : false;
@@ -499,6 +501,7 @@ App.Router = Em.Router.extend({
                 var vrc = router.get('voteRunningController');
                 vrc.set('report', "");
                 vrc.get('mandates').clear();
+                vrc.get('replacements').clear();
                 var pileGroups = vrc.get('pileGroups');
                 pileGroups.clear();
                 if (ac.get('appMode') == 'standalone') {
@@ -578,12 +581,13 @@ App.Router = Em.Router.extend({
                 var groups = pileGroups.map(function (group) {return STVDataPileGroup.fromGUI(group);});
                 var setup = STVDataSetup.fromGUI(router.get('voteSetupController'));
                 var mandates = router.get('voteRunningController').get('mandates').mapProperty('name');
+                var replacements = router.get('voteRunningController').get('replacements');
                 var title = "_Vote".loc() + "_" + setup.voteNo;
                 send_command('download_data', {
                     header: "<pre>",
                     footer: "</pre>",
                     extension: "json",
-                    content: STVDataFormats.jsonFromGroups(title, setup, groups, mandates),
+                    content: STVDataFormats.jsonFromGroups(title, setup, groups, mandates, replacements),
                     title: title
                 });
             },
@@ -627,6 +631,7 @@ App.Router = Em.Router.extend({
                 },
                 function(mandates, replacements) {
                     vrc.get('mandates').pushObjects(mandates);
+                    vrc.get('replacements').pushObjects(replacements);
                     vrc.report_append("<p><em>" + new Date() + "</em> " + "_Computation done".loc() + ".</p>");
                 });
             },

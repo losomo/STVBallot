@@ -429,7 +429,7 @@ STVDataFormats.bltToCase = function(blt) {
     }
 };
 
-STVDataFormats.jsonFromGroups = function(title, setup, groups, mandates) {
+STVDataFormats.jsonFromGroups = function(title, setup, groups, mandates, replacements) {
     var ballots = STVDataBallot.combineGroups(groups);
     console.log(setup.candidates);
     return JSON.stringify({
@@ -442,7 +442,8 @@ STVDataFormats.jsonFromGroups = function(title, setup, groups, mandates) {
         "ordered": parseInt(setup.orderedCount),
         "ballots_ab": STVDataBallot.aggregateBallots(ballots),
         "name": title,
-        "expected": mandates
+        "expected": mandates,
+        "expected_replacements": replacements.map(function(repl){return repl.map(function(r){return r.name})})
     }, null, "  ");
 };
 
