@@ -31,17 +31,17 @@ function envelope(c, ext) {
 }
 
 function save_file() {
-            var config = {type: 'saveFile', suggestedName: title + "." + extension};
-            chrome.fileSystem.chooseFile(config, function(writableEntry) {
-                var blob = new Blob([envelope(content, extension)], {type: 'text/plain'});
-                writableEntry.createWriter(function(writer) {
-                        writer.onerror = function(e) {console.error(e);};
-                        writer.onwriteend = function(e) {
-                            console.log(e);
-                        };
-                        writer.write(blob);
-                    }, function(e) {console.error(e);});
-            });
+    var config = {type: 'saveFile', suggestedName: title + "." + extension};
+    chrome.fileSystem.chooseFile(config, function(writableEntry) {
+        var blob = new Blob([envelope(content, extension)], {type: 'text/plain'});
+        writableEntry.createWriter(function(writer) {
+                writer.onerror = function(e) {console.error(e);};
+                writer.onwriteend = function(e) {
+                    console.log(e);
+                };
+                writer.write(blob);
+            }, function(e) {console.error(e);});
+    });
 }
 
 var mHandler = function(e) {
