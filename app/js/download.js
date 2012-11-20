@@ -22,7 +22,7 @@ var extension;
 
 function envelope(c, ext) {
     if (ext == "html") {
-        return '<!DOCTYPE html><html><head><meta charset="utf8"/></head><body>' + c
+        return '<!DOCTYPE html><html><head><meta charset="utf8"/><link rel="stylesheet" href="css/style.css?v=0.0.1"/></head><body>' + c
         + "</body></html>";
     }
     else {

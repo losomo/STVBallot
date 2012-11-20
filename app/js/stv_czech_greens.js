@@ -58,19 +58,15 @@ STV.prototype.crosscheck = function(pileGroup) {
 }
 
 STV.prototype.ballot_header = function() { return "Pokyny pro hlasování: " +
-    "<ul><li>Označte číslem pořadí kandidátů, ve kterém preferujete jejich zvolení. " +
-    "U&nbsp;kandidáta, kterého upřednostňujete nejvíce, uveďte číslo 1, u&nbsp;kandidáta, " +
-    "kterého považujete za druhého nejlepšího, uveďte číslo 2 atd., až očíslujete " +
-    "podle vašich preferencí pořadí všech kandidátů, jejichž zvolení v&nbsp;tomto pořadí " +
-    "preferujete před zvolením nikoho. Pokud nechcete svůj hlas dát nikomu z" +
-    "&nbsp;kandidátů, neuvedete žádné číslo na hlasovacím lístku.</li>" +
-
-    "<li>Hlas je neplatný, pokud uvedete stejné číslo u&nbsp;dvou kandidátů, pokud " +
-    "nejnižší Vámi uvedené číslo není 1 nebo pokud Vámi uvedené čísla nejsou po " +
-    "sobě jdoucí pořadová čísla.</li>" +
-
-    "<li>Pokud po volbě nejsou obsazeny všechny mandáty voleného orgánu, konají " +
-    "se nové volby na tyto mandáty.</li></ul>";
+    "<p>Kandidátům, jejichž zvolení podporujete, přidělte preference " +
+    "v&nbsp;podobě po sobě jdoucích čísel tak, že ke kandidátovi, kterého " + 
+    "upřednostňujete nejvíce, napíšete „1“, ke kandidátovi, kterého " + 
+    "upřednostňujete jako druhého v&nbsp;pořadí, napíšete „2“ atd. " +
+    "U kandidátů, jejichž zvolení nepodporujete, neuvádějte žádné číslo. " +
+    "Hlasovací lístek je platný, pokud přidělené preference tvoří vzestupnou " + 
+    "řadu po sobě jdoucích přirozených čísel počínaje „1“, nebo pokud je " + 
+    "přidělena preference „1“ pouze u&nbsp;jediného kandidáta, nebo pokud není " +
+    "přidělena preference u žádného kandidáta.</p>"
 }
 
 function stv_round(op) {
