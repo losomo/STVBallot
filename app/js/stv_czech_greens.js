@@ -78,7 +78,7 @@ function stv_round(op) {
         op.report("<p>Shrnutí vyplněných preferencí</p>" + STVDataBallot.reportAggregatedBallots(op.setup, op.ab));
         var fp = STVDataBallot.aggregateFirstPreferences(op.ab, op.setup, op.original_fp);
         if (fp.length == 0) break;
-        op.report("<p>Počet hlasů s nejvyšší preferencí:<table>");
+        op.report("<p>Počet hlasů pro kandidáty:<table>");
         fp.forEach(function(f) {op.report("<tr><td>" + STVDataSetup.round(f[0]) + "</td><td>" + f[1] + " (" + op.setup.candidates[f[1]-1].name + ")</td></tr>")});
         op.report("</table>");
         var has_elected = false;
