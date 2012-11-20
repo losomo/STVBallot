@@ -159,7 +159,7 @@ STVDataBallot.get_most_preferred = function(ab) {
             }, [Number.MAX_VALUE, []]); // returns [min_order, [1+index_with_min_order]]
 };
 
-STVDataBallot.removeCandidateFromAggregatedBallots = function(oab, corder, transfer, soft_remove) {
+STVDataBallot.removeCandidateFromAggregatedBallots = function(oab, corder, discount, soft_remove) {
     var votes_for_candidate = function(aggrb) {
         var most_preferred = STVDataBallot.get_most_preferred(aggrb);
         if (most_preferred[1].some(function(i) {return i == corder})) {
@@ -170,12 +170,12 @@ STVDataBallot.removeCandidateFromAggregatedBallots = function(oab, corder, trans
         }
     };
     var total_for_candidate = 0;
-    if (transfer > 0) {
+    if (discount > 0) {
         for (var b in oab) {
              total_for_candidate += votes_for_candidate(b);
         }
     }
-    var new_weight = total_for_candidate == 0 ? 1 : (total_for_candidate - transfer) / total_for_candidate;
+    var new_weight = total_for_candidate == 0 ? 1 : (total_for_candidate - discount) / total_for_candidate;
     var ab = {};
     for (var b in oab) {
         if (b != "_empty" && b != "_invalid") {
