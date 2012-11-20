@@ -59,9 +59,11 @@ var mHandler = function(e) {
 };
 
 window.addEventListener('load', function() {
-        document.getElementById("print").onclick = function() {
-            window.print();
-        };
+        if (document.getElementById("print") != null) {
+            document.getElementById("print").onclick = function() {
+                window.print();
+            };
+        }
         document.getElementById("save").onclick = function() {
             save_file();
         };
