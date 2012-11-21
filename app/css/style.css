@@ -146,8 +146,8 @@ b {font-weight: bold}
 .sform tr td {padding: 2px;}
 .sform tr td button {width: 100%;}
 .sform {margin-left: 30px; margin-top: 15px;}
-.candidates {float: right;  overflow-x: visible; width: 30%;}
-.result_pane {float: right; min-width: 300px;}
+.candidates {float: right;  overflow-x: visible; min-width: 35%;}
+.result_pane {float: right; min-width: 35%;}
 .vote_control {float: right;}
 .progress_table {min-height: 150px; margin-top: 10px;}
 .progress_table table {position: relative; left: 20px; top: 20px;}

@@ -630,7 +630,7 @@ App.Router = Em.Router.extend({
                     vrc.report_append(msg);
                 },
                 function(mandates, replacements) {
-                    vrc.get('mandates').pushObjects(mandates);
+                    vrc.get('mandates').pushObjects(mandates.map(function(m){return Em.Object.create(m);}));
                     vrc.get('replacements').pushObjects(replacements);
                     vrc.report_append("<p><em>" + new Date() + "</em> " + "_Computation done".loc() + ".</p>");
                 });
