@@ -106,7 +106,7 @@ STVDataBallot.reportAggregatedBallots = function(setup, ab) {
 };
 
 STVDataBallot.aggregateFirstPreferences = function(aggregatedBallots, setup, tie_order) {
-    var ret = []; // Array of [ballots_with_1st_preference, 1+candidate_order] ordered by [0], randomly where there is a tie
+    var ret = []; // Array of [ballots_with_1st_preference, 1+candidate_order] ordered by [0]
     var score = {}; // candidate_order -> ballots_with_1st_preference
     for (var ab in aggregatedBallots) {
         if (ab != "_empty" && ab != "_invalid") {
@@ -126,18 +126,9 @@ STVDataBallot.aggregateFirstPreferences = function(aggregatedBallots, setup, tie
         ret.push([score[candidate], candidate]);
     }
     var tindex = {};
-    if (tie_order == null) {
-        var i = ret.length; // Shuffle to randomize ties
-        while (--i > 0) {
-            var j = Math.floor(Math.random() * (i + 1));
-            var oi = ret[i];
-            ret[i] = ret[j];
-            ret[j] = oi;
-        }
-    }
-    else {
+    if (tie_order != null) {
         tie_order.forEach(function(to, i) {
-            tie_order[to[1]] = i;
+            tindex[to[1]] = i;
         });
     }
     return ret.sort(function(a,b){return b[0]-a[0] == 0 ? tindex[b] - tindex[a] : b[0]-a[0]});
