@@ -179,6 +179,9 @@ STVDataBallot.removeCandidateFromAggregatedBallots = function(oab, corder, disco
             if (barray.some(function(x) {return x > 0;})) {
                 var newb = barray.join(':');
                 var new_score = new_weight * for_candidate + (oab[b] - for_candidate);
+                if (for_candidate > 0) {
+                    console.error(["transferred",STVDataSetup.round(new_score),corder,STVDataBallot.get_most_preferred(newb)[1]].join(":"));
+                }
                 if (!ab[newb]) ab[newb] = 0;
                 ab[newb] += new_score;
             }
