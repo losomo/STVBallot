@@ -265,7 +265,6 @@ STV.prototype.run = function(setup, ballots, report, done) {
         m.first_score = orig_map[candidate_orders[m.name]];
         return m;
     });
-    console.log(orig_map);
     report("<h2>Zvolení kandidáti:</h2><ul><li>" + mandates.map(function(c, i){
         var ret = "";
         if (i < setup.orderedCount) {

@@ -68,7 +68,7 @@ function test(fname, debug) {
                console.error("Expected nothing, got " + JSON.stringify(mandates.map(function(m){return m.name})));
                ok = false;
            }
-           if (test.expected_replacements != null && test.expected_replacements.length > 0) {
+           if (false /*replacements disabled*/ && test.expected_replacements != null && test.expected_replacements.length > 0) {
                 var rnames = replacements.map(function(rr){return rr.map(function(r){return r.name})});
                 if (test.expected_replacements < rnames || rnames < test.expected_replacements) { // http://stackoverflow.com/a/5115066/331271
                     console.error(rnames);
