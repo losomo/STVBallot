@@ -101,7 +101,11 @@
                        <button class="addBallot" {{ action addBallot }}{{bindAttr disabled="currentPile.pileClosed"}}>+</button>
                    </td>
                        {{#each b in currentPile.ballots}}
-                         <td>{{b.index_1}}</td>
+                           {{#if b.highlighted}}
+                               <td><b>{{b.index_1}}</b></td>
+                           {{else}}
+                               <td>{{b.index_1}}</td>
+                           {{/if}}
                        {{/each}}
                    </tr>
                </tbody>

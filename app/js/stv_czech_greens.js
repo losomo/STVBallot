@@ -35,6 +35,40 @@ STV.prototype.validate = function(ballot) {
 
 STV.prototype.crosscheck = function(pileGroup) {
     var piles = pileGroup.piles;
+    var poss = [];
+    var error_return = function(message) {
+        var l = piles[0].ballots.length;
+        piles[0].ballots.forEach(function(b1, i) {
+            var ballotOK = true;
+            piles.forEach(function(p, j) {
+                if (j > 0) {
+                    var b2 = p.ballots[i];
+                    if (b2 == null || b1.invalid != b2.invalid ||
+                        b1.empty != b2.empty ||
+                        b1.entries > b2.entries || b2.entries > b1.entries) {
+                            ballotOK = false;
+                        }
+                }
+            });
+            if (!ballotOK) {
+                  poss.push(i);
+            }
+        });
+        var maxl = 0;
+        piles.forEach(function(p) {
+            if (p.ballots.length > maxl) {
+                maxl = p.ballots.length;
+            }
+        });
+        for (var i = l; i < maxl; i++) {
+            poss.push(i);
+        }
+        return {
+            status: "error",
+            message: message,
+            positions: poss
+        };
+    };
     var aggregatedPiles = [];
     for (var i = 0; i < piles.length; i++) {
         aggregatedPiles.push(STVDataBallot.aggregateBallots(piles[i].ballots));
@@ -46,12 +80,12 @@ STV.prototype.crosscheck = function(pileGroup) {
         var ikeys = Object.keys(ipile).sort();
         if (ikeys.length != firstkeys.length) {
             console.log(pileGroup, ipile, first);
-            return {status: "error", message: "Různá velikost hromádek"};
+            return error_return("Různá velikost hromádek");
         }
         for (var j = 0; j < firstkeys.length; j++) {
             var key = firstkeys[j];
-            if (key != ikeys[j]) return {status: "error", message: "Očekáváno " + key};
-            if (first[key] != ipile[key]) return {status: "error", message: "Neshoda " + key};
+            if (key != ikeys[j]) return error_return("Očekáváno " + key);
+            if (first[key] != ipile[key]) return error_return("Neshoda " + key);
         }
     }
     return {status: "ok", message: "ok"};
@@ -59,12 +93,12 @@ STV.prototype.crosscheck = function(pileGroup) {
 
 STV.prototype.ballot_header = function() { return "Pokyny pro hlasování: " +
     "<p>Kandidátům, jejichž zvolení podporujete, přidělte preference " +
-    "v&nbsp;podobě po sobě jdoucích čísel tak, že ke kandidátovi, kterého " + 
-    "upřednostňujete nejvíce, napíšete „1“, ke kandidátovi, kterého " + 
+    "v&nbsp;podobě po sobě jdoucích čísel tak, že ke kandidátovi, kterého " +
+    "upřednostňujete nejvíce, napíšete „1“, ke kandidátovi, kterého " +
     "upřednostňujete jako druhého v&nbsp;pořadí, napíšete „2“ atd. " +
     "U kandidátů, jejichž zvolení nepodporujete, neuvádějte žádné číslo. " +
-    "Hlasovací lístek je platný, pokud přidělené preference tvoří vzestupnou " + 
-    "řadu po sobě jdoucích přirozených čísel počínaje „1“, nebo pokud je " + 
+    "Hlasovací lístek je platný, pokud přidělené preference tvoří vzestupnou " +
+    "řadu po sobě jdoucích přirozených čísel počínaje „1“, nebo pokud je " +
     "přidělena preference „1“ pouze u&nbsp;jediného kandidáta, nebo pokud není " +
     "přidělena preference u žádného kandidáta.</p>"
 }
@@ -122,7 +156,7 @@ function stv_round(op) {
                         }
                     }
                 }
-                last_alive = [op.setup.candidates[fp[last][1]-1], fp[last][0]];            
+                last_alive = [op.setup.candidates[fp[last][1]-1], fp[last][0]];
                 op.report("<p>Žádný kandidát není zvolen, odstraňuji kandidáta " + last_alive[0].name + " ("  + fp[last][1] + ")</p>");
                 op.ab = STVDataBallot.removeCandidateFromAggregatedBallots(op.ab, fp[last][1], 0, op.soft_remove);
                 break;

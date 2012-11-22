@@ -57,6 +57,7 @@ Ballot = Em.Object.extend({
     empty: null,
     entries: null,
     touched: null,
+    highlighted: null,
     index: null, // no builtin #each_with_index in handlebars
     init: function() {
         this._super();
@@ -555,6 +556,17 @@ App.Router = Em.Router.extend({
                 router.get('voteRunningController').get('pileGroups').forEach(function(item){
                     if (item === pileGroup) {
                         pileGroup.forEach(function(pile) {
+                            pile.get('ballots').forEach(function (b) {
+                                b.set('highlighted', false);
+                            });
+                            if (pileGroup.get('crosscheckstatus').status == "error") {
+                                pileGroup.get('crosscheckstatus').positions.forEach(function(p) {
+                                    if (pile.get('ballots').objectAt(p) != null)
+                                        pile.get('ballots').objectAt(p).set('highlighted', true);
+                                });
+                            }
+                        });
+                        pileGroup.forEach(function(pile) {
                             pile.set('pileClosed', false);
                             if (pile.client) {
                                 send_command('to_client', {client: pile.client, content: {command: "reopen_pile", content: STVDataPile.fromGUI(pile)}});
@@ -822,11 +834,19 @@ function handle_server_message(message) {
             App.router.get('applicationController').set('appState', 2);
             break;
         case 'reopen_pile':
-            var d = STVDataPile.toGUI(data.content).get('desc');
+            var p = STVDataPile.toGUI(data.content);
             App.router.get('voteRunningController').get('pileGroups').forEach(function(pileGroup){
-                pileGroup.forEach(function(pile) {
-                    if (pile.get('desc') == d) pile.set('pileClosed', false);
+                var pindex = -1;
+                pileGroup.forEach(function(pile, i) {
+                    if (pile.get('desc') == p.get('desc')) {
+                        pindex = i;
+                    }
                 });
+                if (pindex >= 0) {
+                    pileGroup.replace(pindex, 1, [p]);
+                    App.router.get('typingController').set('currentPileCaption', null);
+                    App.router.get('typingController').set('currentPileCaption', p.get('desc'));
+                }
             });
             break;
         case 'set_setup':

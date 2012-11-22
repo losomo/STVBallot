@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-function STVDataBallot(invalid, empty, entries, touched, index) {
+function STVDataBallot(invalid, empty, entries, touched, highlighted, index) {
     this.invalid = invalid; // Boolean
     this.empty = empty;     // Boolean
     this.entries = entries; // Array of integers
     this.touched = touched; // Boolean
+    this.highlighted = highlighted; // Boolean
     this.index = index;     // integer
 }
 
@@ -30,6 +31,7 @@ STVDataBallot.fromGUI = function (ballot) {
         ballot.get('empty'),
         ballot.get('entries').mapProperty('order').map(function(item){return parseInt(item)}),
         ballot.get('touched'),
+        ballot.get('highlighted'),
         parseInt(ballot.get('index'))
     );
 };
@@ -40,6 +42,7 @@ STVDataBallot.toGUI = function(b) {
         empty: b.empty,
         entries: BEntries.create({content: b.entries.map(function(eorder) {return BEntry.create({order: eorder || ""});})}),
         touched: b.touched,
+        highlighted: b.highlighted,
         index: b.index,
     });
 };
