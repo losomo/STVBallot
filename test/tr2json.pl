@@ -36,11 +36,11 @@ while(<$trf>) {
     }
     elsif (/^removed:/) {
         $next_col = 1;
-        $special->{$F[1]} = "grey";
+        $special->{$F[1]} = "";
     }
     elsif (/^elected:/) {
         $next_col = 1;
-        $special->{$F[1]} = "green";
+        $special->{$F[1]} = "red";
     }
     elsif(/^transferred/) {
         $scores->{$F[3]} += $F[1];
@@ -48,7 +48,7 @@ while(<$trf>) {
         $links->{$F[3]}->{$F[2]} += $F[1];
     }
     if ($next_col) {
-        push @{$ret->{nodes}}, map {{name => $_->[1], special => $special->{$_->[0]} // "magenta"}} @$names;
+        push @{$ret->{nodes}}, map {{name => $_->[1], special => $special->{$_->[0]} // ""}} @$names;
         push @{$ret->{links}}, map {{source => ($cnum - 1) * @$names + $_->[0] - 1, target => $cnum * @$names + $_->[0] - 1, value => 0 + get_val($_, $scores, $links)}} @$names;
         for my $target (keys %$links) {
             my $hr = $links->{$target};

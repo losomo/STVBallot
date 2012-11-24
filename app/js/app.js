@@ -180,6 +180,7 @@ PileGroup = Em.ArrayProxy.extend({
         }
     }.property('crosscheckstatus'),
     openPiles: function() {
+        return false; // TODO
         if (App.router.get('applicationController').get('appState') != 2 || this.every(function(item) {return !item.get('pileClosed')})) {
             return "disabled";
         }
@@ -369,6 +370,7 @@ App.VoteRunningController = Em.Controller.extend({
         return this.get('appState') == 2 ? "disabled" : false;
     }.property('appState'),
     cantClose: function() {
+        return false; // TODO
         return this.get('appState') == 2 ?
         (this.get('pileGroups').every(function(g){
             return g.get('crosscheckstatus').status == "ok" || g.get('crosscheckstatus').status == "partial";

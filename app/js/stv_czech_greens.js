@@ -20,10 +20,16 @@ function STV() {
 }
 
 (function() {
+var parse = function(value) {
+    value = parseInt(value);
+    value = isNaN(value) ? Infinity : value;
+    return value;
+}
 STV.prototype.validate = function(ballot) {
     if (ballot.invalid || ballot.empty) return "";
     var last = 0;
-    var sorted = ballot.entries.sort();
+    var sorted = ballot.entries.toArray();
+    sorted.sort(function(a,b){return parse(a) - parse(b)});
     for (var i = 0; i < sorted.length; i++) {
         var e = sorted[i];
         if (e) {
