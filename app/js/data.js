@@ -16,6 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+function smerge(left,right,comparison) {
+    var result = new Array();
+    while((left.length > 0) && (right.length > 0))
+    {
+        if(comparison(left[0],right[0]) <= 0)
+            result.push(left.shift());
+        else
+            result.push(right.shift());
+    }
+    while(left.length > 0)
+        result.push(left.shift());
+    while(right.length > 0)
+        result.push(right.shift());
+    return result;
+}
+function merge_sort(array,comparison) {
+    if(array.length < 2)
+        return array;
+    var middle = Math.ceil(array.length/2);
+    return smerge(merge_sort(array.slice(0,middle),comparison),
+            merge_sort(array.slice(middle),comparison),
+            comparison);
+}
+
 function STVDataBallot(invalid, empty, entries, touched, highlighted, index) {
     this.invalid = invalid; // Boolean
     this.empty = empty;     // Boolean
@@ -115,6 +139,7 @@ STVDataBallot.aggregateFirstPreferences = function(aggregatedBallots, setup, tie
         if (ab != "_empty" && ab != "_invalid") {
             var s = aggregatedBallots[ab];
             ab.split(':').forEach(function(o, i) {
+                o = STVDataSetup.parseNum(o);
                 if (o > 0 && o < setup.candidates.length * 100) {
                     if (!score[i+1]) score[i+1] = 0;
                 }
@@ -131,15 +156,16 @@ STVDataBallot.aggregateFirstPreferences = function(aggregatedBallots, setup, tie
     var tindex = {};
     if (tie_order != null) {
         tie_order.forEach(function(to, i) {
-            tindex[to[1]] = i;
+            tindex[STVDataSetup.parseNum(to[1])] = i;
         });
     }
-    return ret.sort(function(a,b){return b[0]-a[0] == 0 ? tindex[b] - tindex[a] : b[0]-a[0]});
+    return merge_sort(ret, function(a,b){return (STVDataSetup.parseNum(b[0]) - STVDataSetup.parseNum(a[0]) == 0) ? (STVDataSetup.parseNum(tindex[a[1]]) - STVDataSetup.parseNum(tindex[b[1]])) : (STVDataSetup.parseNum(b[0]) - STVDataSetup.parseNum(a[0]))});
 };
 
 STVDataBallot.get_most_preferred = function(ab) {
     var barray = ab.split(':');
     return barray.reduce(function(min_count, order, index) {
+                order = STVDataSetup.parseNum(order);
                 if (order > 0 && order < barray.length * 100) {
                     var min = min_count[0];
                     if(order == min) {
@@ -278,9 +304,9 @@ STVDataBallot.remove_non_candidates = function(oab, setup, round, mandates, repo
 STVDataBallot.prototype.get_sorted_orders = function() {
     // Candidate numbers start at 1 !!!!!!
     var pairs = this.entries.map(function(e, index) {return [index+1, e]}); // [candidate_no, priority]
-    return pairs.filter(function(e) {return e[1] > 0;})
-        .sort(function(a, b) {return a[1] - b[1];})
-        .map(function(e) {return e[0]});
+    var ret = pairs.filter(function(e) {return e[1] > 0;});
+    ret = merge_sort(ret, function(a, b) {return STVDataSetup.parseNum(a[1]) - STVDataSetup.parseNum(b[1]);})
+    return ret.map(function(e) {return e[0]});
 };
 
 STVDataBallot.prototype.isReal = function() {
@@ -458,6 +484,12 @@ function STVDataSetup(voteNo, candidateCount, mandateCount, ballotCount, replace
 
 STVDataSetup.round = function (x) {
     return new Number(x).toFixed(5);
+};
+
+STVDataSetup.parseNum = function (value) {
+    value = parseFloat(value);
+    value = isNaN(value) ? 1000 : value; // TODO remove 1000 and test
+    return value;
 };
 
 STVDataSetup.fromGUI = function(controller) {
