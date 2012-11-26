@@ -13,7 +13,7 @@ function test(fname, debug) {
         if (test.ballots_ab) {
             for (var ab in test.ballots_ab) {
                 for (var i = 0; i < test.ballots_ab[ab]; i++) {
-                    ballots.push(new STVDataBallot(false, ab == "_empty", ab.split(':').map(function(o){return parseInt(o);}), true, i));
+                    ballots.push(new STVDataBallot(ab == "_invalid", ab == "_empty", ab.split(':').map(function(o){return parseInt(o);}), true, i));
                 }
             }
         }

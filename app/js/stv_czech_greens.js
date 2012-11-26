@@ -207,9 +207,13 @@ function stv_top_down(setup, valid_ballots_count, original_ab, replacement_quota
         new_ab = STVDataBallot.remove_gender_violators_from_ab(new_ab, setup, report, candidate_orders, elected);
         report("Krok 2: volba mandátu<br/>");
         new_ab = STVDataBallot.remove_non_candidates(new_ab, setup, round, elected, report, false);
+        console.error("cycle start: " + round);
+        var new_fp = STVDataBallot.aggregateFirstPreferences(new_ab, setup, original_fp);
+        new_fp.forEach(function (f) {console.error(["original",f[0],f[1]].join(":"));});
         var new_mandates = stv_round({
             "deathmatch": true, "setup": setup, "ab": new_ab, "report": report, "quota": quota, "original_fp": original_fp
         });
+        console.error("cycle end: " + round);
         if (new_mandates.length > 0) {
             var winner = new_mandates[0];
             report("<br/>V cyklu č. " + round + " byl zvolen kandidát: <b>" + winner[0].name + "</b>.");

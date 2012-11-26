@@ -488,7 +488,7 @@ STVDataSetup.round = function (x) {
 
 STVDataSetup.parseNum = function (value) {
     value = parseFloat(value);
-    value = isNaN(value) ? 1000 : value; // TODO remove 1000 and test
+    value = isNaN(value) ? 1000000000 : value;
     return value;
 };
 
