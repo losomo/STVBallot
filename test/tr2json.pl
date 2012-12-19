@@ -3,22 +3,21 @@ use JSON;
 
 my $pref = shift @ARGV or die;
 
-open my $jsonf, '<', "$pref.json" or die $!;
+open my $jsonf, '<', "v3s1.json" or die $!;
 
 my $jsont = "";
 while (<$jsonf>) {
     $jsont .= $_;
 }
 my $config = decode_json($jsont);
-my $names = [];
-for (my $i = 0; $i < @{$config->{candidates}}; $i++) {
-    push @$names, [$i+1, $config->{candidates}->[$i]];
-}
+my $names = $config->{candidates};
 close $jsonf;
 
 open my $trf, '<', "$pref.tr" or die $!;
 
 my $ret = {nodes => [], links => []};
+my $graph = {}; # $graph->{$col}->{$candidate} = {special => '', name => '', order => 0, transfers => {$candidate => 0}}
+my $inactive = {}; # $inactive->{$candidate} = 0;
 my $scores = {};
 my $cnum = 0;
 my $next_col = 0;
@@ -27,33 +26,35 @@ my $special = {};
 while(<$trf>) {
     chomp;
     if (!$cnum && !/^original:/) {
+        $inactive->{$_} = 1 for grep !$scores->{$_}, @$names;
         $cnum++;
-        push @{$ret->{nodes}}, map {{name => $_->[1]}} @$names;
     }
     my @F = split /:/;
     if (/^original:/) {
-        $scores->{$F[2]} = $F[1];
+        $scores->{$names->[$F[2]-1]} = $F[1];
     }
     elsif (/^removed:/) {
         $next_col = 1;
-        $special->{$F[1]} = "";
+        $special->{$names->[$F[1]-1]} = "yellow";
     }
     elsif (/^elected:/) {
         $next_col = 1;
-        $special->{$F[1]} = "red";
+        $special->{$names->[$F[1]-1]} = "red";
     }
     elsif(/^transferred/) {
-        $scores->{$F[3]} += $F[1];
-        $scores->{$F[2]} -= $F[1];
-        $links->{$F[3]}->{$F[2]} += $F[1];
+        $scores->{$names->[$F[3]-1]} += $F[1];
+        $scores->{$names->[$F[2]-1]} -= $F[1];
+        $links->{$names->[$F[3]-1]}->{$names->[$F[2]-1]} += $F[1];
     }
     if ($next_col) {
-        push @{$ret->{nodes}}, map {{name => $_->[1], special => $special->{$_->[0]} // ""}} @$names;
-        push @{$ret->{links}}, map {{source => ($cnum - 1) * @$names + $_->[0] - 1, target => $cnum * @$names + $_->[0] - 1, value => 0 + get_val($_, $scores, $links)}} @$names;
+        $graph->{$cnum} = {};
+        $graph->{$cnum}->{$_} = {special => $special->{$_} // "", transfers => {$_ => get_remainder($_, $scores, $links)}} for grep !$inactive->{$_}, @$names;
+        $inactive->{$_} = 1 for grep $special->{$_}, @$names;
+        delete $graph->{$cnum}->{$_}->{transfers}->{$_} for grep $special->{$_}, @$names;
         for my $target (keys %$links) {
             my $hr = $links->{$target};
             for my $source (keys %$hr) {
-                push @{$ret->{links}}, {source => ($cnum - 1) * @$names + $source - 1, target => $cnum * @$names + $target - 1, value => 0 + $hr->{$source}};
+                $graph->{$cnum}->{$source}->{transfers}->{$target} = 0 + $hr->{$source};
             }
         }
         $cnum++;
@@ -62,11 +63,37 @@ while(<$trf>) {
         $next_col = 0;
     }
 }
+
+my $i = 0;
+for my $col (sort {$a <=> $b} keys %$graph) {
+    for (@$names) {
+        if ($graph->{$col}->{$_}) {
+            $graph->{$col}->{$_}->{i} = $i++;
+        }
+    }
+}
+
+for my $col (sort {$a <=> $b} keys %$graph) {
+    for my $name (@$names) {
+        my $rec = $graph->{$col}->{$name};
+        if ($rec) {
+            push @{$ret->{nodes}}, {name => $name, special => $rec->{special}};
+            for my $target_name (keys %{$rec->{transfers}}) {
+                push @{$ret->{links}}, {
+                    source => $rec->{i},
+                    target => $graph->{$col + 1}->{$target_name}->{i},
+                    value => $rec->{transfers}->{$target_name},
+                };
+            }
+        }
+    }
+}
+
 print encode_json($ret);
 
-sub get_val {
+sub get_remainder {
     my ($name, $scores, $links) = @_;
-    my $target = $name->[0];
+    my $target = $name;
     my $val = $scores->{$target};
     for my $source (keys %{$links->{$target}}) {
         $val -= $links->{$target}->{$source};
