@@ -210,8 +210,7 @@ Tab = Em.Object.extend({
 });
 
 Client = Em.Object.extend({
-    host: null,
-    port: null,
+    sid: null,
     name: null,
     pilesCaptions: null,
     last_alive: null,
@@ -781,23 +780,19 @@ function send_command(c, d) {
     window.parent.postMessage({
        command: c,
        data: d,
-       socketId: App.socketId,
-       server_host: App.router.get('connectingController').get('server_ip'),
     }, '*');
 }
 
-function handle_client_message(message) {
+function handle_client_message(data) {
     var ac = App.router.get('applicationController');
     var client = ac.get('clients').find(function (item) {
-        return item.host == message.address && item.port == message.port;
+        return item.sid == data.sid;
     });
-    var data = ab2struct(message.data);
     console.log("Message from client", data);
     switch(data.command) {
         case 'hand_shake':
             client = Client.create({
-                host: message.address,
-                port: message.port,
+                sid: data.sid,
                 name: data.name,
             });
             ac.get('clients').pushObject(client);
@@ -817,8 +812,7 @@ function handle_client_message(message) {
     };
 }
 
-function handle_server_message(message) {
-    var data = ab2struct(message.data);
+function handle_server_message(data) {
     console.log("Message from server", data);
     switch(data.command) {
         case 'accepted':
@@ -866,14 +860,12 @@ function handle_server_message(message) {
 
 function handle_request (data) {
     var command = data.command;
+    console.log(data);
     switch(command) {
         case 'client_request':
             handle_client_message(data.message);
             break;
         case 'server_request':
-            if (!App.socketId && data.socketId) {
-               App.socketId = data.socketId;
-            }
             handle_server_message(data.message);
             break;
         default:
@@ -884,20 +876,6 @@ function handle_request (data) {
 var messageHandler = function(e) {
   handle_request(e.data);
 };
-
-function ab2struct(buf) {
-  return JSON.parse(String.fromCharCode.apply(null, new Uint16Array(buf)));
-}
-
-function struct2ab(struct) {
-  var str = JSON.stringify(struct);
-  var buf = new ArrayBuffer(str.length*2);
-  var bufView = new Uint16Array(buf);
-  for (var i=0, strLen=str.length; i<strLen; i++) {
-    bufView[i] = str.charCodeAt(i);
-  }
-  return buf;
-}
 
 function create_derranged_map(clients) {
     var m = {};

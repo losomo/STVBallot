@@ -18,20 +18,36 @@
  */
 var socket = chrome.socket || chrome.experimental.socket;
 var find_servers_running = false;
-var server_socket = null;
+var client_socket = null;
 
 function start_server(requesting_window) {
     //  START SERVICE
-    socket.create('udp', {}, function(createInfo) {
-        server_socket = createInfo.socketId;
-        socket.bind(server_socket, '0.0.0.0', 42424, function (result) {
+    socket.create('tcp', {}, function(createInfo) {
+        var server_socket = createInfo.socketId;
+        socket.listen(server_socket, '0.0.0.0', 42424, function (result) {
             if (result < 0) console.error(result);
-            var rfunc;
-            rfunc = function(recvFromInfo) {
-                requesting_window.postMessage({command: 'client_request', message: recvFromInfo}, '*');
-                socket.recvFrom(server_socket, rfunc);
+            var accept_func;
+            accept_func = function(acceptInfo) {
+                var read_func;
+                var message = "";
+                read_func = function(readInfo) {
+                    console.log(readInfo.resultCode);
+                    message += ab2string(readInfo.data);
+                    var m = message.split("\n");
+                    console.log(m);
+                    while (m.length > 1) {
+                        var mstruct = JSON.parse(m[0]);
+                        mstruct.sid = acceptInfo.socketId;
+                        requesting_window.postMessage({command: 'client_request', message: mstruct}, '*');
+                        m.shift();
+                    }
+                    message = m[0];
+                    socket.read(acceptInfo.socketId, read_func);
+                };
+                socket.read(acceptInfo.socketId, read_func);
+                socket.accept(server_socket, accept_func);
             };
-            socket.recvFrom(server_socket, rfunc);
+            socket.accept(server_socket, accept_func);
         });
         chrome.runtime.onSuspend.addListener(function(){
             socket.destroy(server_socket);
@@ -39,6 +55,7 @@ function start_server(requesting_window) {
         });
     });
     // PUBLISH SERVICE
+    /*
     socket.create('udp', {}, function(createInfo) {
         var publish_socket = createInfo.socketId;
         socket.bind(publish_socket, '255.255.255.255', 42425, function (result) {
@@ -54,9 +71,11 @@ function start_server(requesting_window) {
             console.log("publish socket released");
         });
     });
+    */
 }
 
 function find_servers(requesting_window) {
+    /*
     socket.create('udp', {}, function(socketInfo) {
        var socketId = socketInfo.socketId;
        socket.bind(socketId, "0.0.0.0", 0, function(res) {
@@ -73,26 +92,35 @@ function find_servers(requesting_window) {
            console.log("search socket released");
        });
     });
+    */
 }
 
 function join_server(requesting_window, data) {
-    socket.create('udp', {}, function(socketInfo) {
-       var socketId = socketInfo.socketId;
-       socket.bind(socketId, "0.0.0.0", 0, function(res) {
-           if(res !== 0) {
-            throw('cannot bind socket');
-           }
-           socket.sendTo(socketId, struct2ab({command: "hand_shake", name: data.name}), data.server_ip, 42424, function(writeInfo) {
+    socket.create('tcp', {}, function(socketInfo) {
+       client_socket = socketInfo.socketId;
+       socket.connect(client_socket, data.server_ip, 42424, function(result) {
+           if (result < 0) console.error(result);
+           socket.write(client_socket, struct2ab({command: "hand_shake", name: data.name}), function(writeInfo) {
                if (writeInfo.bytesWritten < 0) console.error(writeInfo);
            });
-           var rfunc = function(recvFromInfo) {
-               requesting_window.postMessage({command: 'server_request', socketId: socketId, message: recvFromInfo}, '*');
-               socket.recvFrom(socketId, rfunc);
+           var read_func;
+           var message = "";
+           read_func = function(readInfo) {
+               console.log(readInfo.resultCode);
+               message += ab2string(readInfo.data);
+               var m = message.split("\n");
+               console.log(m);
+               while (m.length > 1) {
+                   requesting_window.postMessage({command: 'server_request', message: JSON.parse(m[0])}, '*');
+                   m.shift();
+               }
+               message = m[0];
+               socket.read(client_socket, read_func);
            };
-           socket.recvFrom(socketId, rfunc);
+           socket.read(client_socket, read_func);
        });
        chrome.runtime.onSuspend.addListener(function(){
-           socket.destroy(socketId);
+           socket.destroy(client_socket);
            console.log("client socket released");
        });
     });
@@ -100,14 +128,14 @@ function join_server(requesting_window, data) {
 
 function send_to_client(data) {
    console.log("To client", data);
-   socket.sendTo(server_socket, struct2ab(data.content), data.client.host, data.client.port, function(writeInfo) {
+   socket.write(data.client.sid, struct2ab(data.content), function(writeInfo) {
        if (writeInfo.bytesWritten < 0) console.error(writeInfo);
    });
 }
 
-function send_to_server(socketId, server_host, data) {
+function send_to_server(data) {
    console.log("To server", data);
-   socket.sendTo(socketId, struct2ab(data), server_host, 42424, function(writeInfo) {
+   socket.write(client_socket, struct2ab(data), function(writeInfo) {
        if (writeInfo.bytesWritten < 0) console.error(writeInfo);
    });
 }
@@ -125,7 +153,7 @@ var messageHandler = function(e) {
             send_to_client(e.data.data);
             break;
         case 'to_server':
-            send_to_server(e.data.socketId, e.data.server_host, e.data.data);
+            send_to_server(e.data.data);
             break;
         case 'download_data':
             display_data(e.data.data);
@@ -153,12 +181,12 @@ function display_data(config) {
   });
 }
 
-function ab2struct(buf) {
-  return JSON.parse(String.fromCharCode.apply(null, new Uint16Array(buf)));
+function ab2string(buf) {
+  return String.fromCharCode.apply(null, new Uint16Array(buf));
 }
 
 function struct2ab(struct) {
-  var str = JSON.stringify(struct);
+  var str = JSON.stringify(struct) + "\n";
   var buf = new ArrayBuffer(str.length*2);
   var bufView = new Uint16Array(buf);
   for (var i=0, strLen=str.length; i<strLen; i++) {
