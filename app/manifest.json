@@ -2,8 +2,8 @@
   "name": "STVBallot",
   "description": "STV Ballot",
   "manifest_version": 2,
-  "minimum_chrome_version": "23",
-  "version": "0.6.0",
+  "minimum_chrome_version": "25",
+  "version": "0.6.1",
   "app": {
     "background": {
       "scripts": ["background.js"]
@@ -17,7 +17,6 @@
         "tcp-connect", "tcp-listen"
     ]},
     "app.window",
-    "experimental",
     {"fileSystem" : [
         "write"
     ]}
