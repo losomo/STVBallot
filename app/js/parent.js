@@ -107,15 +107,17 @@ function join_server(requesting_window, data) {
            var message = "";
            read_func = function(readInfo) {
                console.log(readInfo.resultCode);
-               message += ab2string(readInfo.data);
-               var m = message.split("\n");
-               console.log(m);
-               while (m.length > 1) {
-                   requesting_window.postMessage({command: 'server_request', message: JSON.parse(m[0])}, '*');
-                   m.shift();
+               if (readInfo.resultCode > 0) {
+                   message += ab2string(readInfo.data);
+                   var m = message.split("\n");
+                   console.log(m);
+                   while (m.length > 1) {
+                       requesting_window.postMessage({command: 'server_request', message: JSON.parse(m[0])}, '*');
+                       m.shift();
+                   }
+                   message = m[0];
+                   socket.read(client_socket, read_func);
                }
-               message = m[0];
-               socket.read(client_socket, read_func);
            };
            socket.read(client_socket, read_func);
        });

@@ -417,7 +417,7 @@ App.TypingController = Em.Controller.extend({
         return a;
     }.property('pileGroups', 'pileGroups.@each'),
     obstruct_style: function () {
-        return this.get('appState') == 2 ? "display: none;" : "position: absolute; top: 0%; left: 0%; width: 100%; height: 100%; background-color: black; z-index: 1001; opacity: .60";
+        return this.get('appState') == 2 ? "display: none;" : "position: absolute; top: 0%; left: 0%; width: 100%; height: 100%; background-color: black; z-index: 1001; opacity: .60; text-align: center; color: white; font-size: 20pt; padding-top: 20%";
     }.property('appState'),
     init: function() {
         this.set('currentPileCaption', this.get('pilesCaptions')[0]);
@@ -494,8 +494,11 @@ App.Router = Em.Router.extend({
             shuffle: function(router) {
                 router.get('voteSetupController').shuffle();
             },
-            disconnect: function(router, client) {
-                //TODO
+            disconnect: function(router, clientEvent) {
+                var client = clientEvent.context;
+                console.log("Disconnect pressed:", client);
+                send_command('to_client', {client: client, content: {command: "disconnect"}});
+                router.get('applicationController').get('clients').removeObject(client);
             },
             launch: function(router) {
                 var ac = router.get('applicationController');
@@ -791,12 +794,36 @@ function handle_client_message(data) {
     console.log("Message from client", data);
     switch(data.command) {
         case 'hand_shake':
+            var orig_client = ac.get('clients').find(function (item) {
+                return item.name == data.name;
+            });
             client = Client.create({
                 sid: data.sid,
                 name: data.name,
             });
-            ac.get('clients').pushObject(client);
-            send_command('to_client', {client: client, content: {command: "accepted"}});
+            if (orig_client == undefined) {
+                ac.get('clients').pushObject(client);
+                send_command('to_client', {client: client, content: {command: "accepted"}});
+            }
+            else {
+                // replace the client with the same name
+                ac.get('clients').removeObject(orig_client);
+                send_command('to_client', {client: orig_client, content: {command: "disconnect"}});
+                ac.get('clients').pushObject(client);
+                send_command('to_client', {client: client, content: {command: "accepted"}});
+                var pileGroups = App.router.get('voteRunningController').get('pileGroups');
+                var setup = STVDataSetup.fromGUI(App.router.get('voteSetupController'));
+                send_command('to_client', {client: client, content: {command: "set_setup", content: setup}});
+                pileGroups.forEach(function(pileGroup) {
+                    pileGroup.forEach(function(pile) {
+                        if (pile.client.sid == orig_client.sid) {
+                            pile.set('client', client);
+                            send_command('to_client', {client: client, content: {command: "create_pile", content: STVDataPile.fromGUI(pile)}});
+                            //send_command('to_client', {client: client, content: {command: "reopen_pile", content: STVDataPile.fromGUI(pile)}});
+                        }
+                    });
+                });
+            }
             break;
         case 'alive':
             client.set('last_alive', new Date())
@@ -851,7 +878,7 @@ function handle_server_message(data) {
             App.router.get('applicationController').set('appState', 2);
             break;
         case 'disconnect':
-            // TODO
+            App.router.transitionTo('modeSetup');
             break;
         default:
             console.warn(data);

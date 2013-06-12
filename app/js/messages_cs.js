@@ -75,6 +75,7 @@ Ember.STRINGS = {
     '_Vote Progress'              : 'Kontolní panel',
     '_Vote Running'               : 'Průběh volby',
     '_Vote setup'                 : 'Parametry volby',
+    '_Waiting for the setup'      : 'Čekám na zadání',
     '_Maximal no. of men'         : 'Mužů maximálně',
     '_Maximal no. of women'       : 'Žen maximálně',
     '_Number of ordered positions': 'Pozic s pořadím',
