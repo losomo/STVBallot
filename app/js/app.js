@@ -44,6 +44,26 @@ Candidate = Em.Object.extend({
     },
 });
 
+GConstraints = Em.ArrayProxy.extend({
+    autoAdd: function() {
+        var cCount = this.content.length;
+        var lastC = this.objectAt(cCount - 1);
+        if (lastC.from && lastC.to && lastC.mmax && lastC.wmax) {
+            this.pushObject(GConstraint.create({}));
+        }
+    }.observes('@each.from', '@each.to', '@each.mmax', '@each.wmax'),
+});
+
+GConstraint = Em.Object.extend({
+    from: null,
+    to: null,
+    mmax: null,
+    wmax: null,
+    toString: function () {
+        return this.from + "-" + this.to + ": " + this.mmax + "/" + this.wmax;
+    },
+});
+
 BEntry = Em.Object.extend({
     order: "",
 });
@@ -267,6 +287,7 @@ App.VoteSetupController = Em.Controller.extend({
     mandateCount: 3,
     ballotCount: 8,
     candidates: null,
+    gconstraints: null,
     shuffled: null,
     m_max: null,
     f_max: null,
@@ -345,6 +366,7 @@ App.VoteSetupController = Em.Controller.extend({
     init: function() {
         this._super();
         this.set('candidates', Candidates.create({content: []}));
+        this.set('gconstraints', GConstraints.create({content: [GConstraint.create()]}));
     },
     cantShuffle: function() {
         return !this.get('shuffled') && parseInt(this.get('candidateCount')) > 0 ? false : "disabled";

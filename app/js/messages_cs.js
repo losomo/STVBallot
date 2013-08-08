@@ -79,4 +79,8 @@ Ember.STRINGS = {
     '_Maximal no. of men'         : 'Mužů maximálně',
     '_Maximal no. of women'       : 'Žen maximálně',
     '_Number of ordered positions': 'Pozic s pořadím',
+    '_Constraint from'            : 'Omezení od',
+    '_to'                         : 'do',
+    '_Max. men'                   : 'mužů max.',
+    '_Max. women'                 : 'žen max.',
 }

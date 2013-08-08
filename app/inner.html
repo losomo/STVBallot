@@ -195,6 +195,20 @@
        <tr><td><label>{{t "_Maximal no. of women"}}</label></td> <td>{{view Em.TextField valueBinding="f_max"}}</td></tr>
        <tr><td><label>{{t "_Number of ordered positions"}}</label></td> <td>{{view Em.TextField valueBinding="orderedCount"}}</td></tr>
        </table>
+       <table class="sform typing">
+           {{#each c in gconstraints}}
+               <tr>
+               <td><label>{{t "_Constraint from"}}</label></td>
+               <td>{{view Em.TextField valueBinding="c.from"}}</td>
+               <td><label>{{t "_to"}}</label></td>
+               <td>{{view Em.TextField valueBinding="c.to"}}</td>
+               <td><label>{{t "_Max. men"}}</label></td>
+               <td>{{view Em.TextField valueBinding="c.mmax"}}</td>
+               <td><label>{{t "_Max. women"}}</label></td>
+               <td>{{view Em.TextField valueBinding="c.wmax"}}</td>
+               </tr>
+           {{/each}}
+       </table>
     </script>
     <script data-template-name="app-setup" type="text/x-handlebars">
        <div class="centeredVerticalWide">{{t "_Enter your name"}}: {{view Em.TextField valueBinding="userName"}}</div>
