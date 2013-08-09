@@ -259,16 +259,37 @@ STVDataBallot.reinsert_to_ab = function(oab) {
     return ab;
 }
 
-STVDataBallot.remove_gender_violators_from_ab = function(oab, setup, report, candidate_orders, mandates) {
+STVDataBallot.remove_gender_violators_from_ab = function(oab, setup, report, candidate_orders, mandates, round) {
     var ab = oab;
     var m_count = 0;
     var f_count = 0;
-    mandates.forEach(function (mandate) {
+    var c_counts = [];
+    setup.gconstraints.forEach(function(c) { c_counts.push({M: 0, F: 0})});
+    mandates.forEach(function (mandate, mround) {
         if (mandate.gender == 'M') m_count++;
         if (mandate.gender == 'F') f_count++;
+        setup.gconstraints.forEach(function(c, gcindex) {
+            if (c.from <= mround && mround <= c.to) {
+                c_counts[gcindex][mandate.gender] += 1;
+            }
+        });
     });
     var rm_m = setup.m_max > 0 && m_count >= setup.m_max;
+    if (rm_m) report("Dosaženo celkového dovoleného počtu mužů (" + setup.m_max + "), vyřazuji muže.");
     var rm_f = setup.f_max > 0 && f_count >= setup.f_max;
+    if (rm_f) report("Dosaženo celkového dovoleného počtu žen (" + setup.f_max + "), vyřazuji ženy.");
+    setup.gconstraints.forEach(function(c, gci) {
+        if (c.from <= round && round <= c.to) {
+            if (c['M'] >= c.mmax) {
+                report("Dosaženo limitu mužů pro pravidlo " + c.toString());
+                rm_m = true;
+            }
+            if (c['F'] >= c.fmax) {
+                report("Dosaženo limitu žen pro pravidlo " + c.toString());
+                rm_f = true;
+            }
+        }
+    });
     setup.candidates.forEach(function(candidate, i) {
         if (candidate.gender == 'M' && rm_m || candidate.gender == 'F' && rm_f) {
             ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, i+1, 0, false);

@@ -320,38 +320,41 @@ App.VoteSetupController = Em.Controller.extend({
         });
     }.observes('orderedCount'),
     launchState: function() {
-        var mandateCount = parseInt(this.get('mandateCount'));
-        var orderedCount = parseInt(this.get('orderedCount'));
-        if (this.get('voteNo') != "" && parseInt(this.get('candidateCount')) > 0 && mandateCount > 0 && parseInt(this.get('ballotCount')) > 0) {
+        var mandateCount = parseInt(this.get('mandateCount')) || 0;
+        var orderedCount = parseInt(this.get('orderedCount')) || 0;
+        var candidateCount = parseInt(this.get('candidateCount')) || 0;
+        if (this.get('voteNo') != "" && candidateCount > 0 && mandateCount > 0 && parseInt(this.get('ballotCount')) > 0) {
             var names = {};
-            var problem = false;
-            var genders = (parseInt(this.get('m_max')) > 0 || parseInt(this.get('f_max')) > 0) ? true : false;
+            var problem = "";
+            var ccount = 0;
+            this.get('gconstraints').forEach (function(c) {
+                if (c.from != null && c.from != '' || c.to != null && c.to != '' || c.mmax != null && c.mmax != '' || c.fmax != null && c.fmax != '') {
+                    var from = parseInt(c.from) || 0;
+                    var to = parseInt(c.to) || 0;
+                    var mmax = parseInt(c.mmax) || 0;
+                    var fmax = parseInt(c.fmax) || 0
+                    if (mmax < 0 || fmax < 0 || from <= 0 || to < from || to > orderedCount) {
+                        problem = "bad constraint: " + c.toString();
+                    }
+                    ccount += 1;
+                }
+            });
+            var genders = (parseInt(this.get('m_max')) > 0 || parseInt(this.get('f_max')) > 0 || ccount > 0) ? true : false;
             this.get('candidates').forEach (function(item) {
                 var name = item.get("name");
                 var gender = item.get("gender");
                 if (name.length < 1) {
-                    problem = true;
+                    problem = "short name";
                     return;
                 }
-                if (names[name]) problem = true;
+                if (names[name]) problem = "duplicate name";
                 names[name] = true;
 
-                if (gender && genders != (gender.code != '')) problem = true;
+                if (gender && genders != (gender.code != '')) problem = "candidate gender info missing or superfluous";
             });
-            this.get('gconstraints').forEach (function(c) {
-                if (c.from != '' || c.to != '' || c.mmax != '' || c.fmax != '') {
-                    var from = parseInt(c.from);
-                    var to = parseInt(c.to);
-                    var mmax = parseInt(c.mmax);
-                    var fmax = parseInt(c.fmax);
-                    if (mmax < 0 || fmax < 0 || from <= 0 || to < from || to > orderedCount) {
-                        problem = true;
-                    }
-                }
-            });
-            if (parseInt(this.get('candidateCount')) < mandateCount) problem = true;
-            if (orderedCount > mandateCount) problem = true;
-            return problem ? 'disabled' : false;
+            if (orderedCount > mandateCount) problem = "too many ordered mandates";
+            if (problem != '') console.log(problem);
+            return problem != '' ? 'disabled' : false;
         }
         else {
             return "disabled";

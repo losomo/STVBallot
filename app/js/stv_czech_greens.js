@@ -186,10 +186,10 @@ function stv_round(op) {
 
 function stv_top_down(setup, valid_ballots_count, original_ab, replacement_quota, original_fp, candidate_orders, report) {
     var mandates = [];
-    var quota = valid_ballots_count / (setup.mandateCount + 1);
     for (var round = 1; round <= setup.mandateCount; round++) {
         var new_ab = STVDataBallot.clone_ab(original_ab);
         var elected = mandates.map(function(m){return m[0];});
+        var quota = valid_ballots_count / ((round <= setup.orderedCount ? round : setup.mandateCount) + 1);
         report("<h5>Cyklus č. " + round + "</h5>");
         // krok 1
         if (round > 1) {
@@ -204,7 +204,7 @@ function stv_top_down(setup, valid_ballots_count, original_ab, replacement_quota
             new_ab = STVDataBallot.reinsert_to_ab(new_ab);
             report("<p>Preference po vrácení kandidátů vyřazených v kroku 1</p>" + STVDataBallot.reportAggregatedBallots(setup, new_ab));
         }
-        new_ab = STVDataBallot.remove_gender_violators_from_ab(new_ab, setup, report, candidate_orders, elected);
+        new_ab = STVDataBallot.remove_gender_violators_from_ab(new_ab, setup, report, candidate_orders, elected, round);
         report("Krok 2: volba mandátu<br/>");
         new_ab = STVDataBallot.remove_non_candidates(new_ab, setup, round, elected, report, false);
         console.error("cycle start: " + round);
@@ -244,6 +244,11 @@ STV.prototype.run = function(setup, ballots, report, done) {
         "</tr></table></p>" +
         "<p>Maximální počet mužů: " + (setup.m_max > 0 ? setup.m_max : 'neomezen')  + ", " +
         "maximální počet žen: " + (setup.f_max > 0 ? setup.f_max : 'neomezen') + "<br/>" +
+        "<p>Genderová omezení pořadí: <table><tr>" + (setup.gconstraints.length > 0 ? setup.gconstraints.map(function(c){
+            return "<td>Mezi místy </td><td>" + c.from + "</td><td> a </td><td>" + c.to + "</td><td>smí být nejvýše </td><td>" +
+            c.mmax + "</td><td> mužů a nejvýše </td><td>" + c.fmax + "</td><td>žen</td>";
+            }).join("</tr><tr>") : "žádná") +
+        "</tr></table></p>" +
         "Počet platných hlasovacích lístků: " + valid_ballots_count + "</p>"
     );
     var candidate_orders = {};
