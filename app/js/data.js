@@ -179,7 +179,7 @@ STVDataBallot.get_most_preferred = function(ab) {
             }, [Number.MAX_VALUE, []]); // returns [min_order, [1+index_with_min_order]]
 };
 
-STVDataBallot.removeCandidateFromAggregatedBallots = function(oab, corder, discount, soft_remove) {
+STVDataBallot.removeCandidateFromAggregatedBallots = function(oab, corder, discount, soft_remove, debug) {
     var votes_for_candidate = function(aggrb) {
         var most_preferred = STVDataBallot.get_most_preferred(aggrb);
         if (most_preferred[1].some(function(i) {return i == corder})) {
@@ -205,7 +205,7 @@ STVDataBallot.removeCandidateFromAggregatedBallots = function(oab, corder, disco
             if (barray.some(function(x) {return x > 0;})) {
                 var newb = barray.join(':');
                 var new_score = new_weight * for_candidate + (oab[b] - for_candidate);
-                if (for_candidate > 0) {
+                if (for_candidate > 0 && debug) {
                     console.error(["transferred",STVDataSetup.round(new_score),corder,STVDataBallot.get_most_preferred(newb)[1]].join(":"));
                 }
                 if (!ab[newb]) ab[newb] = 0;
@@ -269,30 +269,32 @@ STVDataBallot.remove_gender_violators_from_ab = function(oab, setup, report, can
         if (mandate.gender == 'M') m_count++;
         if (mandate.gender == 'F') f_count++;
         setup.gconstraints.forEach(function(c, gcindex) {
-            if (c.from <= mround && mround <= c.to) {
+            if (c.from <= mround + 1 && mround + 1 <= c.to) {
                 c_counts[gcindex][mandate.gender] += 1;
             }
         });
     });
     var rm_m = setup.m_max > 0 && m_count >= setup.m_max;
-    if (rm_m) report("Dosaženo celkového dovoleného počtu mužů (" + setup.m_max + "), vyřazuji muže.");
+    if (rm_m) report("Dosaženo celkového dovoleného počtu mužů (" + setup.m_max + "), vyřazuji muže.<br/>");
     var rm_f = setup.f_max > 0 && f_count >= setup.f_max;
-    if (rm_f) report("Dosaženo celkového dovoleného počtu žen (" + setup.f_max + "), vyřazuji ženy.");
+    if (rm_f) report("Dosaženo celkového dovoleného počtu žen (" + setup.f_max + "), vyřazuji ženy.<br/>");
     setup.gconstraints.forEach(function(c, gci) {
+        //report("<br/>Kontrola genderového omezení " + STVDataGConstraint.desc(c));
         if (c.from <= round && round <= c.to) {
-            if (c['M'] >= c.mmax) {
-                report("Dosaženo limitu mužů pro pravidlo " + c.toString());
+            //report("<br/>Genederové omezení je pro tento cyklus aktivní, doposud " + JSON.stringify(c_counts[gci]));
+            if (c_counts[gci]['M'] >= c.mmax) {
+                report("Dosaženo limitu mužů pro pravidlo " + STVDataGConstraint.desc(c) + "<br/>");
                 rm_m = true;
             }
-            if (c['F'] >= c.fmax) {
-                report("Dosaženo limitu žen pro pravidlo " + c.toString());
+            if (c_counts[gci]['F'] >= c.fmax) {
+                report("Dosaženo limitu žen pro pravidlo " + STVDataGConstraint.desc(c) + "<br/>");
                 rm_f = true;
             }
         }
     });
     setup.candidates.forEach(function(candidate, i) {
         if (candidate.gender == 'M' && rm_m || candidate.gender == 'F' && rm_f) {
-            ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, i+1, 0, false);
+            ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, i+1, 0, false, setup.debug);
             report("Vyřazen z důvodu genderové kvóty: " + candidate.name + "<br/>");
         }
     });
@@ -314,7 +316,7 @@ STVDataBallot.remove_non_candidates = function(oab, setup, round, mandates, repo
                     else {
                         report("<br/>Kandidát " + candidate.name + " nekandiduje v kole " + round + ", vyřazuji.<br/>");
                     }
-                    ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, cindex+1, 0, soft_remove);
+                    ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, cindex+1, 0, soft_remove, setup.debug);
                 }
             }
         }
@@ -580,4 +582,8 @@ STVDataGConstraint.toGUI = function (c, i) {
         mmax: c.mmax,
         fmax: c.fmax,
     });
+};
+
+STVDataGConstraint.desc = function (c) {
+        return c.from + "-" + c.to + ": " + c.mmax + "/" + c.fmax;
 };
