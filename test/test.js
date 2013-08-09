@@ -32,6 +32,7 @@ function test(fname, debug) {
                     acceptable_positions: ap == null ? [] : ap[i]
                 };
             }),
+            gconstraints: test.gconstraints == null ? [] : test.gconstraints,
             f_max: test.f_max || 0,
             m_max: test.m_max || 0,
             orderedCount: test.ordered || 0

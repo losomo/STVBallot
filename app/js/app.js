@@ -48,19 +48,19 @@ GConstraints = Em.ArrayProxy.extend({
     autoAdd: function() {
         var cCount = this.content.length;
         var lastC = this.objectAt(cCount - 1);
-        if (lastC.from && lastC.to && lastC.mmax && lastC.wmax) {
+        if (lastC.from && lastC.to && lastC.mmax && lastC.fmax) {
             this.pushObject(GConstraint.create({}));
         }
-    }.observes('@each.from', '@each.to', '@each.mmax', '@each.wmax'),
+    }.observes('@each.from', '@each.to', '@each.mmax', '@each.fmax'),
 });
 
 GConstraint = Em.Object.extend({
     from: null,
     to: null,
     mmax: null,
-    wmax: null,
+    fmax: null,
     toString: function () {
-        return this.from + "-" + this.to + ": " + this.mmax + "/" + this.wmax;
+        return this.from + "-" + this.to + ": " + this.mmax + "/" + this.fmax;
     },
 });
 
@@ -320,7 +320,9 @@ App.VoteSetupController = Em.Controller.extend({
         });
     }.observes('orderedCount'),
     launchState: function() {
-        if (this.get('voteNo') != "" && parseInt(this.get('candidateCount')) > 0 && parseInt(this.get('mandateCount')) > 0 && parseInt(this.get('ballotCount')) > 0) {
+        var mandateCount = parseInt(this.get('mandateCount'));
+        var orderedCount = parseInt(this.get('orderedCount'));
+        if (this.get('voteNo') != "" && parseInt(this.get('candidateCount')) > 0 && mandateCount > 0 && parseInt(this.get('ballotCount')) > 0) {
             var names = {};
             var problem = false;
             var genders = (parseInt(this.get('m_max')) > 0 || parseInt(this.get('f_max')) > 0) ? true : false;
@@ -336,14 +338,25 @@ App.VoteSetupController = Em.Controller.extend({
 
                 if (gender && genders != (gender.code != '')) problem = true;
             });
-            if (parseInt(this.get('candidateCount')) < parseInt(this.get('mandateCount'))) problem = true;
-            if (parseInt(this.get('orderedCount')) > parseInt(this.get('mandateCount'))) problem = true;
+            this.get('gconstraints').forEach (function(c) {
+                if (c.from != '' || c.to != '' || c.mmax != '' || c.fmax != '') {
+                    var from = parseInt(c.from);
+                    var to = parseInt(c.to);
+                    var mmax = parseInt(c.mmax);
+                    var fmax = parseInt(c.fmax);
+                    if (mmax < 0 || fmax < 0 || from <= 0 || to < from || to > orderedCount) {
+                        problem = true;
+                    }
+                }
+            });
+            if (parseInt(this.get('candidateCount')) < mandateCount) problem = true;
+            if (orderedCount > mandateCount) problem = true;
             return problem ? 'disabled' : false;
         }
         else {
             return "disabled";
         }
-    }.property('voteNo', 'candidateCount', 'mandateCount', 'ballotCount', 'candidates.@each.name', 'candidates.@each.gender', 'orderedCount', 'f_max', 'm_max'),
+    }.property('voteNo', 'candidateCount', 'mandateCount', 'ballotCount', 'candidates.@each.name', 'candidates.@each.gender', 'orderedCount', 'f_max', 'm_max', 'gconstraints.@each', 'gconstraints.@each.from', 'gconstraints.@each.to', 'gconstraints.@each.mmax', 'gconstraints.@each.fmax'),
     shuffle: function() {
         var c = this.get('candidates');
         var i = c.content.length;

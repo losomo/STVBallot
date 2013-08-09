@@ -462,6 +462,7 @@ STVDataFormats.jsonFromGroups = function(title, setup, groups, mandates, replace
         "m_max": parseInt(setup.m_max),
         "f_max": parseInt(setup.f_max),
         "genders": setup.candidates.mapProperty('gender'),
+        "gconstraints": setup.gconstraints,
         "ordered": parseInt(setup.orderedCount),
         "ballots_ab": STVDataBallot.aggregateBallots(ballots),
         "name": title,
@@ -470,13 +471,14 @@ STVDataFormats.jsonFromGroups = function(title, setup, groups, mandates, replace
     }, null, "  ");
 };
 
-function STVDataSetup(voteNo, candidateCount, mandateCount, ballotCount, replacements, candidates, m_max, f_max, orderedCount) {
+function STVDataSetup(voteNo, candidateCount, mandateCount, ballotCount, replacements, candidates, gconstraints, m_max, f_max, orderedCount) {
     this.voteNo = voteNo; // Not necessarily a number
     this.candidateCount = parseInt(candidateCount);
     this.mandateCount = parseInt(mandateCount);
     this.ballotCount = parseInt(ballotCount);
     this.replacements = replacements; // Boolean
     this.candidates = candidates; // Array of STVDataCandidate
+    this.gconstraints = gconstraints; // Array of STVDataGConstraint
     this.m_max = parseInt(m_max || 0);
     this.f_max = parseInt(f_max || 0);
     this.orderedCount = parseInt(orderedCount || 0);
@@ -500,6 +502,7 @@ STVDataSetup.fromGUI = function(controller) {
         controller.get('ballotCount'),
         controller.get('replacements'),
         controller.get('candidates').map(function(candidate) {return STVDataCandidate.fromGUI(candidate);}),
+        controller.get('gconstraints').map(function(c) {return STVDataGConstraint.fromGUI(c);}).filter(function(c){return c.from > 0 && c.to > 0}),
         controller.get('m_max'),
         controller.get('f_max'),
         controller.get('orderedCount')
@@ -514,6 +517,9 @@ STVDataSetup.toGUI = function(setup, controller) {
     controller.set('replacements', setup.replacements);
     controller.set('candidates', Em.ArrayProxy.create({
         content: setup.candidates.map(function(candidate, index) {return STVDataCandidate.toGUI(candidate, index);})
+    }));
+    controller.set('gconstraints', GConstraints.create({
+        content: setup.gconstraints.map(function(c) {return STVDataGConstraint.toGUI(c);})
     }));
 };
 
@@ -532,5 +538,25 @@ STVDataCandidate.toGUI = function (c, i) {
         name: c.name,
         gender: c.gender,
         index: i
+    });
+};
+
+function STVDataGConstraint(from, to, mmax, fmax) {
+    this.from = from;
+    this.to = to;
+    this.mmax = mmax;
+    this.fmax = fmax;
+}
+
+STVDataGConstraint.fromGUI = function (c) {
+    return new STVDataGConstraint(parseInt(c.get('from')), parseInt(c.get('to')), parseInt(c.get('mmax')), parseInt(c.get('fmax')));
+};
+
+STVDataGConstraint.toGUI = function (c, i) {
+    return GConstraint.create({
+        from: c.from,
+        to: c.to,
+        mmax: c.mmax,
+        fmax: c.fmax,
     });
 };
