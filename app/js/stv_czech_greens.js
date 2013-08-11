@@ -189,7 +189,7 @@ STV.prototype.stv_top_down = function(setup, valid_ballots_count, original_ab, r
     var mandates = [];
     for (var round = 1; round <= setup.mandateCount; round++) {
         var new_ab = STVDataBallot.clone_ab(original_ab);
-        var elected = mandates.map(function(m){return m[0];});
+        var elected = mandates.map(function(m){return m[0];}).filter(function(c){return !c.is_null;});
         var quota = valid_ballots_count / ((round <= setup.orderedCount ? round : setup.mandateCount) + 1);
         report("<h5>Cyklus č. " + round + "</h5>");
         // krok 1
@@ -222,6 +222,7 @@ STV.prototype.stv_top_down = function(setup, valid_ballots_count, original_ab, r
         }
         else {
             report("V cyklu č. " + round + " nebyl zvolen žádný kandidát.");
+            mandates.push([STVDataCandidate.nullCandidate(), 0]);
         }
     }
     return mandates;
@@ -277,7 +278,7 @@ STV.prototype.run = function(setup, ballots, report, done) {
     var mandates = mandates_scores.map(function(ms) {
         var m = ms[0];
         m.score = new Number(ms[1]).toFixed(0);
-        m.first_score = orig_map[candidate_orders[m.name]];
+        m.first_score = orig_map[candidate_orders[m.name]] || 0;
         return m;
     });
     report("<h2>Zvolení kandidáti:</h2><ul><li>" + mandates.map(function(c, i){

@@ -93,7 +93,7 @@ function test(fname, debug) {
 }
 
 function envelope(msg) {
-    return '<!DOCTYPE html><html><head><meta charset="utf8"/></head><body>' + msg
+    return '<!DOCTYPE html><html><head><meta charset="utf8"/><link rel="stylesheet" href="css/style.css"/></head><body>' + msg
     + "</body></html>";
 }
 

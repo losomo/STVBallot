@@ -32,7 +32,7 @@
     "0:2:1:0:3": 3
   },
   "name": "Volba_2",
-  "expected": ["B"],
+  "expected": ["B", "neobsazeno"],
     "expected_replacements": [
         ["C", "A"]
     ]

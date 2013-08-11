@@ -546,14 +546,15 @@ STVDataSetup.toGUI = function(setup, controller) {
     }));
 };
 
-function STVDataCandidate(name, gender, acceptable_positions) {
+function STVDataCandidate(name, gender, acceptable_positions, is_null) {
     this.name = name;
     this.gender = gender;
     this.acceptable_positions = acceptable_positions;
+    this.is_null = is_null;
 }
 
 STVDataCandidate.fromGUI = function (c) {
-    return new STVDataCandidate(c.get('name'), c.get('gender').code, c.get('acceptable_positions').content.mapProperty('accepted'));
+    return new STVDataCandidate(c.get('name'), c.get('gender').code, c.get('acceptable_positions').content.mapProperty('accepted'), false);
 };
 
 STVDataCandidate.toGUI = function (c, i) {
@@ -562,6 +563,10 @@ STVDataCandidate.toGUI = function (c, i) {
         gender: c.gender,
         index: i
     });
+};
+
+STVDataCandidate.nullCandidate = function () {
+    return new STVDataCandidate("neobsazeno", '', [], true);
 };
 
 function STVDataGConstraint(from, to, mmax, fmax) {

@@ -52,6 +52,7 @@
   "name": "Volba_3",
   "expected": [
     "A",
-    "B"
+    "B",
+    "neobsazeno"
   ]
 }

@@ -54,7 +54,7 @@
   },
   "name": "Volba_ordered_1",
   "expected": [
-    null,
+    "neobsazeno",
     "B"
   ],
   "expected_replacements": []
