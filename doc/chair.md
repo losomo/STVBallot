@@ -8,7 +8,7 @@
 
 - *Počet kandidátů*: Číslo vyjadřující počet lidí, kteří do orgánu nebo na kandidátku v této volbě kandidují. Musí být vyplněno.
 
-- *Počet mandátů*: Velikost orgánu nebo kendidátky. Tedy kolik lidí má být v ideálním případě zvoleno. Musí být vyplněno.
+- *Počet mandátů*: Velikost orgánu nebo kandidátky. Tedy kolik lidí má být v ideálním případě zvoleno. Musí být vyplněno.
 
 - *Počet hlasovacích lístků*: Počet oprávněných volitelů. Toto číslo je potřeba při případném tisku volebních lístků, který zatím není umožněn. Toto číslo nemá na výsledek volby vliv, ale pomáhá odhadovat, jaká část lístků už je členy komise zpracována. Musí být vyplněno
 
@@ -16,7 +16,7 @@
 
 - *Žen maximálně*: Totéž jako předchozí pole pro muže
 
-- *Pozic s pořadím*: Pokud je nevyplněno, je volba spočítána jednodušším způsobem bez ohledu na pořadí (ale pokud jsou aktivní genderová omezení, toto neplatí, protože pořadí je nutné znát kvůli nim). Pokud je vyplněno, čílo udává, u kolika mandátů záleží na jejich pořadí. Nemusí být vyplněno, pak je to totéž jako nula.
+- *Pozic s pořadím*: Pokud je nevyplněno, je volba spočítána jednodušším způsobem bez ohledu na pořadí (ale pokud jsou aktivní genderová omezení, toto neplatí, protože pořadí je nutné znát kvůli nim). Pokud je vyplněno, číslo udává, u kolika mandátů záleží na jejich pořadí. Nemusí být vyplněno, pak je to totéž jako nula.
 
    Příklad 1: u volby na kandidátní listinu bude *Pozic s pořadím* stejné číslo jako *Počet mandátů*, protože v celé délce kandidátky záleží na pořadí
 
@@ -33,7 +33,7 @@
    <tr><td> 6 </td><td> 8 </td><td> 2 </td><td> 2 </td></tr>
    </table>
 
-- *Seznam kandidátů*: Pole se jmény a pohlavími kandidátů. Pokud nejsou žádána žádná genderová omezení, pohlaví kandidátů **nesmí** být vyplněna. Pokud existuje aspoň jedno genderové omezení, pohlaví všech kandidátů musí být vyplněna. Jména jsou na počátku nahrazena písmeny, je třeba, aby všechna jména byla vyplněna a žádné se neopakovalo. Pokud je vyplněno *Pozic s pořadím*, vpravo od pohlaví se objeví ještě zaškrtávací políčka, kterými lze indikovat, že daný kandidát na některou pozici nekandiduje. Zaškrtávacích políček je *Pozic s pořadím* + 1, zleva doprava odpovídají pozicím od nejvyšší po nejnížší a poslední políčko indikuje, zda daný kandidát kandiduje na zbývající místa, kde na pořadí už nezáleží. Na počátku jsou všechna políčka zaškrtnutá, t.j. všichni kandidáti mají zájem kandidovat na všechna místa.
+- *Seznam kandidátů*: Pole se jmény a pohlavími kandidátů. Pokud nejsou žádána žádná genderová omezení, pohlaví kandidátů **nesmí** být vyplněna. Pokud existuje aspoň jedno genderové omezení, pohlaví všech kandidátů musí být vyplněna. Jména jsou na počátku nahrazena písmeny, je třeba, aby všechna jména byla vyplněna a žádné se neopakovalo. Pokud je vyplněno *Pozic s pořadím*, vpravo od pohlaví se objeví ještě zaškrtávací políčka, kterými lze indikovat, že daný kandidát na některou pozici nekandiduje. Zaškrtávacích políček je *Pozic s pořadím* + 1, zleva doprava odpovídají pozicím od nejvyšší po nejnižší a poslední políčko indikuje, zda daný kandidát kandiduje na zbývající místa, kde na pořadí už nezáleží. Na počátku jsou všechna políčka zaškrtnutá, t.j. všichni kandidáti mají zájem kandidovat na všechna místa.
 
 - *Zamíchat kandidáty*: Tlačítko pro jednorázové zamíchání kandidátů, pokud volební komise neprovedla vylosování pořadí kandidátů předem. Není obvykle nutné použít.
 
