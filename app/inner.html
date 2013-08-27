@@ -211,6 +211,7 @@
        </table>
     </script>
     <script data-template-name="app-setup" type="text/x-handlebars">
+       <div class="vote_control"><a href="doc/index.html">{{t "_Manual"}}</a></div>
        <div class="centeredVerticalWide">{{t "_Enter your name"}}: {{view Em.TextField valueBinding="userName"}}</div>
        {{#each btn in buttons}}
            <button class="centeredVertical" {{ action start btn.ba }} {{bindAttr disabled="btnState"}} >{{ btn.desc }}</button>

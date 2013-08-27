@@ -50,6 +50,7 @@ Ember.STRINGS = {
     '_Join the committee'         : 'Člen komise',
     '_Launch ballot'              : 'Zahájit volbu',
     '_Male'                       : 'Muž',
+    '_Manual'                     : 'Návod k použití',
     '_Maximal no. of men'         : 'Mužů maximálně',
     '_Maximal no. of women'       : 'Žen maximálně',
     '_Max. men'                   : 'mužů max.',

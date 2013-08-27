@@ -8,6 +8,6 @@ STVBallot má tři základní způsoby užití:
 
 [Další možností](cli.html) je spuštění výpočtu pro hlasovací lístky zadané v datovém souboru z příkazové řádky.
 
-Pro zájemce jsou ke stažení [zdrojové kódy aplikace](https://github.com/losomo/STVBallot)
+Pro zájemce jsou ke stažení <a href="https://github.com/losomo/STVBallot" target="_blank">zdrojové kódy aplikace</a>
 
-Kontakt na autora: [vaclav.novak@zeleni.cz](mailto:vaclav.novak@zeleni.cz)
+Kontakt na autora: <a href="mailto:vaclav.novak@zeleni.cz" target="_blank">vaclav.novak@zeleni.cz</a>
