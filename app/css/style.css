@@ -151,7 +151,7 @@ b {font-weight: bold}
 .vote_control {float: right;}
 .progress_table {min-height: 150px; margin-top: 10px;}
 .progress_table table {position: relative; left: 20px; top: 20px;}
-.report {overflow: auto; height: 390px; margin-bottom: 5px; border-bottom: solid #CCC 1px;}
+.report {overflow: auto; height: 390px; margin-bottom: 5px; border-bottom: solid #CCC 1px; -webkit-user-select: text;}
 .done_pane button { margin: 10px; }
 .leaders {width: 0; white-space: nowrap;}
 .square {font-size: 300%; line-height: .85; vertical-align: middle;}
