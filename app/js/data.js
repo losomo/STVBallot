@@ -201,7 +201,14 @@ STVDataBallot.removeCandidateFromAggregatedBallots = function(oab, corder, disco
         if (b != "_empty" && b != "_invalid") {
             var for_candidate = votes_for_candidate(b);
             var barray = b.split(':');
-            barray[corder-1] = soft_remove && barray[corder-1] > 0 ? 100 * barray.length + parseInt(barray[corder-1]) : 0;
+            if (soft_remove && barray[corder-1] > 0) {
+                if (barray[corder-1] <= 100 * barray.length) { // prevent double soft_removing
+                    barray[corder-1] = 100 * barray.length + parseInt(barray[corder-1]);
+                }
+            }
+            else {
+                barray[corder-1] = 0;
+            }
             if (barray.some(function(x) {return x > 0;})) {
                 var newb = barray.join(':');
                 var new_score = new_weight * for_candidate + (oab[b] - for_candidate);

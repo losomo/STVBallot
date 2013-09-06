@@ -209,7 +209,7 @@ STV.prototype.stv_top_down = function(setup, valid_ballots_count, original_ab, r
             new_ab = STVDataBallot.reinsert_to_ab(new_ab);
             report("<p>Preference po vrácení kandidátů vyřazených v kroku 1</p>" + STVDataBallot.reportAggregatedBallots(setup, new_ab));
         }
-        report("Krok 2: volba mandátu<br/>");
+        report("<b>Krok 2 cyklu " + round + "</b>: volba mandátu<br/>");
         new_ab = STVDataBallot.remove_gender_violators_from_ab(new_ab, setup, report, candidate_orders, elected, round, false);
         new_ab = STVDataBallot.remove_non_candidates(new_ab, setup, round, elected, report, false);
         if (this.debug) console.error("cycle start: " + round);
