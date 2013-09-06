@@ -259,7 +259,7 @@ STVDataBallot.reinsert_to_ab = function(oab) {
     return ab;
 }
 
-STVDataBallot.remove_gender_violators_from_ab = function(oab, setup, report, candidate_orders, mandates, round) {
+STVDataBallot.remove_gender_violators_from_ab = function(oab, setup, report, candidate_orders, mandates, round, soft_remove) {
     var ab = oab;
     var m_count = 0;
     var f_count = 0;
@@ -293,9 +293,13 @@ STVDataBallot.remove_gender_violators_from_ab = function(oab, setup, report, can
         }
     });
     setup.candidates.forEach(function(candidate, i) {
-        if (candidate.gender == 'M' && rm_m || candidate.gender == 'F' && rm_f) {
-            ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, i+1, 0, false, setup.debug);
-            report("Vyřazen z důvodu genderové kvóty: " + candidate.name + "<br/>");
+        if (!mandates.some(function(m) { // suboptimal, could have used hash instead
+                    return candidate.name == m.name;
+        })) {
+            if (candidate.gender == 'M' && rm_m || candidate.gender == 'F' && rm_f) {
+                ab = STVDataBallot.removeCandidateFromAggregatedBallots(ab, i+1, 0, soft_remove, setup.debug);
+                report("Vyřazen z důvodu genderové kvóty: " + candidate.name + "<br/>");
+            }
         }
     });
     return ab;

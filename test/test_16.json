@@ -1,0 +1,58 @@
+{
+  "candidates": [
+    "A",
+    "b",
+    "C",
+    "d"
+  ],
+  "acceptable_positions": [
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ]
+  ],
+  "mandates": 2,
+  "m_max": 0,
+  "f_max": 0,
+  "genders": [
+    "M",
+    "F",
+    "M",
+    "F"
+  ],
+  "gconstraints": [
+    {
+      "from": 1,
+      "to": 1,
+      "mmax": 0,
+      "fmax": 1
+    }
+  ],
+  "ordered": 2,
+  "ballots_ab": {
+    "_invalid": 0,
+    "_empty": 2,
+    "1:2:0:0": 10,
+	"0:3:1:2": 9
+  },
+  "name": "Volba_ordered_1",
+  "expected": [ "b", "C"
+  ],
+  "expected_replacements": []
+}

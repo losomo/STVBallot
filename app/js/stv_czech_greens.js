@@ -194,8 +194,12 @@ STV.prototype.stv_top_down = function(setup, valid_ballots_count, original_ab, r
         report("<h5>Cyklus č. " + round + "</h5>");
         // krok 1
         if (round > 1) {
-            report("Krok 1: odstranění již zvolených kandidátů (" + elected.map(function(m){return m.name;}).join(", ") + ")");
+            report("Krok 1: odstranění již zvolených kandidátů (" + elected.map(function(m){return m.name;}).join(", ") + ")<br/>");
             new_ab = STVDataBallot.remove_non_candidates(new_ab, setup, round - 1, elected, report, true);
+            var elected_last_round = mandates.map(function(m){return m[0];});
+            elected_last_round.pop();
+            elected_last_round = elected_last_round.filter(function(c){return !c.is_null;});
+            new_ab = STVDataBallot.remove_gender_violators_from_ab(new_ab, setup, report, candidate_orders, elected_last_round, round -1, true);
             var op_step1 = {
                 "soft_remove": true, "admissible_candidates": elected, "setup": setup, "ab": new_ab, "report": report, "quota": quota, "original_fp": original_fp
             };
@@ -206,7 +210,7 @@ STV.prototype.stv_top_down = function(setup, valid_ballots_count, original_ab, r
             report("<p>Preference po vrácení kandidátů vyřazených v kroku 1</p>" + STVDataBallot.reportAggregatedBallots(setup, new_ab));
         }
         report("Krok 2: volba mandátu<br/>");
-        new_ab = STVDataBallot.remove_gender_violators_from_ab(new_ab, setup, report, candidate_orders, elected, round);
+        new_ab = STVDataBallot.remove_gender_violators_from_ab(new_ab, setup, report, candidate_orders, elected, round, false);
         new_ab = STVDataBallot.remove_non_candidates(new_ab, setup, round, elected, report, false);
         if (this.debug) console.error("cycle start: " + round);
         var new_fp = STVDataBallot.aggregateFirstPreferences(new_ab, setup, original_fp);
