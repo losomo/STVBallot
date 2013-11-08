@@ -165,7 +165,7 @@
        <button {{ action exportProtocol }}{{bindAttr disabled="isRunning"}}>{{t "_Export protocol"}}</button>
        <button {{ action exportOstv }}>{{t "_Export to OpenSTV"}}</button>
        <button {{ action exportCase }}>{{t "_Export to JSON"}}</button>
-       <button class="btn btnfixedbr" {{ action resetAll }}{{bindAttr disabled="cantReset"}}>{{t "_Prepare new vote"}}</button>
+       <button class="btn btnfixedbr" title="{{t "_Available after exporting protocol"}}" {{ action resetAll }}{{bindAttr disabled="cantReset"}}>{{t "_Prepare new vote"}}</button>
        {{/if}}
     </script>
     <script data-template-name="vote-setup" type="text/x-handlebars">

@@ -53,8 +53,7 @@ var mHandler = function(e) {
     extension = config.extension;
     document.getElementById("content").innerHTML = config.header + content + config.footer;
     if (config.print) {
-        //window.print();
-        console.error("Printing disabled");
+        window.print();
     }
 };
 

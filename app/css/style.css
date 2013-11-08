@@ -153,9 +153,6 @@ b {font-weight: bold}
 .progress_table table {position: relative; left: 20px; top: 20px;}
 .report {overflow: auto; height: 390px; margin-bottom: 5px; border-bottom: solid #CCC 1px; -webkit-user-select: text;}
 .done_pane button { margin: 10px; }
-.leaders {width: 0; white-space: nowrap;}
-.square {font-size: 300%; line-height: .85; vertical-align: middle;}
-.bentry {margin-left: 3em;}
 em {font-style: italic}
 .clist { height: 390px;overflow-y: auto;}
 .clistrow { white-space: nowrap; }
@@ -232,6 +229,7 @@ white-space: nowrap;
 .typingOutlet {
     margin-left: 5px;
 }
+
 h4 { font-size: larger; text-align: center;}
 .mandates {border: groove #D94B31 5px; margin: 10px; font-size: larger; padding: 10px;}
 .conn_tbl {width: 100%;}
@@ -263,7 +261,7 @@ h4 { font-size: larger; text-align: center;}
   .ir a:after, a[href^="javascript:"]:after, a[href^="#"]:after { content: ""; }
   pre, blockquote { border: 1px solid #999; page-break-inside: avoid; }
   thead { display: table-header-group; }
-  tr, img, .ballot, .griddy { page-break-inside: avoid; }
+  tr, img, .griddy { page-break-inside: avoid; }
   @page { margin: 0.5cm; }
   p, h2, h3 { orphans: 3; widows: 3; }
   h2, h3{ page-break-after: avoid; text-align: left;}

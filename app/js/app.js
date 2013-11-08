@@ -48,7 +48,7 @@ GConstraints = Em.ArrayProxy.extend({
     autoAdd: function() {
         var cCount = this.content.length;
         var lastC = this.objectAt(cCount - 1);
-        if (lastC.from && lastC.to && lastC.mmax && lastC.fmax) {
+        if (lastC != null && lastC.from && lastC.to && lastC.mmax && lastC.fmax) {
             this.pushObject(GConstraint.create({}));
         }
     }.observes('@each.from', '@each.to', '@each.mmax', '@each.fmax'),
@@ -396,6 +396,7 @@ App.VoteRunningController = Em.Controller.extend({
     mandates: null,
     replacements: null,
     ballots_printed: null,
+    protocol_printed: null,
     init: function() {
         this._super();
         this.set('pileGroups', PileGroups.create({content: []}));
@@ -415,8 +416,8 @@ App.VoteRunningController = Em.Controller.extend({
         : "disabled";
     }.property('appState', 'pileGroups.@each.crosscheckstatus'),
     cantReset: function() {
-        return this.get('appState') == 3 ? false : "disabled";
-    }.property('appState'),
+        return this.get('protocol_printed') ? false : "disabled";
+    }.property('protocol_printed'),
     updatePileExternally: function(pile) {
         var affected_pile = find_pile(this.get('pileGroups'), pile);
         affected_pile.set('ballots', STVDataPile.toGUI(pile).get('ballots'));
@@ -653,8 +654,9 @@ App.Router = Em.Router.extend({
                    extension: "html",
                    content: vrc.get('report'),
                    title: "",
-                   print: true,
+                   print: false,
                 });
+                vrc.set('protocol_printed', true);
             },
             printBallots: function(router) {
                 var setup = STVDataSetup.fromGUI(router.get('voteSetupController'));
@@ -673,6 +675,7 @@ App.Router = Em.Router.extend({
                 router.get('applicationController').set('appState', 3);
                 var setup = STVDataSetup.fromGUI(router.get('voteSetupController'));
                 var vrc = router.get('voteRunningController');
+                vrc.set('protocol_printed', false);
                 var pileGroups = vrc.get('pileGroups');
                 var groups = pileGroups.map(function (group) {return STVDataPileGroup.fromGUI(group);});
                 vrc.report_append("<h1>" + "_Vote".loc() + " " + setup.voteNo + "</h1>" +
@@ -708,7 +711,7 @@ App.Router = Em.Router.extend({
                     }
                 }
                 vsc.set('voteNo', n);
-                ac.set('appState', 0);
+                ac.set('appState', 1);
                 vsc.set('shuffled', false);
                 router.get('voteRunningController').set('ballots_printed', false);
                 router.transitionTo('voteSetup');
@@ -754,7 +757,7 @@ App.Router = Em.Router.extend({
                    extension: "html",
                    content: c,
                    title:  "_Vote".loc() + " " + setup.voteNo,
-                   print: true,
+                   print: false,
                 });
             },
             addVoteFor: function(router, candidate) {
@@ -975,19 +978,19 @@ function find_pile(pileGroups, p) {
 }
 
 function print_ballots(setup, title) {
-    var ret = '';
+    var ret = '<div style="-webkit-column-count: 2; -moz-column-count: 2; column-count: 2;">';
     for (var i = 0; i < setup.ballotCount; i++) {
-        ret += '<div class="ballot"><h1>' + title + "</h1>";
+        ret += '<div style="page-break-inside: avoid;"><h1>' + title + "</h1>";
         ret += stv.ballot_header();
         setup.candidates.forEach(function (candidate) {
-            ret += '<div class="bentry"><span class="square">❏</span><span class="cname">' + candidate.name + "</span></div>";
+            ret += '<div style="margin-left: 3em;"><span style="font-size: 300%; line-height: .85; vertical-align: middle;">❏</span><span class="cname">' + candidate.name + "</span></div>";
         });
-        ret += '<br/><span class="leaders">✂ ' +
+        ret += '<br/><span style="width: 0; white-space: nowrap;">✂ ' +
         '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ' +
         '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ' +
         '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</span><br/></div>';
     }
-    return ret;
+    return ret + '</div>';
 }
 
 window.addEventListener('message', messageHandler, false);

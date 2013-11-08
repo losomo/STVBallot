@@ -10,7 +10,7 @@
 
 - *Počet mandátů*: Velikost orgánu nebo kandidátky. Tedy kolik lidí má být v ideálním případě zvoleno. Musí být vyplněno.
 
-- *Počet hlasovacích lístků*: Počet oprávněných volitelů. Toto číslo je potřeba při případném tisku volebních lístků, který zatím není umožněn. Toto číslo nemá na výsledek volby vliv, ale pomáhá odhadovat, jaká část lístků už je členy komise zpracována. Musí být vyplněno
+- *Počet hlasovacích lístků*: Počet oprávněných volitelů. Toto číslo je potřeba při případném tisku volebních lístků. Toto číslo nemá na výsledek volby vliv, ale pomáhá odhadovat, jaká část lístků už je členy komise zpracována. Musí být vyplněno
 
 - *Mužů maximálně*: Globální omezení počtu mužů v orgánu nebo na kandidátce. Pokud při výpočtu je obsazen uvedený počet míst muži, z obsazování dalších míst jsou vyřazeni. Pokud není žádné omezení na celkový počet mužů, může zůstat pole prázdné.
 
@@ -49,7 +49,7 @@
 
 ### Průběh volby
 
-Průběh volby tlačítko "Tisk hlasovacích lístků", které vyvolá dialog umožňující uložit HTML soubor, který lze dále využít pro tisk hlasovacích lístků. Tato funkce není ještě doladěná a praktičtější bude vytisknout si lístky jiným způsobem.
+Průběh volby tlačítko "Tisk hlasovacích lístků", které vyvolá dialog umožňující vytisknout lístky nebo uložit HTML soubor, který lze dále využít pro tisk hlasovacích lístků.
 
 Dále se ukazuje tabulka "hromádek" a pokroku v jejich sčítání. Každá řádka tabulky odpovídá jednomu
 členu komise. Sloupce ukazují pokrok ve vyplnění hlavní a kontrolní hromádky. Indikátor za nimi ukazuje status hromádky:
@@ -71,4 +71,4 @@ Podrobná zpráva o výpočtu na konci ukazuje obsazení jednotlivých míst.
 - *Export protokolu*: umožňuje uložit zprávu o výpočtu jako HTML soubor.
 - *Export do OpenSTV*: umožňuje uložit hlasovací lístky ve formátu vhodném pro zpracování OpenSTV. Jelikož OpenSTV nemá všechny funkce aplikace STVBallot, tento export je ztrátový, nepřenáší se genderová omezení a nic okolo pozic s pořadím.
 - *Export do JSONu*: umožňuje vyplněné lístky uložit pro možnou kontrolu výpočtu a [další zpracování](cli.html). Tento soubor by měl být součástí dat archivovaných volební komisí z každé volby
-- *Přejít k nové volbě*: Umožňuje s připojenými členy komise provést další volbu, všechna nastavení se zachovávají, pouze Označení volby se pro rozlišení zvýší.
+- *Přejít k nové volbě*: Umožňuje s připojenými členy komise provést další volbu, všechna nastavení se zachovávají, pouze Označení volby se pro rozlišení zvýší. Aby toto tlačítko nebylo zmáčknuto omylem, aktivuje se až po použití tlačítka *Export protokolu*.

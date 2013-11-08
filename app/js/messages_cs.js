@@ -17,6 +17,7 @@
  * under the License.
  */
 Ember.STRINGS = {
+    '_Available after exporting protocol': 'Uložili jste protokol?',
     '_Ballot Typing'              : 'Zadání lístků',
     '_Cancel'                     : 'Zrušit',
     '_Candidate list'             : 'Seznam kandidátů',
