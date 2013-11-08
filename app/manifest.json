@@ -1,10 +1,10 @@
 {
-  "name": "Single Transferable Vote ballots processing",
+  "name": "STV Ballot",
   "short_name": "STVBallot",
-  "description": "Zadávání hlasovacích lístků a výpočet výsledků ve volebním systému jednoho přenosného hlasu",
+  "description": "Zadávání hlasovacích lístků a výpočet výsledků ve volebním systému jednoho přenosného hlasu (Single Transferable Vote ballots processing)",
   "manifest_version": 2,
   "minimum_chrome_version": "25",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "app": {
     "background": {
       "scripts": ["background.js"]
