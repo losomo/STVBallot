@@ -3,7 +3,7 @@ var fs = require('fs');
 eval(fs.readFileSync('../app/js/data.js')+'');
 eval(fs.readFileSync('../app/js/stv_czech_greens.js')+'');
 
-var stv = new STV(false);
+var stv = new STV(false); // enable TR file creation for sankey here
 
 function test(fname, debug) {
     if (fname.match('\.json$')) {

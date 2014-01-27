@@ -134,7 +134,7 @@ STV.prototype.stv_round = function(op) {
                 }
             }
             mandates.push([first_candidate, fp[i][0]]);
-            op.ab = STVDataBallot.removeCandidateFromAggregatedBallots(op.ab, fp[i][1], op.quota, false);
+            op.ab = STVDataBallot.removeCandidateFromAggregatedBallots(op.ab, fp[i][1], op.quota, false, this.debug);
             if (this.debug) console.error("elected:" + fp[i][1]);
             op.report("<p>Kandidát " + first_candidate.name +" (" + fp[i][1] +
                 ") zvolen, na další místa se přesouvá " + STVDataSetup.round(fp[i][0]-op.quota) +
@@ -161,7 +161,7 @@ STV.prototype.stv_round = function(op) {
                 }
                 last_alive = [op.setup.candidates[fp[last][1]-1], fp[last][0]];
                 op.report("<p>Žádný kandidát není zvolen, odstraňuji kandidáta " + last_alive[0].name + " ("  + fp[last][1] + ")</p>");
-                op.ab = STVDataBallot.removeCandidateFromAggregatedBallots(op.ab, fp[last][1], 0, op.soft_remove);
+                op.ab = STVDataBallot.removeCandidateFromAggregatedBallots(op.ab, fp[last][1], 0, op.soft_remove, this.debug);
                 if (this.debug) console.error("removed:" + fp[last][1]);
                 break;
             }
