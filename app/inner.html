@@ -112,6 +112,7 @@
                </table>
            </div>
            <div class="done_pane btnfixedbr">
+               <button style="min-width: 120px;" class="btn" {{ action import }}>{{t "_Import"}}</button>
                <button style="min-width: 120px;" class="btn" {{ action done }}{{bindAttr disabled="currentPile.pileClosed"}}>{{t "_Done"}}</button>
                <button style="min-width: 120px;" class="btn" {{ action print }}{{bindAttr disabled="currentPile.pileOpened"}}>{{t "_Export protocol"}}</button>
            </div>

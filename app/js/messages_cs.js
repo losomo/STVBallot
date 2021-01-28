@@ -48,6 +48,7 @@ Ember.STRINGS = {
     '_Host IP address'            : 'IP adresa předsedy',
     '_invalid'                    : 'neplatný',
     '_Invalid'                    : 'Neplatný',
+    '_Import'                     : 'Importuj data',
     '_Join the committee'         : 'Člen komise',
     '_Launch ballot'              : 'Zahájit volbu',
     '_Male'                       : 'Muž',

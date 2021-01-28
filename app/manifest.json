@@ -4,7 +4,7 @@
   "description": "Zadávání hlasovacích lístků a výpočet výsledků v systému jednoho přenosného hlasu (Single Transferable Vote ballots processing)",
   "manifest_version": 2,
   "minimum_chrome_version": "25",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "app": {
     "background": {
       "scripts": ["background.js"]
