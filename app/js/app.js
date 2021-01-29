@@ -747,14 +747,11 @@ App.Router = Em.Router.extend({
                         var reader = new FileReader();
                         reader.onload = function (e) {
                             var contents = e.target.result;
-                            /* Handle your document contents here */
-                            import_data(contents, router.get('typingController').get('currentPile'))
+                            import_data(contents, router.get('typingController').get('currentPile'));
                         }
                         const text = reader.readAsText(f);
-                       
                     }
                 });
-
                 fileChooser.click();
             },
             done: function(router) {
@@ -997,36 +994,31 @@ function find_pile(pileGroups, p) {
     return r;
 }
 
-function import_data(text,pile) {
+function import_data(text, pile) {
     const data = JSON.parse(text);
     function parseBallotKey (keyToParse) {
-        const parsedKeys = keyToParse.split(":");
-
-        return parsedKeys;
+        return keyToParse.split(":");
     }
 
     for (var key of Object.keys(data.ballots_ab )) {
-        if(key === "_invalid" || key === "empty"){
-
-        }else {
+        if (key !== "_invalid" && key !== "empty") {
             const keys = parseBallotKey(key);
-            const amount =parseInt(data.ballots_ab[key]);
-            for(var i = 0; i<amount; i++){
+            const amount = parseInt(data.ballots_ab[key]);
+            for(var i = 0; i < amount; i++) {
                 const ballot = pile.lastIncompleteBallot();
 
-                for(var x = 0; x<keys.length; x++){
-                    for(var y = 0; y<keys.length; y++){
-                        if(parseInt(keys[y])===x+1){
-                            ballot.addVoteAt(y)
+                for (var x = 0; x < keys.length; x++) {
+                    for (var y = 0; y < keys.length; y++) {
+                        if (parseInt(keys[y]) === x + 1) {
+                            ballot.addVoteAt(y);
                         }
                     }
                 }
-                pile.addBallot();       
+                pile.addBallot();
             }
-        }   
-    }    
+        }
+    }
 }
-
 
 function print_ballots(setup, title) {
     var ret = '<div style="-webkit-column-count: 2; -moz-column-count: 2; column-count: 2;">';
